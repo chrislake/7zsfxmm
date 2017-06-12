@@ -1,0 +1,32 @@
+;!@Install@!UTF-8!
+Title="Переменные 11 %SfxVarModulePlatform% модуля в %%P ОС"
+BeginPrompt="	Проверка переменных %SfxVarModulePlatform% модуля в %%P ОС
+
+• Нажмите 'OK', переменные будут показаны в окне консоли
+
+• Нажмите 'OK', удерживая [Shift], переменные будет
+  сохранены в файл %SystemDrive%\\vars_%SfxVarModulePlatform%_module_on_%%P_OS.txt"
+FinishMessage="Модуль %SfxVarModulePlatform% завершил работу"
+SetEnvironment="cmnd=@Echo Off& Title Module - %SfxVarModulePlatform%, OS - %%P& Echo 	Module - %SfxVarModulePlatform%,	OS - %%P& Echo.& Echo Folders:&Set SfxFolder& Echo.& Echo Vars:&Set SfxVar& Echo %%^M=%%M& Echo %%^P=%%P& Echo %%^S=%%S& Echo %%^T=%%T& Set CommonD& Set MyDoc& Echo UserDesktop=%UserDesktop%& Echo."
+
+ExecuteOnLoad="hidcon:cmd /c Echo Command ExecuteOnLoad>ttt.txt"
+ExecuteOnLoad="cmd /k Echo ExecuteOnLoad 2&dir %TEMP%"
+PreExtract="cmd /k Set SfxVar&dir %TEMP%"
+PreExtract="cmd /k Set /p var=<\"%SfxVarApiPath%\\ttt.txt\"& Call Echo PreExtract \"%var%\"&dir %TEMP%"
+PreExtract="cmd /k Set /p var=<ttt.txt& Call Echo 2 \"%var%\"&dir %TEMP%"
+; PreExtract="cmd /k Echo PreExtract 2"
+PreExtract1="hidcon:cmd /c Echo Command PreExtract1>ttt1.txt"
+PreExtract1="cmd /k Echo PreExtract ai1"
+AutoInstall1="cmd /k Echo AutoInstall1 +"
+AutoInstall1="cmd /k Set /p var=<\"%SfxVarApiPath%\\ttt1.txt\"& Call Echo AutoInstall1 \"%var%\""
+AutoInstall1="%%P:fm0:cmd /k %cmnd%"
+
+RunProgram="hidcon:cmd /c Echo"
+RunProgram="%%P:fm0:cmd /k %cmnd%&dir %TEMP%"
+AutoInstall="hidcon:cmd /c Echo"
+AutoInstall="%%P:fm20:hidcon:cmd /c (%cmnd%)>%SystemDrive%\\vars_%SfxVarModulePlatform%_module_on_%%P_OS.txt"
+GUIMode="2"
+GUIFlags="2+4+8+16+32+2048+4096"
+MiscFlags="4"
+SfxAuthor="gora-sah <gora@7zsfx.info>"
+;!@InstallEnd@!

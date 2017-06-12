@@ -1,0 +1,46 @@
+;!@Install@!UTF-8:Language:1049!
+Title="Инструменты для 7z SFX"
+BeginPrompt="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204 Century Gothic;}{\f1\fswiss\fprq2\fcharset204 Tahoma;}}
+{\colortbl ;\red36\green88\blue178;\red255\green0\blue0;}
+\viewkind4\uc1\pard\b\f0\fs26
+Архив содержит инструменты для 7z SFX:
+\f1\cf2\b0\i\fs18\par\par
+	\bullet  Модифицированные 7z SFX модули\par
+	\bullet  Специальный модифицированный модуль с диалогами\par
+	\bullet  7z SFX Splitter для извлечения компонентов из SFX архива\par
+	\bullet  Файл справки для модуля (CHM формат)\par
+\i0\fs16\par
+\cf1
+Ярлык к файлу справки будет помещен на ваш Рабочий стол.\par
+Файл справки откроется автоматически после извлечения.
+}"
+ExtractDialogText="Подождите, пожалуйста..."
+ExtractPathText="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204 Tahoma;}}
+{\colortbl ;\red36\green88\blue178;}
+\viewkind4\uc1\pard\b1\f0\fs16
+\cf1\b0
+Пожалуйста, введите путь распаковки:
+}"
+FinishMessage="{\rtf1\ansi\ansicpg1251\deff0\deflang1049{\fonttbl{\f0\fswiss\fprq2\fcharset204 Century Gothic;}}
+{\colortbl ;\red36\green88\blue178;}
+\viewkind4\uc1\pard\b\f0\fs32
+\cf1\b\pard\qc
+\par
+\par
+\par
+7z SFX Tools успешно установлены !
+\par\pard
+}"
+CancelPrompt="Вы хотите прервать распаковку?"
+ExtractTitle="Распаковка..."
+;RunProgram="fm20:nowait:7zSD_RU.chm"
+Shortcut="Du,{%%T\\7zSD_RU.chm},{},{},{Описание модифицированного 7z SFX модуля},{Все о 7z SFX модуле},{},{%%T\\7zsd_LZMA.sfx}"
+Delete="%%T\\7zSD_EN.chm"
+;!@InstallEnd@:Language:1049!
+
+
+;!@Install@!UTF-8:x64:Language:1049!
+Title="Инструменты для 7z SFX [x64]"
+RunProgram=""
+RunProgram="fm20:notepad.exe"
+;!@InstallEnd@:x64:Language:1049!

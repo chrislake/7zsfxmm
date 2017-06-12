@@ -1,0 +1,60 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual Studio 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7zSfxMod", "7ZSfxMod.vcproj", "{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}"
+EndProject
+Global
+	GlobalSection(SubversionScc) = preSolution
+		Svn-Managed = True
+		Manager = AnkhSVN - Subversion Support for Visual Studio
+	EndGlobalSection
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		All|Win32 = All|Win32
+		All|x64 = All|x64
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Deflate|Win32 = Deflate|Win32
+		Deflate|x64 = Deflate|x64
+		LZMA|Win32 = LZMA|Win32
+		LZMA|x64 = LZMA|x64
+		LZMA2|Win32 = LZMA2|Win32
+		LZMA2|x64 = LZMA2|x64
+		PPMd|Win32 = PPMd|Win32
+		PPMd|x64 = PPMd|x64
+		SfxTools|Win32 = SfxTools|Win32
+		SfxTools|x64 = SfxTools|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.All|Win32.ActiveCfg = All|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.All|Win32.Build.0 = All|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.All|x64.ActiveCfg = All|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.All|x64.Build.0 = All|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Debug|Win32.ActiveCfg = Debug|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Debug|Win32.Build.0 = Debug|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Debug|x64.ActiveCfg = Debug|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Debug|x64.Build.0 = Debug|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Deflate|Win32.ActiveCfg = Deflate|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Deflate|Win32.Build.0 = Deflate|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Deflate|x64.ActiveCfg = Deflate|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Deflate|x64.Build.0 = Deflate|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA|Win32.ActiveCfg = LZMA|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA|Win32.Build.0 = LZMA|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA|x64.ActiveCfg = LZMA|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA|x64.Build.0 = LZMA|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA2|Win32.ActiveCfg = LZMA2|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA2|Win32.Build.0 = LZMA2|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA2|x64.ActiveCfg = LZMA2|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.LZMA2|x64.Build.0 = LZMA2|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|Win32.ActiveCfg = PPMd|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|Win32.Build.0 = PPMd|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|x64.ActiveCfg = PPMd|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|x64.Build.0 = PPMd|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|Win32.ActiveCfg = SfxTools|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|Win32.Build.0 = SfxTools|Win32
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|x64.ActiveCfg = SfxTools|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|x64.Build.0 = SfxTools|x64
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

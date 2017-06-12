@@ -1,0 +1,147 @@
+/*---------------------------------------------------------------------------*/
+/* File:        7zSfxMod.rc2                                                 */
+/* Created:     Sun, 26 Jul 2009 18:21:00 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Mon, 11 May 2015 07:46:47 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Revision:    2115                                                         */
+/*---------------------------------------------------------------------------*/
+/* Revision:    239                                                          */
+/* Updated:     Mon, 22 Mar 2010 11:08:22 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Description: New file stamp.                                              */
+/*---------------------------------------------------------------------------*/
+#include <windows.h>
+#include "../7zSfxMod.h"
+#include "../version.h"
+
+#define DLG_7ZSFXTOOLS_BEGIN(name,caption)	name DIALOGEX 0, 0, 312, 201		\
+	STYLE DS_MODALFRAME | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU		\
+	CAPTION caption																\
+	FONT 8, "MS Sans Serif", 0, 0, 0x1											\
+	BEGIN																		\
+	CONTROL         "",IDC_BANNER,"Static",SS_BITMAP,0,0,16,15
+
+#define DLG_7ZSFXTOOLS_END(back_style,next_style,cancel_style,next_text)								\
+	PUSHBUTTON      "%SfxString35%",IDC_BACK,96,180,65,14,back_style									\
+    DEFPUSHBUTTON   next_text,IDC_NEXT,161,180,65,14,next_style											\
+    PUSHBUTTON      "%SfxString38%",IDC_CANCEL,238,180,65,14,cancel_style								\
+    CONTROL         "",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,0,170,312,2,WS_EX_STATICEDGE	\
+    LTEXT           "%sfx_homepage%",IDC_STATIC,7,180,85,14,WS_VISIBLE									\
+	END
+
+#define DLG_7ZSFXTOOLS_END_SIMPLE(ctext,bid,btext)														\
+    CTEXT           ctext,IDC_MAIN_TEXT,0,44,311,119,SS_CENTERIMAGE										\
+    DEFPUSHBUTTON   btext,bid,254,180,60,14																\
+    CONTROL         "",IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,0,170,312,2,WS_EX_STATICEDGE	\
+    LTEXT           "%sfx_homepage%",IDC_STATIC,7,180,85,14,WS_VISIBLE									\
+	END
+
+#define DLG_7ZSFXTOOLS_BEGINPROMPT_INTERIOR									\
+	LTEXT           "BeginPrompt",IDC_MAIN_TEXT,7,44,297,123
+
+#define DLG_7ZSFXTOOLS_EXTRACTPATH_INTERIOR									\
+	    LTEXT           "ExtractPathText",IDC_MAIN_TEXT,7,68,287,8			\
+	    EDITTEXT        IDC_EXTRACT_PATH_EDIT,7,87,253,12,ES_AUTOHSCROLL	\
+		PUSHBUTTON      "...",IDC_EXTRACT_PATH_BROWSE,272,84,21,16
+
+#define DLG_7ZSFXTOOLS_BEGINPROMPT_EXTRACTPATH_INTERIOR						\
+	    LTEXT           "BeginPrompt",IDC_MAIN_TEXT,7,44,287,92				\
+		LTEXT           "ExtractPathText",IDC_EXTRA_TEXT,7,138,287,8		\
+		EDITTEXT        IDC_EXTRACT_PATH_EDIT,7,151,258,12,ES_AUTOHSCROLL	\
+	    PUSHBUTTON      "...",IDC_EXTRACT_PATH_BROWSE,272,150,18,14
+
+#define DLG_7ZSFXTOOLS_EXTRACT_INTERIOR												\
+	    LTEXT           "ExtractDialogText",IDC_MAIN_TEXT,7,68,287,8				\
+	    LTEXT           "Percents",1205,249,95,45,15								\
+		CONTROL         "",1208,"msctls_progress32",WS_BORDER,7,95,235,15
+
+#define DLG_FINISHMESSAGE_INTERIOR													\
+		CTEXT           "FinishMessage",IDC_MAIN_TEXT,0,44,311,119
+
+//////////////////////////////////////////////////////////////////////////////
+LANGUAGE LANG_NEUTRAL, SUBLANG_NEUTRAL
+//////////////////////////////////////////////////////////////////////////////
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION VERSION_7ZSFX_BIN
+ PRODUCTVERSION VERSION_7ZSFX_BIN
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x9L
+#else
+ FILEFLAGS 0x8L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "000004b0"
+        BEGIN
+            VALUE "CompanyName", "Oleg N. Scherbakov"
+            VALUE "FileDescription", "7z Setup SFX (" PLATFORM_NAME_A ")"
+            VALUE "FileVersion", VERSION_7ZSFX_TXT
+            VALUE "InternalName", "7ZSfxMod"
+            VALUE "LegalCopyright", VERSION_SFX_LEGAL_COPYRIGHT
+            VALUE "OriginalFilename", "7ZSfxMod_" PLATFORM_NAME_A ".exe"
+            VALUE "PrivateBuild", PRIVATEBUILD_EN
+            VALUE "ProductName", "7-Zip SFX"
+            VALUE "ProductVersion", VERSION_7ZSFX_TXT
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0, 1200
+    END
+END
+
+#ifndef APP_MANIFEST
+	#define APP_MANIFEST	1
+#endif // APP_MANIFEST
+
+#ifndef _DEBUG
+	#ifdef _WIN64
+		APP_MANIFEST RT_MANIFEST res/manifest64.xml
+	#else
+		APP_MANIFEST RT_MANIFEST res/manifest32.xml
+	#endif  // _WIN64
+#endif // _DEBUG
+
+#ifdef _SFXTOOLS
+	IDC_BANNER              IMAGES  DISCARDABLE     "res\banner_en.gif"
+	// BeginPrompt
+	DLG_7ZSFXTOOLS_BEGIN(IDD_BEGINPROMT_CLASSIC,"BeginPrompt")
+		DLG_7ZSFXTOOLS_BEGINPROMPT_INTERIOR
+	DLG_7ZSFXTOOLS_END(WS_DISABLED,WS_VISIBLE,WS_VISIBLE,"%SfxString36%")
+	// ExtractPath
+	DLG_7ZSFXTOOLS_BEGIN(IDD_EXTRACTPATH,"ExtractPath")
+		DLG_7ZSFXTOOLS_EXTRACTPATH_INTERIOR
+	DLG_7ZSFXTOOLS_END(WS_VISIBLE,WS_VISIBLE,WS_VISIBLE,"%SfxString36%")
+	// BeginPrompt+ExtractPath
+	DLG_7ZSFXTOOLS_BEGIN(IDD_BEGINPROMT_EXTRACTPATH,"BeginPrompt+ExtractPath")
+		DLG_7ZSFXTOOLS_BEGINPROMPT_EXTRACTPATH_INTERIOR
+	DLG_7ZSFXTOOLS_END(WS_DISABLED,WS_VISIBLE,WS_VISIBLE,"%SfxString36%")
+	// Extract
+	DLG_7ZSFXTOOLS_BEGIN(IDD_EXTRACT,"Extract")
+		DLG_7ZSFXTOOLS_EXTRACT_INTERIOR
+	DLG_7ZSFXTOOLS_END(WS_DISABLED,WS_DISABLED,WS_VISIBLE,"%SfxString36%")
+	// FinishMessage
+	DLG_7ZSFXTOOLS_BEGIN(IDD_FINISHMESSAGE,"FinishMessage")
+		DLG_FINISHMESSAGE_INTERIOR
+	DLG_7ZSFXTOOLS_END(WS_DISABLED,WS_VISIBLE,WS_DISABLED,"%SfxString37%")
+	// HelpText
+	DLG_7ZSFXTOOLS_BEGIN(IDD_HELPTEXT,"HelpText")
+	DLG_7ZSFXTOOLS_END_SIMPLE("HelpText",IDC_CANCEL,"%SfxString25%")
+#endif
+
+
+//////////////////////////////////////////////////////////////////////////////
+// Russian resources
+//////////////////////////////////////////////////////////////////////////////
+LANGUAGE LANG_RUSSIAN, SUBLANG_DEFAULT
+
+#ifdef _SFXTOOLS
+	IDC_BANNER              IMAGES  DISCARDABLE     "res\banner_ru.gif"
+#endif

@@ -1,0 +1,17 @@
+ ;!@Install@!UTF-8!
+BeginPrompt="BeginPrompt"
+CancelPrompt="CancelPrompt"
+ExtractCancelText="ExtractCancelText"
+ExtractDialogText="ExtractDialogText"
+ExtractDialogWidth="266"
+ExtractTitle="ExtractTitle"
+ErrorTitle="ErrorTitle"
+FinishMessage="FinishMessage             "
+GUIFlags="2+4+8+16+32+2048+4096"
+;GUIMode="1"
+HelpText="HelpText                      "
+OverwriteMode="2"
+RunProgram="fm999:hidcon:cmd /c @echo off"
+Title="Title"
+SelfDelete="1"
+;!@InstallEnd@!

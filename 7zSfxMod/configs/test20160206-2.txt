@@ -1,0 +1,35 @@
+ ;!@Install@!UTF-8!
+Title="Variables %SfxVarModulePlatform% module in %%P OS"
+BeginPrompt="	Check of variables %SfxVarModulePlatform% module in %%P OS
+
+• Click 'OK', variables will are shown in a console window
+
+• Click 'OK', retaining [Shift], variables will be are saved
+  to the file %SystemDrive%\\vars_%SfxVarModulePlatform%_module_on_%%P_OS.txt"
+FinishMessage="The module %SfxVarModulePlatform% finished operation"
+SetEnvironment="cmnd=@Echo Off& Title Module - %SfxVarModulePlatform%, OS - %%P& Echo 	Module - %SfxVarModulePlatform%,	OS - %%P& Echo.& Echo Folders:&Set SfxFolder& Echo.& Echo Vars:&Set SfxVar& Echo %%^M=%%M& Echo %%^P=%%P& Echo %%^S=%%S& Echo %%^T=%%T& Set CommonD& Set MyDoc& Echo UserDesktop=%UserDesktop%& Echo."
+
+ExecuteOnLoad="cmd /k set SfxVarApiPath"
+PreExtract="cmd /k Set SfxVarApiPath"
+; PreExtract="cmd /k Echo PreExtract 2"
+PreExtract1="cmd /k Echo PreExtract ai1"
+AutoInstall1="cmd /k Echo AutoInstall1 +"
+AutoInstall1="%%P:fm20:hidcon:cmd /c (%cmnd%)>%SystemDrive%\\vars_%SfxVarModulePlatform%_module_on_%%P_OS.txt"
+
+RunProgram="hidcon:cmd /c Echo"
+RunProgram="%%P:fm0:cmd /k %cmnd%& CD"
+AutoInstall="hidcon:cmd /c Echo"
+AutoInstall="%%P:fm20:hidcon:cmd /c (%cmnd%)>%SystemDrive%\\vars_%SfxVarModulePlatform%_module_on_%%P_OS.txt"
+GUIMode="2"
+GUIFlags="2+4+8+16+32+2048+4096"
+;!@InstallEnd@!
+;!@Install@!UTF-8:Language:1049!
+Title="Переменные %SfxVarModulePlatform% модуля в %%P ОС"
+BeginPrompt="	Проверка переменных %SfxVarModulePlatform% модуля в %%P ОС
+
+• Нажмите 'OK', переменные будут показаны в окне консоли
+
+• Нажмите 'OK', удерживая [Shift], переменные будет
+  сохранены в файл %SystemDrive%\\vars_%SfxVarModulePlatform%_module_on_%%P_OS.txt"
+FinishMessage="Модуль %SfxVarModulePlatform% завершил работу"
+;!@InstallEnd@:Language:1049!

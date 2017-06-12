@@ -1,0 +1,4 @@
+1. Test & add to manifest
+	http://msdn.microsoft.com/en-us/library/windows/desktop/hh848036%28v=vs.85%29.aspx
+	{4a2f28e3-53b9-4441-ba9c-d69d4a4a6e38}
+	for Windows 8: Apps that set this value in the application manifest get the Windows 8 behavior

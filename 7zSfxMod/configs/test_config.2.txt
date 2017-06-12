@@ -1,0 +1,12 @@
+;!@Install@!UTF-8!
+;BeginPrompt="BeginPrompt"
+;BeginPromptTimeout="10"
+;ExtractPathText="ExtractPathText"
+;ExtractPathTitle="ExtractPathTitle"
+RunProgram="cmd /c Ping -n 2 localhost"
+GUIMode="2"
+;GUIFlags="1+4+8+16+32+128+256+1024+4096"
+PasswordTitle="PasswordTitle"
+PasswordText="PasswordText"
+;MiscFlags="8"
+;!@InstallEnd@!

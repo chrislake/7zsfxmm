@@ -1,0 +1,14 @@
+﻿;!@Install@!UTF-8!
+Title="Title"
+BeginPrompt="Test %%P"
+PasswordTitle="А архив-то зашифрован"
+PasswordText="Скажите \"пожалуйста\":"
+HelpText="Default help"
+InstallPath="%TMP%"
+RunProgram="cmd"
+GUIFlags="16384"
+;!@InstallEnd@!
+
+;!@Install@!UTF-8:Language:1049!
+HelpText=-
+;!@InstallEnd@:Language:1049!
