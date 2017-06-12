@@ -18,9 +18,9 @@
 	#if defined(_WIN32) && !defined(_DEBUG) && defined(_MSC_VER_OK) && defined(_SFX_USE_CUSTOM_MSVCRT)
 		// only MS VC, only release versions
 		#if !defined(_WIN64) && defined(_M_IX86)
-#pragma comment( lib, "S:/Develop/Lib/Custom/x86/msvcrt.lib" )
+#pragma comment( lib, "C:/WinDDK/7600.16385.1/lib/Crt/i386/msvcrt.lib" )
 		#elif defined(_WIN64) && defined(_M_X64)
-#pragma comment( lib, "S:/Develop/Lib/Custom/x64/msvcrt.lib" )
+#pragma comment( lib, "C:/WinDDK/7600.16385.1/lib/Crt/amd64/msvcrt.lib" )
 		#endif // platform
 	#else
 		#pragma comment( lib, "msvcrt.lib" )
