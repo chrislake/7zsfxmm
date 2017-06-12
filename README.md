@@ -8,6 +8,7 @@ Wiki pages are again a copy of the website: [Home](../../wiki/Home)
 
 
 Author: Oleg Scherbakov
+
 Credits:
 - Igor Pavlov ([7-Zip archiver](http://7-zip.org/))
 - Vadim Sterkin aka [Vadikan](http://www.msfn.org/board/profile/14702-vadikan/) (help with documentation and its translation to English)
