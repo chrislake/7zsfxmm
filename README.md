@@ -12,4 +12,4 @@ Credits:
 - Igor Pavlov ([7-Zip archiver](http://7-zip.org/))
 - Vadim Sterkin aka [Vadikan](http://www.msfn.org/board/profile/14702-vadikan/) (help with documentation and its translation to English)
 - [gora](http://forum.oszone.net/member.php?userid=8802) (help with updating documentation)
-- Forum.OSZone.net members (testing and valuable input)
+- [Forum.OSZone.net](http://forum.oszone.net/) members (testing and valuable input)
