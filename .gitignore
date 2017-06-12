@@ -2,6 +2,7 @@
 *.d
 
 # Compiled Object files
+Intermediate/
 *.slo
 *.lo
 *.o
@@ -27,6 +28,16 @@
 *.lib
 
 # Executables
+Output/
 *.exe
 *.out
 *.app
+
+# Other
+*.cache
+*.ncb
+*.sdf
+*.suo
+*.vcproj.*.user
+*.vcxproj.filters
+*.vcxproj.user

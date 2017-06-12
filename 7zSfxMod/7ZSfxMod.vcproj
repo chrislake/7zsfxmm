@@ -171,7 +171,7 @@
 				FavorSizeOrSpeed="2"
 				WholeProgramOptimization="false"
 				AdditionalIncludeDirectories="..\7-Zip\CPP\"
-				PreprocessorDefinitions="NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_DEFLATE;COMPRESS_PPMD;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA,WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;UNICODE;_USE_SFXTEST"
+				PreprocessorDefinitions="NDEBUG;COMPRESS_COPY;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_DEFLATE;COMPRESS_PPMD;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;UNICODE;_USE_SFXTEST;_SFX_MAINTAINER;SFX_VOLUMES;SFX_CRYPTO;_NO_EXCEPTIONS;"
 				StringPooling="true"
 				ExceptionHandling="0"
 				SmallerTypeCheck="false"
@@ -2908,6 +2908,136 @@
 			</File>
 			<File
 				RelativePath="..\7-Zip\Asm\x86\7zCrcOpt.asm"
+				>
+				<FileConfiguration
+					Name="All|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="All|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="SfxTools|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="SfxTools|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="LZMA2|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="LZMA2|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="LZMA|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="LZMA|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /coff /Zf /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Debug|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Deflate|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="Deflate|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PPMd|Win32"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+				<FileConfiguration
+					Name="PPMd|x64"
+					>
+					<Tool
+						Name="VCCustomBuildTool"
+						CommandLine="ml64 /Dx64 /nologo /c /Fo$(IntDir)\$(InputName).obj $(InputPath)&#x0D;&#x0A;"
+						Outputs="$(IntDir)\$(InputName).obj"
+					/>
+				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\7-Zip\Asm\x86\AesOpt.asm"
 				>
 				<FileConfiguration
 					Name="All|Win32"
