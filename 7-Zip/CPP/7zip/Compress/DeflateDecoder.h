@@ -79,8 +79,10 @@ public:
   bool ZlibMode;
   Byte ZlibFooter[4];
 
-  CCoder(bool deflate64Mode, bool deflateNSIS = false);
+  CCoder(bool deflate64Mode);
   virtual ~CCoder() {};
+
+  void SetNsisMode(bool nsisMode) { _deflateNSIS = nsisMode; }
 
   void Set_KeepHistory(bool keepHistory) { _keepHistory = keepHistory; }
   void Set_NeedFinishInput(bool needFinishInput) { _needFinishInput = needFinishInput; }
@@ -92,14 +94,16 @@ public:
       const UInt64 *outSize, ICompressProgressInfo *progress);
 
   #ifndef NO_READ_FROM_CODER
-  MY_UNKNOWN_IMP4(
+  MY_UNKNOWN_IMP5(
+      ICompressCoder,
       ICompressGetInStreamProcessedSize,
       ICompressSetInStream,
       ICompressSetOutStreamSize,
       ISequentialInStream
       )
   #else
-  MY_UNKNOWN_IMP1(
+  MY_UNKNOWN_IMP2(
+      ICompressCoder,
       ICompressGetInStreamProcessedSize)
   #endif
 
@@ -145,7 +149,6 @@ public:
 };
 
 class CCOMCoder     : public CCoder { public: CCOMCoder(): CCoder(false) {} };
-class CNsisCOMCoder : public CCoder { public: CNsisCOMCoder(): CCoder(false, true) {} };
 class CCOMCoder64   : public CCoder { public: CCOMCoder64(): CCoder(true) {} };
 
 }}}

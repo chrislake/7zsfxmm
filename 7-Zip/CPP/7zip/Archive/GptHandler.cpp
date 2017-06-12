@@ -87,6 +87,9 @@ struct CPartType
 static const CPartType kPartTypes[] =
 {
   // { 0x0, 0, "Unused" },
+
+  { 0x21686148, 0, "BIOS Boot" },
+
   { 0xC12A7328, 0, "EFI System" },
   { 0x024DEE41, 0, "MBR" },
       
@@ -98,10 +101,13 @@ static const CPartType kPartTypes[] =
   // { 0x37AFFC90, 0, "IBM GPFS" },
   // { 0xE75CAF8F, 0, "Windows Storage Spaces" },
 
-  { 0x83BD6B9D, 0, "FreeBSD Boot"  },
+  { 0x0FC63DAF, 0, "Linux Data" },
+  { 0x0657FD6D, 0, "Linux Swap" },
+
+  { 0x83BD6B9D, 0, "FreeBSD Boot" },
   { 0x516E7CB4, 0, "FreeBSD Data" },
   { 0x516E7CB5, 0, "FreeBSD Swap" },
-  { 0x516E7CB6, "ufs", "FreeBSD UFS"  },
+  { 0x516E7CB6, "ufs", "FreeBSD UFS" },
   { 0x516E7CB8, 0, "FreeBSD Vinum" },
   { 0x516E7CB8, "zfs", "FreeBSD ZFS" },
 
@@ -238,9 +244,31 @@ HRESULT CHandler::Open2(IInStream *stream)
     _items.Add(item);
   }
   
-  UInt64 end = (backupLba + 1) * kSectorSize;
-  if (_totalSize < end)
-    _totalSize = end;
+  {
+    const UInt64 end = (backupLba + 1) * kSectorSize;
+    if (_totalSize < end)
+      _totalSize = end;
+  }
+
+  {
+    UInt64 fileEnd;
+    RINOK(stream->Seek(0, STREAM_SEEK_END, &fileEnd));
+    
+    if (_totalSize < fileEnd)
+    {
+      const UInt64 rem = fileEnd - _totalSize;
+      const UInt64 kRemMax = 1 << 22;
+      if (rem <= kRemMax)
+      {
+        RINOK(stream->Seek(_totalSize, STREAM_SEEK_SET, NULL));
+        bool areThereNonZeros = false;
+        UInt64 numZeros = 0;
+        if (ReadZeroTail(stream, areThereNonZeros, numZeros, kRemMax) == S_OK)
+          if (!areThereNonZeros)
+            _totalSize += numZeros;
+      }
+    }
+  }
 
   return S_OK;
 }
@@ -334,6 +362,12 @@ STDMETHODIMP CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *val
         if (c == 0)
           break;
         s += c;
+      }
+      if (s.IsEmpty())
+      {
+        char temp[16];
+        ConvertUInt32ToString(index, temp);
+        s.AddAscii(temp);
       }
       {
         int typeIndex = FindPartType(item.Type);

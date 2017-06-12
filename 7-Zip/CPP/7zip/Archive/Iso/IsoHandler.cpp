@@ -30,7 +30,14 @@ static const Byte kProps[] =
   kpidIsDir,
   kpidSize,
   kpidPackSize,
-  kpidMTime
+  kpidMTime,
+  // kpidCTime,
+  // kpidATime,
+  kpidPosixAttrib,
+  // kpidUser,
+  // kpidGroup,
+  // kpidLinks,
+  kpidSymLink
 };
 
 static const Byte kArcProps[] =
@@ -213,17 +220,87 @@ STDMETHODIMP CHandler::GetProperty(UInt32 index, PROPID propID, PROPVARIANT *val
           prop = s;
         }
         break;
+
+      case kpidSymLink:
+        if (_archive.IsSusp)
+        {
+          UString s;
+          UInt32 mode;
+          if (item.GetPx(_archive.SuspSkipSize, k_Px_Mode, mode))
+          {
+            if (((mode >> 12) & 0xF) == 10)
+            {
+              AString s8;
+              if (item.GetSymLink(_archive.SuspSkipSize, s8))
+              {
+                s = MultiByteToUnicodeString(s8, CP_OEMCP);
+                prop = s;
+              }
+            }
+          }
+        }
+        break;
+
+
+      case kpidPosixAttrib:
+      /*
+      case kpidLinks:
+      case kpidUser:
+      case kpidGroup:
+      */
+      {
+        if (_archive.IsSusp)
+        {
+          UInt32 t = 0;
+          switch (propID)
+          {
+            case kpidPosixAttrib: t = k_Px_Mode; break;
+            /*
+            case kpidLinks: t = k_Px_Links; break;
+            case kpidUser: t = k_Px_User; break;
+            case kpidGroup: t = k_Px_Group; break;
+            */
+          }
+          UInt32 v;
+          if (item.GetPx(_archive.SuspSkipSize, t, v))
+            prop = v;
+        }
+        break;
+      }
+      
       case kpidIsDir: prop = item.IsDir(); break;
       case kpidSize:
       case kpidPackSize:
         if (!item.IsDir())
           prop = (UInt64)ref.TotalSize;
         break;
+
       case kpidMTime:
+      // case kpidCTime:
+      // case kpidATime:
       {
         FILETIME utc;
-        if (item.DateTime.GetFileTime(utc))
+        if (/* propID == kpidMTime && */ item.DateTime.GetFileTime(utc))
           prop = utc;
+        /*
+        else
+        {
+          UInt32 t = 0;
+          switch (propID)
+          {
+            case kpidMTime: t = k_Tf_MTime; break;
+            case kpidCTime: t = k_Tf_CTime; break;
+            case kpidATime: t = k_Tf_ATime; break;
+          }
+          CRecordingDateTime dt;
+          if (item.GetTf(_archive.SuspSkipSize, t, dt))
+          {
+            FILETIME utc;
+            if (dt.GetFileTime(utc))
+              prop = utc;
+          }
+        }
+        */
         break;
       }
     }
@@ -321,8 +398,10 @@ STDMETHODIMP CHandler::Extract(const UInt32 *indices, UInt32 numItems,
       UInt64 offset = 0;
       for (UInt32 e = 0; e < ref.NumExtents; e++)
       {
-        lps->InSize = lps->OutSize = currentTotalSize + offset;
         const CDir &item2 = ref.Dir->_subItems[ref.Index + e];
+        if (item2.Size == 0)
+          continue;
+        lps->InSize = lps->OutSize = currentTotalSize + offset;
         RINOK(_stream->Seek((UInt64)item2.ExtentLocation * kBlockSize, STREAM_SEEK_SET, NULL));
         streamSpec->Init(item2.Size);
         RINOK(copyCoder->Code(inStream, realOutStream, NULL, NULL, progress));
@@ -358,7 +437,7 @@ STDMETHODIMP CHandler::GetStream(UInt32 index, ISequentialInStream **stream)
   UInt64 blockIndex;
   UInt64 currentItemSize;
   
-  if (index < (UInt32)_archive.Refs.Size())
+  if (index < _archive.Refs.Size())
   {
     const CRef &ref = _archive.Refs[index];
     const CDir &item = ref.Dir->_subItems[ref.Index];
@@ -375,14 +454,14 @@ STDMETHODIMP CHandler::GetStream(UInt32 index, ISequentialInStream **stream)
       UInt64 virtOffset = 0;
       for (UInt32 i = 0; i < ref.NumExtents; i++)
       {
-        const CDir &item = ref.Dir->_subItems[ref.Index + i];
-        if (item.Size == 0)
+        const CDir &item2 = ref.Dir->_subItems[ref.Index + i];
+        if (item2.Size == 0)
           continue;
         CSeekExtent se;
-        se.Phy = (UInt64)item.ExtentLocation * kBlockSize;
+        se.Phy = (UInt64)item2.ExtentLocation * kBlockSize;
         se.Virt = virtOffset;
         extentStreamSpec->Extents.Add(se);
-        virtOffset += item.Size;
+        virtOffset += item2.Size;
       }
       if (virtOffset != ref.TotalSize)
         return S_FALSE;
@@ -394,6 +473,7 @@ STDMETHODIMP CHandler::GetStream(UInt32 index, ISequentialInStream **stream)
       *stream = extentStream.Detach();
       return S_OK;
     }
+    
     currentItemSize = item.Size;
     blockIndex = item.ExtentLocation;
   }

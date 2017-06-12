@@ -88,7 +88,7 @@ enum
   EW_SENDMESSAGE,       // SendMessage
   EW_ISWINDOW,          // IsWindow
   EW_GETDLGITEM,        // GetDlgItem
-  EW_SETCTLCOLORS,      // SerCtlColors
+  EW_SETCTLCOLORS,      // SetCtlColors
   EW_SETBRANDINGIMAGE,  // SetBrandingImage
   EW_CREATEFONT,        // CreateFont
   EW_SHOWWINDOW,        // ShowWindow, EnableWindow, HideWindow
@@ -175,7 +175,7 @@ static const CCommandInfo k_Commands[kNumCmds] =
   { 0 }, // "BringToFront" },
   { 2 }, // "SetDetailsView" },
   { 2 }, // "SetFileAttributes" },
-  { 2 }, // CreateDirectory, SetOutPath
+  { 3 }, // CreateDirectory, SetOutPath
   { 3 }, // "IfFileExists" },
   { 3 }, // SetRebootFlag, ...
   { 4 }, // "If" }, // IfAbort, IfSilent, IfErrors, IfRebootFlag
@@ -1155,9 +1155,13 @@ bool CInArchive::IsGoodString(UInt32 param) const
   if (param == 0)
     return true;
   const Byte *p = _data + _stringsPos;
+  unsigned c;
   if (IsUnicode)
-    return (Get16(p + param * 2 - 2)) == 0;
-  return p[param - 1] == 0;
+    c = Get16(p + param * 2 - 2);
+  else
+    c = p[param - 1];
+  // some files have '\\' character before string?
+  return (c == 0 || c == '\\');
 }
 
 bool CInArchive::AreTwoParamStringsEqual(UInt32 param1, UInt32 param2) const
@@ -1391,7 +1395,7 @@ void CInArchive::AddRegRoot(UInt32 val)
   Script += s;
 }
 
-static const char *g_WinAttrib[] =
+static const char * const g_WinAttrib[] =
 {
     "READONLY"
   , "HIDDEN"
@@ -1509,7 +1513,7 @@ static const UInt32 CMD_REF_Pre     = (1 << 2);
 static const UInt32 CMD_REF_Show    = (1 << 3);
 static const UInt32 CMD_REF_Leave   = (1 << 4);
 static const UInt32 CMD_REF_OnFunc  = (1 << 5);
-static const UInt32 CMD_REF_Section  = (1 << 6);
+static const UInt32 CMD_REF_Section = (1 << 6);
 static const UInt32 CMD_REF_InitPluginDir = (1 << 7);
 // static const UInt32 CMD_REF_Creator = (1 << 5); // _Pre is used instead
 static const unsigned CMD_REF_OnFunc_NumShifts = 28; // it uses for onFunc too
@@ -3357,7 +3361,12 @@ HRESULT CInArchive::ReadEntries(const CBlockHeader &bh)
         
         #ifdef NSIS_SCRIPT
         s += isSetOutPath ? "SetOutPath" : "CreateDirectory";
-          AddParam(params[0]);
+        AddParam(params[0]);
+        if (params[2] != 0)
+        {
+          SmallSpaceComment();
+          s += "CreateRestrictedDirectory";
+        }
         #endif
         
         break;
@@ -3374,11 +3383,8 @@ HRESULT CInArchive::ReadEntries(const CBlockHeader &bh)
               params[2] == 0 &&
               params[3] == 0)
           {
-            if (IsVarStr(params[1], kVar_OUTDIR))
-            {
-              spec_outdir_U = UPrefixes.Back(); // outdir_U;
-              spec_outdir_A = APrefixes.Back();// outdir_A;
-            }
+            spec_outdir_U = UPrefixes.Back(); // outdir_U;
+            spec_outdir_A = APrefixes.Back(); // outdir_A;
           }
         }
 
@@ -3571,15 +3577,16 @@ HRESULT CInArchive::ReadEntries(const CBlockHeader &bh)
 
         AddParam(params[0]);
 
-        SmallSpaceComment();
-
         /*
         for (int i = 1; i < 3; i++)
           AddParam_UInt(params[i]);
         */
 
         if (params[3] != 0)
+        {
+          SmallSpaceComment();
           AddParam(params[3]);
+        }
         
         #endif
 
@@ -5040,6 +5047,9 @@ HRESULT CInArchive::Parse()
 
   DetectNsisType(bhEntries, _data + bhEntries.Offset);
 
+  Decoder.IsNsisDeflate = (NsisType != k_NsisType_Nsis3);
+
+
   #ifdef NSIS_SCRIPT
 
   {
@@ -5601,6 +5611,9 @@ HRESULT CInArchive::Open2(const Byte *sig, size_t size)
   Decoder.Method = Method;
   Decoder.FilterFlag = FilterFlag;
   Decoder.Solid = IsSolid;
+  
+  Decoder.IsNsisDeflate = true; // we need some smart check that NSIS is not NSIS3 here.
+  
   Decoder.InputStream = _stream;
   Decoder.Buffer.Alloc(kInputBufSize);
   Decoder.StreamPos = 0;

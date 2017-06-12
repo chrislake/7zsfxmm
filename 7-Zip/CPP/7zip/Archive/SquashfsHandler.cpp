@@ -296,23 +296,25 @@ struct CNode
 
 UInt32 CNode::Parse1(const Byte *p, UInt32 size, const CHeader &_h)
 {
-  bool be = _h.be;
+  const bool be = _h.be;
   if (size < 4)
     return 0;
-  UInt16 t = Get16(p);
-  if (be)
   {
-    Type = (UInt16)(t >> 12);
-    Mode = (UInt16)(t & 0xFFF);
-    Uid = (UInt16)(p[2] >> 4);
-    Gid = (UInt16)(p[2] & 0xF);
-  }
-  else
-  {
-    Type = (UInt16)(t & 0xF);
-    Mode = (UInt16)(t >> 4);
-    Uid = (UInt16)(p[2] & 0xF);
-    Gid = (UInt16)(p[2] >> 4);
+    const UInt32 t = Get16(p);
+    if (be)
+    {
+      Type = (UInt16)(t >> 12);
+      Mode = (UInt16)(t & 0xFFF);
+      Uid = (UInt16)(p[2] >> 4);
+      Gid = (UInt16)(p[2] & 0xF);
+    }
+    else
+    {
+      Type = (UInt16)(t & 0xF);
+      Mode = (UInt16)(t >> 4);
+      Uid = (UInt16)(p[2] & 0xF);
+      Gid = (UInt16)(p[2] >> 4);
+    }
   }
 
   // Xattr = kXattr_Empty;
@@ -402,17 +404,20 @@ UInt32 CNode::Parse2(const Byte *p, UInt32 size, const CHeader &_h)
   bool be = _h.be;
   if (size < 4)
     return 0;
-  UInt16 t = Get16(p);
-  if (be)
   {
-    Type = (UInt16)(t >> 12);
-    Mode = (UInt16)(t & 0xFFF);
+    const UInt32 t = Get16(p);
+    if (be)
+    {
+      Type = (UInt16)(t >> 12);
+      Mode = (UInt16)(t & 0xFFF);
+    }
+    else
+    {
+      Type = (UInt16)(t & 0xF);
+      Mode = (UInt16)(t >> 4);
+    }
   }
-  else
-  {
-    Type = (UInt16)(t & 0xF);
-    Mode = (UInt16)(t >> 4);
-  }
+
   Uid = p[2];
   Gid = p[3];
 
@@ -532,17 +537,21 @@ UInt32 CNode::Parse3(const Byte *p, UInt32 size, const CHeader &_h)
   bool be = _h.be;
   if (size < 12)
     return 0;
-  UInt16 t = Get16(p);
-  if (be)
+  
   {
-    Type = (UInt16)(t >> 12);
-    Mode = (UInt16)(t & 0xFFF);
+    const UInt32 t = Get16(p);
+    if (be)
+    {
+      Type = (UInt16)(t >> 12);
+      Mode = (UInt16)(t & 0xFFF);
+    }
+    else
+    {
+      Type = (UInt16)(t & 0xF);
+      Mode = (UInt16)(t >> 4);
+    }
   }
-  else
-  {
-    Type = (UInt16)(t & 0xF);
-    Mode = (UInt16)(t >> 4);
-  }
+
   Uid = p[2];
   Gid = p[3];
   // GET_32 (4, MTime);
@@ -950,7 +959,7 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
   *srcLen = 0;
   const Byte *destStart = dest;
   const Byte *srcStart = src;
-  unsigned mode = 2;
+  unsigned mode = 0;
 
   {
     if (srcRem == 0)
@@ -961,7 +970,7 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
       src++;
       srcRem--;
       b -= 17;
-      mode = (b < 4 ? 0 : 1);
+      mode = (b < 4 ? 1 : 4);
       if (b > srcRem || b > destRem)
         return S_FALSE;
       srcRem -= b;
@@ -979,6 +988,7 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
     UInt32 b = *src++;
     srcRem--;
     UInt32 len, back;
+    
     if (b >= 64)
     {
       srcRem--;
@@ -987,7 +997,7 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
     }
     else if (b < 16)
     {
-      if (mode == 2)
+      if (mode == 0)
       {
         if (b == 0)
         {
@@ -1004,21 +1014,23 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
             }
           }
         }
+      
         b += 3;
         if (b > srcRem || b > destRem)
           return S_FALSE;
         srcRem -= b;
         destRem -= b;
-        mode = 1;
+        mode = 4;
         do
           *dest++ = *src++;
         while (--b);
         continue;
       }
+      
       srcRem--;
       back = (b >> 2) + (*src++ << 2);
       len = 2;
-      if (mode == 1)
+      if (mode == 4)
       {
         back += (1 << 11);
         len = 3;
@@ -1029,6 +1041,7 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
       UInt32 bOld = b;
       b = (b < 32 ? 7 : 31);
       len = bOld & b;
+      
       if (len == 0)
       {
         for (len = b;; len += 255)
@@ -1044,6 +1057,7 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
           }
         }
       }
+      
       len += 2;
       if (srcRem < 2)
         return S_FALSE;
@@ -1053,38 +1067,39 @@ static HRESULT LzoDecode(Byte *dest, SizeT *destLen, const Byte *src, SizeT *src
       srcRem -= 2;
       if (bOld < 32)
       {
+        back += ((bOld & 8) << 11);
         if (back == 0)
         {
           *destLen = dest - destStart;
           *srcLen = src - srcStart;
           return S_OK;
         }
-        back += ((bOld & 8) << 11) + (1 << 14) - 1;
+        back += (1 << 14) - 1;
       }
     }
+    
     back++;
     if (len > destRem || (size_t)(dest - destStart) < back)
       return S_FALSE;
     destRem -= len;
     Byte *destTemp = dest - back;
     dest += len;
+    
     do
     {
       *(destTemp + back) = *destTemp;
       destTemp++;
     }
     while (--len);
+    
     b &= 3;
+    mode = b;
     if (b == 0)
-    {
-      mode = 2;
       continue;
-    }
     if (b > srcRem || b > destRem)
       return S_FALSE;
     srcRem -= b;
     destRem -= b;
-    mode = 0;
     *dest++ = *src++;
     if (b > 1)
     {
@@ -2115,7 +2130,7 @@ STDMETHODIMP CHandler::Extract(const UInt32 *indices, UInt32 numItems,
       {
         RINOK(hres);
         {
-          HRESULT hres = copyCoder->Code(inSeqStream, outStream, NULL, NULL, progress);
+          hres = copyCoder->Code(inSeqStream, outStream, NULL, NULL, progress);
           if (hres == S_OK)
           {
             if (copyCoderSpec->TotalSize == unpackSize)

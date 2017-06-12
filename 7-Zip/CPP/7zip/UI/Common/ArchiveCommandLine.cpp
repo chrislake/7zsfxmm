@@ -387,7 +387,7 @@ static void AddRenamePair(CObjectVector<CRenamePair> *renamePairs,
     val.Add_LF();
     if (type == NRecursedType::kRecursed)
       val.AddAscii("-r");
-    else if (type == NRecursedType::kRecursed)
+    else if (type == NRecursedType::kWildcardOnlyRecursed)
       val.AddAscii("-r0");
     throw CArcCmdLineException("Unsupported rename command:", val);
   }
@@ -1053,7 +1053,7 @@ void CArcCmdLineParser::Parse2(CArcCmdLineOptions &options)
   const UStringVector &nonSwitchStrings = parser.NonSwitchStrings;
   unsigned numNonSwitchStrings = nonSwitchStrings.Size();
   if (numNonSwitchStrings < kMinNonSwitchWords)
-    throw CArcCmdLineException("The command must be spcified");
+    throw CArcCmdLineException("The command must be specified");
 
   if (!ParseArchiveCommand(nonSwitchStrings[kCommandIndex], options.Command))
     throw CArcCmdLineException("Unsupported command:", nonSwitchStrings[kCommandIndex]);

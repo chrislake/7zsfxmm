@@ -3,6 +3,7 @@
 #include "StdAfx.h"
 
 #include <Windowsx.h>
+// #include <stdio.h>
 
 #include "../../../Common/IntToString.h"
 #include "../../../Common/StringConvert.h"
@@ -74,6 +75,7 @@ HRESULT CPanel::Create(HWND mainWindow, HWND parentWindow, UINT id,
     const UString &currentFolderPrefix,
     const UString &arcFormat,
     CPanelCallback *panelCallback, CAppState *appState,
+    bool needOpenArc,
     bool &archiveIsOpened, bool &encrypted)
 {
   _mainWindow = mainWindow;
@@ -100,10 +102,15 @@ HRESULT CPanel::Create(HWND mainWindow, HWND parentWindow, UINT id,
 
   RINOK(BindToPath(cfp, arcFormat, archiveIsOpened, encrypted));
 
+  if (needOpenArc && !archiveIsOpened)
+    return S_OK;
+
   if (!CreateEx(0, kClassName, 0, WS_CHILD | WS_VISIBLE,
       0, 0, _xSize, 260,
       parentWindow, (HMENU)(UINT_PTR)id, g_hInstance))
     return E_FAIL;
+  PanelCreated = true;
+
   return S_OK;
 }
 
@@ -525,7 +532,7 @@ bool CPanel::OnCreate(CREATESTRUCT * /* createStruct */)
   _statusBar.Create(WS_CHILD | WS_VISIBLE, L"Status", (*this), _statusBarID);
   // _statusBar2.Create(WS_CHILD | WS_VISIBLE, L"Status", (*this), _statusBarID + 1);
 
-  int sizes[] = {160, 250, 350, -1};
+  const int sizes[] = {220, 320, 420, -1};
   _statusBar.SetParts(4, sizes);
   // _statusBar2.SetParts(5, sizes);
 
@@ -613,10 +620,47 @@ bool CPanel::OnNotifyReBar(LPNMHDR header, LRESULT & /* result */)
   return false;
 }
 
+/*
+UInt32 g_OnNotify = 0;
+UInt32 g_LVIF_TEXT = 0;
+UInt32 g_Time = 0;
+
+void Print_OnNotify(const char *name)
+{
+  char s[256];
+  DWORD tim = GetTickCount();
+  sprintf(s,
+      "Time = %7u ms, Notify = %9u, TEXT = %9u, %s",
+      tim - g_Time,
+      g_OnNotify,
+      g_LVIF_TEXT,
+      name);
+  g_Time = tim;
+  OutputDebugStringA(s);
+  g_OnNotify = 0;
+  g_LVIF_TEXT = 0;
+}
+*/
+
 bool CPanel::OnNotify(UINT /* controlID */, LPNMHDR header, LRESULT &result)
 {
+  /*
+  g_OnNotify++;
+
+  if (header->hwndFrom == _listView)
+  {
+    if (header->code == LVN_GETDISPINFOW)
+    {
+      LV_DISPINFOW *dispInfo = (LV_DISPINFOW *)header;
+        if ((dispInfo->item.mask & LVIF_TEXT))
+          g_LVIF_TEXT++;
+    }
+  }
+  */
+
   if (!_processNotify)
     return false;
+
   if (header->hwndFrom == _headerComboBox)
     return OnNotifyComboBox(header, result);
   else if (header->hwndFrom == _headerReBar)
@@ -834,18 +878,20 @@ void CPanel::AddToArchive()
   // KillSelection();
 }
 
-static UString GetSubFolderNameForExtract(const UString &arcPath)
+// function from ContextMenu.cpp
+UString GetSubFolderNameForExtract(const UString &arcPath);
+
+static UString GetSubFolderNameForExtract2(const UString &arcPath)
 {
-  UString s = arcPath;
-  int slashPos = s.ReverseFind_PathSepar();
-  int dotPos = s.ReverseFind_Dot();
-  if (dotPos <= slashPos + 1)
-    s += L'~';
-  else
+  int slashPos = arcPath.ReverseFind_PathSepar();
+  UString s;
+  UString name = arcPath;
+  if (slashPos >= 0)
   {
-    s.DeleteFrom(dotPos);
-    s.TrimRight();
+    s = arcPath.Left(slashPos + 1);
+    name = arcPath.Ptr(slashPos + 1);
   }
+  s += GetSubFolderNameForExtract(name);
   return s;
 }
 
@@ -885,7 +931,7 @@ void CPanel::ExtractArchives()
   
   UString outFolder = GetFsPath();
   if (indices.Size() == 1)
-    outFolder += GetSubFolderNameForExtract(GetItemRelPath(indices[0]));
+    outFolder += GetSubFolderNameForExtract2(GetItemRelPath(indices[0]));
   else
     outFolder += L'*';
   outFolder.Add_PathSepar();

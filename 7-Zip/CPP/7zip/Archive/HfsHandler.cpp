@@ -507,7 +507,7 @@ HRESULT CHeaderRec::Parse(const Byte *p)
   // LeafRecords = Get32(p + 6);
   FirstLeafNode = Get32(p + 0xA);
   // LastLeafNode = Get32(p + 0xE);
-  UInt32 nodeSize = Get16(p + 0x12);
+  const UInt32 nodeSize = Get16(p + 0x12);
 
   unsigned i;
   for (i = 9; ((UInt32)1 << i) != nodeSize; i++)
@@ -583,9 +583,9 @@ HRESULT CDatabase::LoadExtentFile(const CFork &fork, IInStream *inStream, CObjec
 
     for (unsigned i = 0; i < desc.NumRecords; i++)
     {
-      UInt32 nodeSize = (UInt32)1 << hr.NodeSizeLog;
-      UInt32 offs = Get16(p + nodeOffset + nodeSize - (i + 1) * 2);
-      UInt32 offsNext = Get16(p + nodeOffset + nodeSize - (i + 2) * 2);
+      const UInt32 nodeSize = (UInt32)1 << hr.NodeSizeLog;
+      const UInt32 offs = Get16(p + nodeOffset + nodeSize - (i + 1) * 2);
+      const UInt32 offsNext = Get16(p + nodeOffset + nodeSize - (i + 2) * 2);
       if (offs > nodeSize || offsNext > nodeSize)
         return S_FALSE;
       UInt32 recSize = offsNext - offs;
@@ -727,12 +727,12 @@ HRESULT CDatabase::LoadAttrs(const CFork &fork, IInStream *inStream, IArchiveOpe
     
     for (unsigned i = 0; i < desc.NumRecords; i++)
     {
-      UInt32 nodeSize = (1 << hr.NodeSizeLog);
-      UInt32 offs = Get16(p + nodeOffset + nodeSize - (i + 1) * 2);
-      UInt32 offsNext = Get16(p + nodeOffset + nodeSize - (i + 2) * 2);
+      const UInt32 nodeSize = (1 << hr.NodeSizeLog);
+      const UInt32 offs = Get16(p + nodeOffset + nodeSize - (i + 1) * 2);
+      const UInt32 offsNext = Get16(p + nodeOffset + nodeSize - (i + 2) * 2);
       UInt32 recSize = offsNext - offs;
       if (offs >= nodeSize
-          || offsNext >= nodeSize
+          || offsNext > nodeSize
           || offsNext < offs)
         return S_FALSE;
 
@@ -876,7 +876,7 @@ HRESULT CDatabase::LoadCatalog(const CFork &fork, const CObjectVector<CIdExtents
   // CNodeDescriptor nodeDesc;
   // nodeDesc.Parse(p);
   CHeaderRec hr;
-  hr.Parse(p + kNodeDescriptor_Size);
+  RINOK(hr.Parse(p + kNodeDescriptor_Size));
   
   // CaseSensetive = (Header.IsHfsX() && hr.KeyCompareType == 0xBC);
 
@@ -898,7 +898,7 @@ HRESULT CDatabase::LoadCatalog(const CFork &fork, const CObjectVector<CIdExtents
       return S_FALSE;
     usedBuf[node] = 1;
     
-    size_t nodeOffset = (size_t)node << hr.NodeSizeLog;
+    const size_t nodeOffset = (size_t)node << hr.NodeSizeLog;
     CNodeDescriptor desc;
     desc.Parse(p + nodeOffset);
     if (!desc.CheckNumRecords(hr.NodeSizeLog))
@@ -908,12 +908,12 @@ HRESULT CDatabase::LoadCatalog(const CFork &fork, const CObjectVector<CIdExtents
     
     for (unsigned i = 0; i < desc.NumRecords; i++)
     {
-      UInt32 nodeSize = (1 << hr.NodeSizeLog);
-      UInt32 offs = Get16(p + nodeOffset + nodeSize - (i + 1) * 2);
-      UInt32 offsNext = Get16(p + nodeOffset + nodeSize - (i + 2) * 2);
+      const UInt32 nodeSize = (1 << hr.NodeSizeLog);
+      const UInt32 offs = Get16(p + nodeOffset + nodeSize - (i + 1) * 2);
+      const UInt32 offsNext = Get16(p + nodeOffset + nodeSize - (i + 2) * 2);
       UInt32 recSize = offsNext - offs;
       if (offs >= nodeSize
-          || offs >= nodeSize
+          || offsNext > nodeSize
           || offsNext < offs
           || recSize < 6)
         return S_FALSE;
@@ -987,7 +987,9 @@ HRESULT CDatabase::LoadCatalog(const CFork &fork, const CObjectVector<CIdExtents
       item.GroupID = Get32(r + 0x24);
       item.AdminFlags = r[0x28];
       item.OwnerFlags = r[0x29];
+      */
       item.FileMode = Get16(r + 0x2A);
+      /*
       item.special.iNodeNum = Get16(r + 0x2C); // or .linkCount
       item.FileType = Get32(r + 0x30);
       item.FileCreator = Get32(r + 0x34);
@@ -1572,6 +1574,9 @@ HRESULT CHandler::ExtractZlibFile(
 
     UInt32 size = GetUi32(tableBuf + i * 8 + 4);
 
+    if (size > buf.Size() || size > kCompressionBlockSize + 1)
+      return S_FALSE;
+
     RINOK(ReadStream_FALSE(inStream, buf, size));
 
     if ((buf[0] & 0xF) == 0xF)
@@ -1759,7 +1764,7 @@ STDMETHODIMP CHandler::Extract(const UInt32 *indices, UInt32 numItems,
             if (rem == 0)
             {
               // Here we check that there are no extra (empty) blocks in last extent.
-              if (extentRem >= (UInt64)((UInt32)1 << Header.BlockSizeLog))
+              if (extentRem >= ((UInt64)1 << Header.BlockSizeLog))
                 res = NExtract::NOperationResult::kDataError;
               break;
             }
