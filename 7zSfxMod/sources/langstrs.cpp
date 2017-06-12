@@ -33,12 +33,12 @@ LANGSTRING SfxLangStrings[] = {
 // Версия модуля
 	{ STR_SFXVERSION,		"SFX module - Copyright (c) 2005-2016 Oleg Scherbakov\n"
 							"\t" VERSION_SFX_TEXT_EN "\n"
-							"\n7-Zip archiver - Copyright (c) 1999-2015 Igor Pavlov\n"
+							"\n7-Zip archiver - Copyright (c) 1999-2016 Igor Pavlov\n"
 							"\t" VERSION_7ZIP_TEXT_EN "\n"
 							"\nSupported methods and filters, build options:\n\t",
 						"SFX модуль - Copyright (c) 2005-2016 Олег Щербаков\n"
 						"\t" VERSION_SFX_TEXT_RU "\n"
-						"\nАрхиватор 7-Zip - Copyright (c) 1999-2015 Игорь Павлов\n"
+						"\nАрхиватор 7-Zip - Copyright (c) 1999-2016 Игорь Павлов\n"
 						"\t" VERSION_7ZIP_TEXT_RU "\n"
 						"\nПоддерживаемые методы и фильтры, опции сборки:\n\t", NULL },
 // Заголовок окон сообщений по умолчанию, отображаемое, если
