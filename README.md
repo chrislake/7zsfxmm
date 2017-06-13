@@ -1,5 +1,5 @@
 # 7-Zip SFX Modified Module
-This is a copy of the last available version of the 7-Zip SFX Modified Module by Oleg Scherbakov.
+This is a copy of the last available version of the 7-Zip SFX Modified Module by Oleg Scherbakov - [SVN Repo](http://web.archive.org/web/20160311162325/http://svn.7zsfx.info/).
 
 The original website 7zsfx.info now seems unavaiable so the info contained here is from the latest Internet Archive version available:
 [Archived 7zsfx.info](http://web.archive.org/web/20160516114610/http://7zsfx.info:80/en/).
