@@ -1,0 +1,21 @@
+Ya158:
+When using the module, you can display the progress bar of file distribution.
+If the executable files are then run using RunProgram, the progress bar is not displayed.
+Therefore, it may appear that the installation has already ended, although the executable files are still working.
+Is it possible to make sure that when running executable files using RunProgram would be displayed
+A window with the inscription "Wait for the installation to finish" without the buttons and the ability to close it.
+Http://forum.oszone.net/post/1112277-751.html
+
+Banzaika
+I need to run exe with different keys,
+Cmd behaves chaotically when starting from a network folder,
+For this I exe myself squeezed 7z (then my installer is first decompressed into a temporary folder, and run, but locally) and in the way I appended keys, which is terribly inconvenient.
+Is it possible to add buttons in sfx to execute different installation scripts?
+Http://forum.oszone.net/post-1164098-802.html
+
+Dmitry_K
+There is a request: add additional RunPreSetup and RunPostSetup commands,
+Which would be launched at the very beginning of the module (the first command)
+And at the very end (the last team) in any case,
+Are RunPrograms and AutoInstall available?
+Http://forum.oszone.net/post-1447125-1049.html

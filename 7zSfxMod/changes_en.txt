@@ -1,0 +1,133 @@
+1.7 develop (build 3873) 05.03.16
+# The '-nr' key operation is extended to the parameters 'ExecuteOnLoad', 'PreExtract', 'PreExtractX'
+
+1.7 develop (build 3864) 25.02.16
+* Some of the child processes windows were displayed in the background (ArtXGroup: forum.oszone.net)
+
+1.7.0 develop (assembly 3861) 02/22/2016
+* Incorrect work of -sfxlang
+
+1.7.0 develop (build 3850)
+* In some situations, the temporary folder was not deleted
+
+1.7.0 develop (build 3844)
++ Added the parameters 'ExecuteOnLoad' and 'PreExecute'
+
+1.6.0-RC (assembly 3844) 02/06/2016
+* SfxVarSystemPlatform has always reported 'x86'
+
+1.6.0 beta (build 3818) 01/10/2016
+# The source code of 7-Zip version 15.14 of December 31, 2015 was used.
+
+1.6.0 beta (build 3807) 12/30/2015 * BUGGED VERSION *
+# The source code of 7-Zip version 15.12 of November 19, 2015 was used.
+
+1.6 develop (build 3574) 11.05.15
+* Support for volumes
+
+1.6 develop (build 3565) 02.05.15
++ Multivolume support enabled by default
+* When warned, the icon in the taskbar has a yellow background
++ Delta filter support is enabled "by default" in the modules LZMA, LZMA2, LZMA_Dialogs and All
+
+1.6 develop (build 3564) 01.05.15
+# 7-Zip sources updated up to 9.38-beta
+# Some changes due new 7-Zip sources
+* First chance exception 0x0EEDFADE from Delphi library fixed (may be raised by some auto-loaded DLLs into our process)
+
+1.6 develop (build 2478)
++ Encryption support
+
+1.5 beta (build 2478)
+* The unpacking folder was not current when there is a prefix 'waitall' (gora: forum.oszone.net)
+
+1.5 beta (build 2367) 01/21/12
+* Selecting a folder on x64 platforms resulted in an exception (gora: forum.oszone.net)
+
+1.5 beta (build 2088) 16.04.11
+# The -sfxversion dialog
+# The source code of 7-Zip version 9.21 beta was used on April 11, 2011.
+
+1.5 alpha (assembly 2079) 07.04.11
+* Variable '%% P' did not understand the parameters of the commands 'Shortcut', 'ShortcutX' (gora: forum.oszone.net)
+
+1.5 alpha (assembly 1989) 07.01.11
+* The '-fm0' key was not working (usver32: forum.oszone.net)
+
+1.5 alpha (assembly 1978) 23.12.10
+* FinishMessage did not work without the keys on the command line or the fm prefixes
+# Changed the logic in the key -!, Removed the leading forced space
+
+1.5 alpha (build 1951)
++ Displaying volume support in -sfxversion
+* Error display for an incorrect sequence of volumes
+* Absence of method 'Copy'
+
+1.5 alpha (build 1948) 11/27/10
++ Volume Support
+
+1.5 alpha (assembly 1941) 11/21/10
+# The source code of 7-Zip version 9.20 of November 18, 2010 is used.
+# MiscFlags 8 - request password Before the BeginPrompt & ExtractPath dialogs
+
+1.5 alpha (build 1937) 15.11.10
++ MiscFlags 8 - request a password after the BeginPrompt & ExtractPath dialogs
++ Support for encryption of archives
++ Parameters 'PasswordTitle' and 'PasswordText' of the password input dialog
++ The command line switch -pPASSWORD for specifying a password
+
+1.5 alpha (build 1934) 11/13/10
+# The source code of 7-Zip version 9.19 beta was used on November 11, 2010.
+
+1.5 alpha (build 1928) 11/07/10
++ Variable module %% P - operating system platform
+
+1.5 alpha (build 1924) 03/11/10
+# The source code of 7-Zip version 9.18 beta was used on November 2, 2010.
+
+1.5 alpha (build 1922) 11/01/10
+# Optimizations for faster unpacking speed
+# Changes associated with the batch assembly
+
+1.5 alpha (build 1915)
+# The branch is translated into the status of 'alpha'
+
+1.5 alpha (build 1915)
+# The branch is translated into the status of 'alpha'
+
+1.5 develop (build 1912) 10/22/10
+* Incorrect operation of '-fm0' (irod61: forum.oszone.net)
+* Disclosure of shared variables of the module and user variables worked incorrectly (gora: forum.oszone.net)
++ Flag 16384 'GUIFlags' for displaying '&' in dialog texts (gora: forum.oszone.net)
+
+1.5 develop (build 1903) 10/13/10
+* Handling errors of memory leaks
+
+1.5 develop (build 1902)
++ Handling errors of memory
+
+1.5 develop (build 1899) 10/09/10
+# Changed the processing logic of language sections
+
+1.5 develop (build 1898) 10/08/10
+* Wrong size of dialogs with strings that use environment variables (Das Betrunkene Pferd: forum.oszone.net)
++ Parameter 'BeginPromptTimeout' in the configuration file (DPavlik82: forum.oszone.net)
++ '-bptX' key
+
+1.5 develop (build 1896) 10/06/10
+# The source code of 7-Zip version 9.17 beta was used on October 4, 2010.
+
+1.5 develop (build 1799)
++ Windows7 PCA support in the manifest
+
+1.5 develop (build 1798)
+* When starting external programs, the "unpacking folder" was not installed as a "default folder"
+
+1.5 develop (build 1795) 06/27/10
+* Incorrect operation of '-mf'
+* Incorrect file overwrite error if the user has insufficient rights
++ Flag 4 'MiscFlags' to run with elevated privileges
+
+1.5 develop (build 1794) 06/26/10
++ Prefix 'waitall' to wait for completion of all child processes
++ Copyright ('-sfxversion' switch)
