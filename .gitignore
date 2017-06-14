@@ -9,6 +9,7 @@ Intermediate/
 *.obj
 
 # Precompiled Headers
+**/ipch/
 *.gch
 *.pch
 

@@ -139,7 +139,7 @@ CFLAGS=$(CFLAGS)			\
 !ENDIF
 
 
-LFLAGS = -nologo -opt:REF -opt:ICF -opt:NOWIN98 -subsystem:WINDOWS
+LFLAGS = -nologo -opt:REF -opt:ICF -subsystem:WINDOWS
 RFLAGS = $(RFLAGS) -nologo -l0
 
 !IF "$(CPU)" == "x64" || "$(CPU)" == "amd64"
