@@ -47,6 +47,10 @@
 	#endif // _SFX_USE_CUSTOM_EXCEPTIONS
 #endif // defined(_MSC_VER) && defined(_WIN32) && !defined(_DEBUG)
 
+#ifndef DBG_PRINTEXCEPTION_WIDE_C
+	#define DBG_PRINTEXCEPTION_WIDE_C ((DWORD)0x4001000AL)
+#endif
+
 #ifdef _SFX_USE_CUSTOM_EXCEPTIONS
 	UINT_PTR uSfxExceptionText = 0;
 	typedef UINT_PTR (* GetSfxExceptionText)(void);
@@ -57,7 +61,10 @@
 	{
 		#ifdef _SFX_USE_CUSTOM_EXCEPTIONS_VECTORED_WIN64
 			/* 0x0EEDFADE - first chance exception from Delphi library, may be raised by some auto-loaded DLLs into our process */
-			if( rec->ExceptionCode == dwFirstChanceException || rec->ExceptionCode == 0x0EEDFADE)
+			if( rec->ExceptionCode == dwFirstChanceException ||
+				rec->ExceptionCode == 0x0EEDFADE ||
+				rec->ExceptionCode == DBG_PRINTEXCEPTION_C ||
+				rec->ExceptionCode == DBG_PRINTEXCEPTION_WIDE_C)
 				return;
 		#endif // _SFX_USE_CUSTOM_EXCEPTIONS_VECTORED_WIN64
 		if( uSfxExceptionText != 0 )
