@@ -1,14 +1,14 @@
-@Echo off
-rem SetLocal enabledelayedexpansion
+@ECHO OFF
+REM SETLOCAL ENABLEDELAYEDEXPANSION
 
-Set SfxVersion=170
+SET SfxVersion=170
 
-For /F %%i In (SfxBuild.txt) Do Set %%i
+FOR /F %%i IN (SfxBuild.txt) DO SET %%i
 
-set source_dir=%CD%
-set sfx_name=%source_dir%\..\snapshots\7zsd_%SfxVersion%_%SfxBuild%
+SET source_dir=%CD%
+SET sfx_name=%source_dir%\..\snapshots\7zsd_%SfxVersion%_%SfxBuild%
 
-cd ..\output\win32
-7z a -mx=9 %sfx_name%_x86.7z -xr!7zsd_Debug* *.sfx
-cd ..\win64
-7z a -mx=9 %sfx_name%_x64.7z -xr!7zsd_Debug* *.sfx
+CD ..\output\win32
+"C:\Program Files\7-Zip\7z.exe" a -mx=9 %sfx_name%_x86.7z -xr!7zsd_Debug* *.sfx
+CD ..\win64
+"C:\Program Files\7-Zip\7z.exe" a -mx=9 %sfx_name%_x64.7z -xr!7zsd_Debug* *.sfx
