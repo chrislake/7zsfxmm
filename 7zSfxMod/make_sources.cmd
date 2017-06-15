@@ -1,7 +1,7 @@
 @ECHO OFF
 REM SETLOCAL ENABLEDELAYEDEXPANSION
 
-SET SfxVersion=170
+SET SfxVersion=171
 
 FOR /F %%i IN (SfxBuild.txt) DO SET %%i
 

@@ -2,9 +2,14 @@
 /* File:        Exceptions.cpp                                               */
 /* Created:     Mon, 15 Mar 2010 11:26:32 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 11 Mar 2016 16:53:18 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Revision:    2189                                                         */
+/* Last update: Thu, 15 Jun 2017 09:53:44 AET                                */
+/*              by Chris Lake, mailto:chrislake@hotmail.com                  */
+/* Revision:    3901                                                         */
+/*---------------------------------------------------------------------------*/
+/* Revision:    3901                                                         */
+/* Updated:     Thu, 15 Jun 2017 09:53:44 AET                                */
+/*              by Chris Lake, mailto:chrislake@hotmail.com                  */
+/* Description: Fix DBG_PRINTEXCEPTION_WIDE_C error on Win10 1703            */
 /*---------------------------------------------------------------------------*/
 /* Revision:    677                                                          */
 /* Updated:     Fri, 20 Jan 2012 22:42:16 GMT                                */

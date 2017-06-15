@@ -1,3 +1,6 @@
+1.7.1 develop (сборка 3901) 15/06/2017
+* Игнорировать новый DBG_PRINTEXCEPTION_WIDE_C (и существующий DBG_PRINTEXCEPTION_C), чтобы исправить ошибку запуска в Windows 10 1703.
+
 1.7 develop (сборка 3873) 05.03.16
 # Работа ключа '-nr' распространена на параметры 'ExecuteOnLoad', 'PreExtract', 'PreExtractX'
 

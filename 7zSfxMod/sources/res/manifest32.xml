@@ -1,6 +1,6 @@
 <assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
 
-<assemblyIdentity version="1.7.0.3900" processorArchitecture="X86" name="7-Zip.SfxMod" type="win32" />
+<assemblyIdentity version="1.7.1.3901" processorArchitecture="X86" name="7-Zip.SfxMod" type="win32" />
 
 <dependency><dependentAssembly>
 <assemblyIdentity type="win32" name="Microsoft.Windows.Common-Controls" version="6.0.0.0" processorArchitecture="X86" publicKeyToken="6595b64144ccf1df"/>
