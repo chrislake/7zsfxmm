@@ -30,6 +30,7 @@ Intermediate/
 
 # Executables
 Output/
+bin/
 *.exe
 *.out
 *.app
