@@ -2,9 +2,11 @@
 /* File:        Helpers.cpp                                                  */
 /* Created:     Sat, 30 Jul 2005 11:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sun, 20 Mar 2016 07:07:28 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3886                                                         */
+/* Updated:     Sun, 20 Mar 2016 07:07:28 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1697                                                         */
 /* Updated:     Mon, 22 Mar 2010 11:16:07 GMT                                */
@@ -934,24 +936,6 @@ int GetDirectorySeparatorPos( CSfxStringU& ustrPath )
 	int nPos2 = ustrPath.ReverseFind( L'/' );
 	if( nPos2 > nPos1 ) nPos1 = nPos2;
 	return nPos1;
-}
-
-HWND hwndDummyWnd = NULL;
-void CreateDummyWindow()
-{
-	HWND hwnd = CreateWindowEx( WS_EX_TOOLWINDOW, L"tooltips_class32", L"sfx", 0,0,0,0,0, NULL, NULL, GetModuleHandle(NULL), NULL );
-	RECT	rc;
-	GetWindowRect( GetDesktopWindow(), &rc );
-	SetWindowPos( hwnd, NULL, (rc.right-rc.left)/2, (rc.bottom-rc.top)/2, 0,0, SWP_NOZORDER );
-	if( hwnd )
-	{
-		SetTimer( hwnd, 1, 1, NULL );
-		MSG	msg;
-		::GetMessage(&msg,NULL,0,0);
-		::DispatchMessage( &msg );
-		::KillTimer( hwnd, 1 );
-		hwndDummyWnd = hwnd;
-	}
 }
 
 CSfxStringU GetWindowStringU( HWND hwnd )

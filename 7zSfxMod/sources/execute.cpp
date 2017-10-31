@@ -2,9 +2,11 @@
 /* File:        execute.cpp                                                  */
 /* Created:     Fri, 05 Feb 2016 10:45:46 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 12 Mar 2016 11:24:03 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    37                                                           */
+/* Updated:     Sat, 12 Mar 2016 11:24:03 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "7zSfxModInt.h"
@@ -181,9 +183,6 @@ BOOL SfxExecute( LPCWSTR lpwszCmdLine, DWORD dwFlags, LPCWSTR lpwszDirectory )
 		execInfo.lpVerb = L"runas";
 	if( (dwFlags&SFXEXEC_NOWAIT) == 0 )
 		execInfo.fMask |= SEE_MASK_NOASYNC;
-	execInfo.hwnd = hwndDummyWnd;
-	::ShowWindow( hwndDummyWnd, SW_SHOW );
-	::BringWindowToTop( execInfo.hwnd );
 
 	fileParams = LoadQuotedString( lpwszCmdLine, filePath );
 	if( filePath.Len() == 0 )

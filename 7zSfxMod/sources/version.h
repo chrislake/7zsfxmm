@@ -2,9 +2,7 @@
 /* File:        version.h                                                    */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Thu, 15 Jun 2017 09:53:44 AET                                */
-/*              by Chris Lake, mailto:chrislake@hotmail.com                  */
-/* Revision:    3901                                                         */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
 /* Updated:     Thu, 15 Jun 2017 09:53:44 AET                                */
@@ -356,9 +354,9 @@
 
 #define VERSION_SFX_NUM_TEXT		"1.7.1"
 #define VERSION_SFX_NUM_BIN			1,7,1,VERSION_REVISION
-#define VERSION_SFX_DATE_EN			"April 1, 2016"
-#define VERSION_SFX_DATE_RU			"1 апреля 2016"
-#define VERSION_SFX_BRANCH_EN		"develop"
+#define VERSION_SFX_DATE_EN			"October 31, 2017"
+#define VERSION_SFX_DATE_RU			VERSION_SFX_DATE_EN
+#define VERSION_SFX_BRANCH_EN		"datadiode"
 #define VERSION_SFX_BRANCH_RU		VERSION_SFX_BRANCH_EN
 #define VERSION_SFX_LEGAL_COPYRIGHT	"Copyright © 2005-2016 Oleg N. Scherbakov"
 

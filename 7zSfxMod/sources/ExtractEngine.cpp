@@ -2,9 +2,11 @@
 /* File:        ExtractEngine.cpp                                            */
 /* Created:     Wed, 05 Oct 2005 07:36:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Thu, 17 Mar 2016 05:51:18 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3816                                                         */
+/* Updated:     Thu, 17 Mar 2016 05:51:18 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1706                                                         */
 /* Updated:     Sun, 06 Jun 2010 08:51:01 GMT                                */
@@ -338,7 +340,9 @@ STDMETHODIMP CSfxExtractEngine::CryptoGetTextPassword(BSTR *password)
 HRESULT ExtractArchive( const CSfxStringU &folderName )
 {
 	HRESULT hr = S_OK;
+#ifdef SFX_CRYPTO
 	MiscFlags &= ~(MISCFLAGS_LATE_PASSWORD);
+#endif // SFX_CRYPTO
 	if( gSfxArchive.Open() == false )
 	{
 #ifdef SFX_CRYPTO

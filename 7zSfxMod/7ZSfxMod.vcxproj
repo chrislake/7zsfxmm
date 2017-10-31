@@ -102,36 +102,43 @@
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Deflate|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LZMA|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='LZMA2|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='SfxTools|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='All|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>Windows7.1SDK</PlatformToolset>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -139,59 +146,45 @@
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='PPMd|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Deflate|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LZMA|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LZMA2|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SfxTools|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='All|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='PPMd|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Deflate|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LZMA|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='LZMA2|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='SfxTools|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='All|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
-    <Import Project="$(VCTargetsPath)Microsoft.CPP.UpgradeFromVC60.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
@@ -257,14 +250,11 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_DEFLATE;COMPRESS_PPMD;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_DEFLATE;COMPRESS_PPMD;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -285,9 +275,6 @@
       <OutputFile>$(OutDir)7zsd_$(Configuration).sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -316,16 +303,13 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_COPY;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_DEFLATE;COMPRESS_PPMD;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;UNICODE;_USE_SFXTEST;_SFX_MAINTAINER;SFX_VOLUMES;SFX_CRYPTO;_NO_EXCEPTIONS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_DEFLATE;COMPRESS_PPMD;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
       <SmallerTypeCheck>false</SmallerTypeCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -345,8 +329,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration)_x64.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -375,10 +357,8 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
@@ -402,9 +382,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_LZMA_Dialogs.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_LZMA_Dialogs.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -433,17 +410,14 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>
       </ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -465,9 +439,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_LZMA_Dialogs_x64.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_LZMA_Dialogs.map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -496,14 +467,11 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -523,9 +491,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration).sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -554,16 +519,13 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
       <SmallerTypeCheck>false</SmallerTypeCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -583,8 +545,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration)_x64.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -613,14 +573,11 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -641,8 +598,6 @@
       <OutputFile>$(OutDir)7zsd_$(Configuration).sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <IgnoreAllDefaultLibraries>false</IgnoreAllDefaultLibraries>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -671,16 +626,13 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_BCJ;COMPRESS_BCJ2;COMPRESS_DELTA;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
       <SmallerTypeCheck>false</SmallerTypeCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -700,8 +652,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration)_x64.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -730,14 +680,10 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;_DEBUGALL;COMPRESS_PPMD;COMPRESS_LZMA;WIN32;_WINDOWS;_MBCS;UNICODE;SFX_VOLUMES;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <PreprocessorDefinitions>_DEBUG;_DEBUGALL;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -747,6 +693,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
       <OmitDefaultLibName>false</OmitDefaultLibName>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -756,9 +703,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration).exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <HeapReserveSize>16777216</HeapReserveSize>
       <OptimizeReferences>
@@ -769,6 +713,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>sources\res\manifest32.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -790,16 +735,12 @@
     </Midl>
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>_DEBUG;COMPRESS_DEFLATE;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_BCJ2;_SFXTOOLS;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
+      <PreprocessorDefinitions>_DEBUG;_DEBUGALL;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ExceptionHandling>
       </ExceptionHandling>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <SmallerTypeCheck>false</SmallerTypeCheck>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
       <PrecompiledHeader>Use</PrecompiledHeader>
@@ -808,6 +749,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <DisableSpecificWarnings>4530;%(DisableSpecificWarnings)</DisableSpecificWarnings>
+      <StringPooling>true</StringPooling>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>_DEBUG;_SFXTOOLS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -817,9 +759,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration)_x64.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <HeapReserveSize>16777216</HeapReserveSize>
       <OptimizeReferences>
@@ -830,6 +769,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX64</TargetMachine>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -848,14 +788,11 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_DEFLATE;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_DEFLATE;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -873,10 +810,7 @@
     <Link>
       <AdditionalOptions>/STUB:sources/small.stub /RELEASE %(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)7zsd_$(Configuration).sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -884,6 +818,7 @@
       <DataExecutionPrevention>
       </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
+      <OutputFile>$(OutDir)7zsd_$(Configuration).sfx</OutputFile>
     </Link>
     <Manifest>
       <AdditionalManifestFiles>sources\res\manifest32.xml;%(AdditionalManifestFiles)</AdditionalManifestFiles>
@@ -905,16 +840,13 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_DEFLATE;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_LZMA;COMPRESS_LZMA2;COMPRESS_BCJ;COMPRESS_DEFLATE;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
       <SmallerTypeCheck>false</SmallerTypeCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -934,8 +866,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration)_x64.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -964,14 +894,11 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_PPMD;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_PPMD;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -991,8 +918,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration).sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
@@ -1021,16 +946,13 @@
     </Midl>
     <ClCompile>
       <Optimization>MinSpace</Optimization>
-      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
-      <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\7-Zip\CPP\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>NDEBUG;COMPRESS_PPMD;WIN32;_WINDOWS;_MBCS;EXTRACT_ONLY;NO_REGISTRY;_SFX;_NO_CRYPTO;UNICODE;_USE_SFXTEST;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;COMPRESS_PPMD;WIN32;_WINDOWS;EXTRACT_ONLY;NO_REGISTRY;_SFX;SFXBUILD_OPTIONS3=0;_SFX_USE_PREFIX_PLATFORM;SFXBUILD_OPTIONS4=0;SFXBUILD_OPTIONS5=0;_SFX_USE_CUSTOM_MSVCRT;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>
       </ExceptionHandling>
       <SmallerTypeCheck>false</SmallerTypeCheck>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <RuntimeTypeInfo>false</RuntimeTypeInfo>
@@ -1050,8 +972,6 @@
       <AdditionalDependencies>comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)7zsd_$(Configuration)_x64.sfx</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <GenerateMapFile>true</GenerateMapFile>
-      <MapFileName>$(OutDir)7zsd_$(Configuration).map</MapFileName>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>

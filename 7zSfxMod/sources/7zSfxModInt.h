@@ -2,9 +2,11 @@
 /* File:        7zSfxModInt.h                                                */
 /* Created:     Wed, 25 Jul 2007 09:54:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:42:00 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3174                                                         */
+/* Updated:     Fri, 01 Apr 2016 20:42:00 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1641                                                         */
 /* Updated:     Fri, 20 Jan 2012 22:47:56 GMT                                */
@@ -84,7 +86,6 @@ extern LANGID	idSfxLang;
 extern int		ExtractDialogWidth;
 extern int		ExtractPathWidth;
 extern HWND		hwndExtractDlg;
-extern HWND		hwndDummyWnd;
 extern int		FinishMessage;
 extern bool		fUseBackward;
 #ifdef _SFX_USE_BEGINPROMPTTIMEOUT
@@ -227,7 +228,6 @@ CSfxStringU CreateTempName( LPCWSTR lpwszFormat );
 
 BOOL IsRunAsAdmin();
 int GetDirectorySeparatorPos( CSfxStringU& ustrPath );
-void CreateDummyWindow();
 void SfxCleanup();
 void ReplaceVariablesEx( CSfxStringU& str );
 CSfxStringU MyGetEnvironmentVariable( LPCWSTR lpwszName );
@@ -275,7 +275,11 @@ void CreateConfigSignature(
 #define CMDLINE_SFXELEVATION		_CFG_PARAM_TYPE"sfxelevation"
 
 #if !defined(SFX_VOLUMES) && !defined(SFX_PROTECT)
-	#define CSfxInStream CInFileStream
+	class CSfxInStream : public CInFileStream
+	{
+	public:
+		UInt32 GetStreamsCount() { return 0; }
+	};
 #else
 	#include "7zip/Archive/Common/MultiStream.h"
 	class CSfxInStream : public CMultiStream

@@ -2,9 +2,11 @@
 /* File:        config.cpp                                                   */
 /* Created:     Tue, 23 Feb 2010 05:32:49 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 11 Mar 2016 16:45:19 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    2209                                                         */
+/* Updated:     Fri, 11 Mar 2016 16:45:19 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    28                                                           */
 /* Updated:     Mon, 22 Mar 2010 11:11:30 GMT                                */
@@ -15,7 +17,7 @@
 #include "7zSfxModInt.h"
 
 #ifdef _MSC_VER
-	#if defined(_WIN32) && !defined(_DEBUG) && defined(_MSC_VER_OK) && defined(_SFX_USE_CUSTOM_MSVCRT)
+	#if defined(_WIN32) && defined(_MSC_VER_OK) && defined(_SFX_USE_CUSTOM_MSVCRT)
 		// only MS VC, only release versions
 		#if !defined(_WIN64) && defined(_M_IX86)
 #pragma comment( lib, "lib/crt/i386/msvcrt.lib" )
@@ -24,7 +26,7 @@
 		#endif // platform
 	#else
 		#pragma comment( lib, "msvcrt.lib" )
-	#endif // defined(_WIN32) && !defined(_DEBUG) && defined(_MSC_VER_OK) && defined(_SFX_USE_CUSTOM_MSVCRT)
+	#endif // defined(_WIN32) && defined(_MSC_VER_OK) && defined(_SFX_USE_CUSTOM_MSVCRT)
 
 	#if _MSC_VER == 1900
 // sample new & delete operators

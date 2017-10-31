@@ -2,9 +2,11 @@
 /* File:        archive.cpp                                                  */
 /* Created:     Sat, 05 Mar 2016 22:41:49 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 19:54:56 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    27                                                           */
+/* Updated:     Fri, 01 Apr 2016 19:54:56 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "7zSfxModInt.h"
@@ -71,9 +73,9 @@ bool CSfxArchive::Open()
 	if( GetItemsCount() > 0 )
 		return true;
 
+	m_stream->Seek( 0, STREAM_SEEK_SET, NULL );
 #ifdef SFX_CRYPTO
 	CSfxArchive::CPassword * passwordCallback = new CSfxArchive::CPassword;
-	m_stream->Seek( 0, STREAM_SEEK_SET, NULL );
 	result = m_handler->Open( m_stream, &kMaxCheckStartPosition, passwordCallback );
 #else
 	result = m_handler->Open( m_stream, &kMaxCheckStartPosition, NULL );

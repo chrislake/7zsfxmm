@@ -2,9 +2,11 @@
 /* File:        main.cpp                                                     */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 02 Apr 2016 06:31:33 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
+/* Ppdated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1798                                                         */
 /* Updated:		Wed, 30 Jun 2010 09:24:36 GMT                                */
@@ -525,17 +527,6 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	DWORD dwStartTime = ::GetTickCount();
 #endif // -DEBUG
 	_set_new_handler( sfx_new_handler );
-	CreateDummyWindow();
-
-	OSVERSIONINFO versionInfo;
-	versionInfo.dwOSVersionInfoSize = sizeof(versionInfo);
-	if( ::GetVersionEx(&versionInfo) == FALSE ||
-			versionInfo.dwPlatformId != VER_PLATFORM_WIN32_NT ||
-				versionInfo.dwMajorVersion < 5 )
-	{
-		::MessageBoxA( NULL, "Sorry, this program requires Microsoft Windows 2000 or later.", "7-Zip SFX", MB_OK|MB_ICONSTOP );
-		return ERRC_PLATFORM;
-	}
 
 	kSignatureConfigStart[0] = kSignatureConfigEnd[0] = ';';
 
@@ -767,6 +758,8 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	SetConfigVariables();
 
 	gSfxArchive.Open();
+
+#ifdef _SFX_USE_COMPRESSED_CONFIG
 	// Reinit config due possible changes in compressed version
 	gConfig.Clear();
 	LoadAndParseConfig(gSfxArchive.GetStream(),NULL);
@@ -775,6 +768,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	gSfxArchive.LoadAndParseCompressedConfig();
 	ParseCommandLineParameters();
 	SetConfigVariables();
+#endif
 
 #ifdef _SFX_USE_ELEVATION
 // Check elevation
@@ -821,7 +815,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	if( gSfxArchive.GetAssumeYes() != false )
 		GUIFlags &= (~GUIFLAGS_CONFIRM_CANCEL);
 
-	(void)CoInitialize( NULL );
+	CoInitializeEx( NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE );
 
 	// Path to extract
 	if( (lpwszValue = GetTextConfigValue(CFG_INSTALLPATH)) != NULL )

@@ -2,9 +2,11 @@
 /* File:        ExtractEngine.h                                              */
 /* Created:     Wed, 05 Oct 2005 17:35:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Mon, 14 Mar 2016 05:05:17 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3813                                                         */
+/* Updated:     Mon, 14 Mar 2016 05:05:17 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1629                                                         */
 /* Updated:     Mon, 22 Mar 2010 11:15:14 GMT                                */
@@ -41,7 +43,13 @@ public:
 	STDMETHOD(CryptoGetTextPassword)(BSTR *password);
 #endif // SFX_CRYPTO
 
-	CSfxExtractEngine() { m_outFileStreamSpec = NULL; SetIndices(NULL,0); };
+	CSfxExtractEngine()
+	{
+		m_outFileStreamSpec = NULL;
+#ifdef _SFX_USE_EXTRACT_MASK
+		SetIndices(NULL,0);
+#endif // _SFX_USE_EXTRACT_MASK
+	};
 	void SetDirectory( LPCWSTR lpwszDirectory ) { m_directoryPath = lpwszDirectory; m_directoryPath += L'\\'; };
 #ifdef _SFX_USE_EXTRACT_MASK
 	void SetIndices( UInt32 * indices, UInt32 num ) { m_indices = indices; m_numIndices = num; }

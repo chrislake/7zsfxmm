@@ -2,9 +2,11 @@
 /* File:        AES.cpp                                                      */
 /* Created:     Sat, 13 Nov 2010 14:15:29 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 12 Jan 2016 07:31:15 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    1886                                                         */
+/* Updated:     Tue, 12 Jan 2016 07:31:15 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 #include "stdafx.h"
 
@@ -16,8 +18,5 @@
 	extern "C" {
 		#include "../C/Aes.c"
 		#include "../C/Sha256.c"
-		#ifndef _SFX_MAINTAINER
-			#include "../C/AesOpt.c"
-		#endif // _SFX_MAINTAINER
 	}
 #endif // SFX_CRYPTO
