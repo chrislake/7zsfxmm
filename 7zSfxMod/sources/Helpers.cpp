@@ -2,7 +2,7 @@
 /* File:        Helpers.cpp                                                  */
 /* Created:     Sat, 30 Jul 2005 11:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3886                                                         */
 /* Updated:     Sun, 20 Mar 2016 07:07:28 GMT                                */
@@ -254,12 +254,13 @@ bool ReadConfig( IInStream * inStream, LPCSTR startID, LPCSTR endID, CSfxStringA
 			}
 			else
 			{
-				if( (Int32)pos > (Int32)(numBytesInBuffer - signatureStartSize) )
+				if( (Int32)pos >= (Int32)(numBytesInBuffer - signatureStartSize) )
 					break;
 				if( memcmp(buffer + pos, startID, signatureStartSize) == 0 )
 				{
-					writeMode = true;
 					pos += signatureStartSize;
+					if ( buffer[pos] != 0 )
+						writeMode = true;
 				}
 				else
 					pos++;

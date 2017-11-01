@@ -2,9 +2,11 @@
 /* File:        SfxDialogs.cpp                                               */
 /* Created:     Sat, 13 Jan 2007 02:03:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:42:56 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3367                                                         */
+/* Updated:     Fri, 01 Apr 2016 20:42:56 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1262                                                         */
 /* Updated:     Sun, 27 Jun 2010 06:55:56 GMT                                */
@@ -50,7 +52,7 @@
 
 #define MAX_PROGRESS_VALUE	30000
 
-BYTE CSfxDialog::m_DialogsTemplate[] = {
+BYTE const CSfxDialog::m_DialogsTemplate[] = {
 	0x01, 0x00, 0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xC8, 0x00, 0xC8, 0x80,
 	0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x79, 0x00, 0x79, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 	0x08, 0x00, 0x00, 0x00, 0x00, 0x01, 0x4D, 0x00, 0x53, 0x00, 0x20, 0x00, 0x53, 0x00, 0x68, 0x00,
@@ -114,7 +116,7 @@ void CSfxDialog::SetButtonTimerText()
 
 LRESULT CALLBACK CSfxDialog::hookMouseProc( int code, WPARAM wParam, LPARAM lParam )
 {
-	static UINT uHookCodes[] = {
+	static UINT const uHookCodes[] = {
 		WM_LBUTTONUP, WM_LBUTTONDOWN, WM_LBUTTONDBLCLK,
 		WM_RBUTTONUP, WM_RBUTTONDOWN, WM_RBUTTONDBLCLK,
 		WM_MBUTTONUP, WM_MBUTTONDOWN, WM_MBUTTONDBLCLK,
@@ -124,7 +126,7 @@ LRESULT CALLBACK CSfxDialog::hookMouseProc( int code, WPARAM wParam, LPARAM lPar
 	{
 		if( m_pActiveDialog->m_nTimer > 0 )
 		{
-			UINT * msg = uHookCodes;
+			UINT const* msg = uHookCodes;
 			while( *msg != 0 )
 			{
 				if( *msg == wParam )

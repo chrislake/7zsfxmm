@@ -2,7 +2,7 @@
 /* File:        main.cpp                                                     */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
 /* Ppdated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
@@ -37,16 +37,14 @@
 #include "ExtractEngine.h"
 #include "archive.h"
 
-void	DeleteSFX( CSfxStringU moduleName );
+void DeleteSFX( CSfxStringU moduleName );
 
 CSfxStringU SfxMultiByteToUnicodeString( const CSfxStringA &srcString, UINT codePage );
 CSfxStringA SfxUnicodeStringToMultiByte( const CSfxStringU &srcString, UINT codePage );
 
-const UInt64 kMaxCheckStartPosition = 1 << 20;
-
-char kSignatureConfigStart[] = ",!@Install@!UTF-8!";
-char kSignatureConfigEnd[] = ",!@InstallEnd@!";
-
+char const kSignatureConfigStart[] = ";!@Install@!UTF-8!";
+char const kSignatureConfigEnd[] = ";!@InstallEnd@!";
+UInt64 const kMaxCheckStartPosition = 1 << 20;
 
 LPCWSTR	lpwszErrorTitle;
 #ifdef _SFX_USE_WARNINGS
@@ -111,7 +109,7 @@ typedef struct tagENVALIAS {
 	#define CSIDL_COMMON_DOCUMENTS          0x002e        // All Users\Documents
 #endif
 
-ENVALIAS EnvAliases [] = {
+ENVALIAS const EnvAliases [] = {
 	{ CSIDL_COMMON_DESKTOPDIRECTORY,	L"CommonDesktop" },
 	{ CSIDL_COMMON_DOCUMENTS,			L"CommonDocuments" },
 	{ CSIDL_DESKTOPDIRECTORY,			L"UserDesktop" },
@@ -527,8 +525,6 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	DWORD dwStartTime = ::GetTickCount();
 #endif // -DEBUG
 	_set_new_handler( sfx_new_handler );
-
-	kSignatureConfigStart[0] = kSignatureConfigEnd[0] = ';';
 
 	int		ShortcutDefault = -1;
 	int		DeleteDefault = -1;

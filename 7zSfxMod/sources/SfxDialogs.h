@@ -2,9 +2,11 @@
 /* File:        SfxDialogs.h                                                 */
 /* Created:     Sat, 13 Jan 2007 12:01:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:19:25 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3367                                                         */
+/* Updated:     Fri, 01 Apr 2016 20:19:25 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1240                                                         */
 /* Updated:     Sun, 06 Jun 2010 08:48:12 GMT                                */
@@ -102,7 +104,7 @@ protected:
 	static HHOOK	m_hKeyboardHook;
 
 	static POINT	m_ptCenter;
-	static BYTE m_DialogsTemplate[];
+	static BYTE const m_DialogsTemplate[];
 	static INT_PTR CALLBACK SfxDialogProc( HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam );
 };
 

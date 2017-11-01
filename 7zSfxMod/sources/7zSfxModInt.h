@@ -2,7 +2,7 @@
 /* File:        7zSfxModInt.h                                                */
 /* Created:     Wed, 25 Jul 2007 09:54:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3174                                                         */
 /* Updated:     Fri, 01 Apr 2016 20:42:00 GMT                                */
@@ -67,9 +67,9 @@ namespace SfxErrors
 	};
 }
 
-extern char kSignatureConfigStart[];
-extern char kSignatureConfigEnd[];
-extern const UInt64 kMaxCheckStartPosition;
+extern char const kSignatureConfigStart[];
+extern char const kSignatureConfigEnd[];
+extern UInt64 const kMaxCheckStartPosition;
 
 extern LPCWSTR	lpwszTitle;
 extern LPCWSTR	lpwszErrorTitle;
