@@ -491,6 +491,159 @@ void SfxCleanup()
 		DeleteFileOrDirectoryAlways( extractPath );
 }
 
+bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
+{
+	CSfxStringU OutFileName;
+	SKIP_WHITESPACES_W(lpwszValue);
+	lpwszValue = LoadQuotedString(lpwszValue, OutFileName);
+	NWindows::NFile::NIO::CInFile InFile;
+	NWindows::NFile::NIO::COutFile OutFile;
+	if (!InFile.Open(strModulePathName) || !OutFile.Create(OutFileName, CREATE_ALWAYS))
+		return false;
+	UInt32 processedSize;
+	IMAGE_DOS_HEADER mz;
+	IMAGE_NT_HEADERS nt;
+	BYTE buf[8192];
+	// Copy MS-DOS stub
+	if (!InFile.Read(&mz, sizeof mz, processedSize) || (processedSize != sizeof mz))
+		return false;
+	if (mz.e_magic != IMAGE_DOS_SIGNATURE)
+		return false;
+	if (!OutFile.Write(&mz, sizeof mz, processedSize) || (processedSize != sizeof mz))
+		return false;
+	if (mz.e_lfanew < sizeof mz)
+		return false;
+	LONG e_lfanew = sizeof mz;
+	while (e_lfanew < mz.e_lfanew)
+	{
+		UInt32 remainingSize = mz.e_lfanew - e_lfanew;
+		if (remainingSize > sizeof buf)
+			remainingSize = sizeof buf;
+		if (!InFile.Read(buf, remainingSize, processedSize) || (processedSize != remainingSize))
+			return false;
+		if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
+			return false;
+		e_lfanew += processedSize;
+	}
+	// Include config files as specified
+	while (LPCWSTR lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCONFIG))
+	{
+		CSfxStringU InFileName;
+		SKIP_WHITESPACES_W(lpwszAhead);
+		lpwszValue = LoadQuotedString(lpwszAhead, InFileName);
+		NWindows::NFile::NIO::CInFile InFile;
+		if (!InFile.Open(InFileName))
+			return false;
+		do
+		{
+			UInt32 remainingSize;
+			if (!InFile.Read(buf, sizeof buf, remainingSize))
+				return false;
+			if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
+				return false;
+			e_lfanew += processedSize;
+		} while (processedSize != 0);
+	}
+	// Copy NT header
+	if (!InFile.Read(&nt, sizeof nt, processedSize) || (processedSize != sizeof nt))
+		return false;
+	if (nt.Signature != IMAGE_NT_SIGNATURE)
+		return false;
+	if (nt.FileHeader.SizeOfOptionalHeader != sizeof nt.OptionalHeader)
+		return false;
+	// Keep file alignment intact
+	if (UInt32 unalignedSize = e_lfanew - mz.e_lfanew & nt.OptionalHeader.FileAlignment - 1)
+	{
+		UInt32 alignmentSize = nt.OptionalHeader.FileAlignment - unalignedSize;
+		memset(buf, 0, alignmentSize);
+		if (!OutFile.Write(buf, alignmentSize, processedSize) || (processedSize != alignmentSize))
+			return false;
+		e_lfanew += processedSize;
+	}
+	LONG displacement = e_lfanew - mz.e_lfanew;
+	int i;
+	nt.OptionalHeader.SizeOfHeaders += displacement;
+	// No way to relocate code, so don't grow headers beyond section alignment
+	if (nt.OptionalHeader.SizeOfHeaders > nt.OptionalHeader.SectionAlignment)
+		return false;
+	nt.OptionalHeader.CheckSum = 0;
+	if (!OutFile.Write(&nt, sizeof nt, processedSize) || (processedSize != sizeof nt))
+		return false;
+	for (i = 0; i < nt.FileHeader.NumberOfSections; ++i)
+	{
+		IMAGE_SECTION_HEADER sh;
+		if (!InFile.Read(&sh, sizeof sh, processedSize) || (processedSize != sizeof sh))
+			return false;
+		if (sh.PointerToRawData)
+			sh.PointerToRawData += displacement;
+		if (sh.PointerToRelocations)
+			sh.PointerToRelocations += displacement;
+		if (sh.PointerToLinenumbers)
+			sh.PointerToLinenumbers += displacement;
+		if (!OutFile.Write(&sh, sizeof sh, processedSize) || (processedSize != sizeof sh))
+			return false;
+	}
+	do
+	{
+		UInt32 remainingSize;
+		if (!InFile.Read(buf, sizeof buf, remainingSize))
+			return false;
+		if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
+			return false;
+	} while (processedSize != 0);
+	// PE header address fixup
+	if (mz.e_lfanew != e_lfanew)
+	{
+		mz.e_lfanew = e_lfanew;
+		if (!OutFile.SeekToBegin())
+			return false;
+		if (!OutFile.Write(&mz, sizeof mz, processedSize) || (processedSize != sizeof mz))
+			return false;
+	}
+	if (!OutFile.Close())
+		return false;
+	// Add manifest as specified
+	if (LPCWSTR lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXMANIFEST))
+	{
+		CSfxStringU InFileName;
+		SKIP_WHITESPACES_W(lpwszAhead);
+		lpwszValue = LoadQuotedString(lpwszAhead, InFileName);
+		NWindows::NFile::NIO::CInFile InFile;
+		if (!InFile.Open(InFileName))
+			return false;
+		if (!InFile.Read(buf, sizeof buf, processedSize) || (processedSize == sizeof buf))
+			return false;
+		HANDLE handle = BeginUpdateResourceW(OutFileName, FALSE);
+		if (handle == NULL)
+			return false;
+		BOOL done = UpdateResourceW(handle, RT_MANIFEST, MAKEINTRESOURCEW(1),
+			MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), buf, processedSize);
+		if (!EndUpdateResourceW(handle, FALSE) || !done)
+			return false;
+	}
+	// Append archives as specified
+	UInt64 newPosition;
+	if (!OutFile.Open(OutFileName, OPEN_EXISTING) || !OutFile.SeekToEnd(newPosition))
+		return false;
+	while (*lpwszValue)
+	{
+		CSfxStringU InFileName;
+		lpwszValue = LoadQuotedString(lpwszValue, InFileName);
+		NWindows::NFile::NIO::CInFile InFile;
+		if (!InFile.Open(InFileName))
+			return false;
+		do
+		{
+			UInt32 remainingSize;
+			if (!InFile.Read(buf, sizeof buf, remainingSize))
+				return false;
+			if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
+				return false;
+		} while (processedSize != 0);
+	}
+	return true;
+}
+
 #include <new.h>
 int __cdecl sfx_new_handler( size_t size )
 {
@@ -681,6 +834,17 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	}
 #endif // _SFX_USE_TEST
 
+	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXCREATE )) != NULL )
+	{
+		if (!CreateSelfExtractor( strModulePathName, lpwszValue ))
+		{
+			// Existing errmsg for CMDLINE_SFXCONFIG seems reasonable here
+			SfxErrorDialog( FALSE, ERR_WRITE_CONFIG );
+			return ERRC_CONFIG_DATA;
+		}
+		return ERRC_NONE;
+	}
+
 	strSfxFolder = strModulePathName;
 	strSfxName = strModulePathName;
 	int nPos = GetDirectorySeparatorPos( strModulePathName );
@@ -720,7 +884,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 #ifdef _SFX_USE_TEST
 	if( nTestModeType == 0 && (lpwszValue = IsSfxSwitch( str,CMDLINE_SFXCONFIG )) != NULL )
 #else
-	if( (lpwszValue = IsSfxSwitch( str,CMDLINE_SFXCONFIG )) != NULL )
+	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXCONFIG )) != NULL )
 #endif // _SFX_USE_TEST
 	{
 		if( *lpwszValue == L':' ) lpwszValue++;
@@ -732,7 +896,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 		}
 		return ERRC_NONE;
 	}
-	
+
 #ifdef _SFX_USE_TEST
 	if( nTestModeType == TMT_CHECK_CONFIG )
 		return ERRC_NONE;

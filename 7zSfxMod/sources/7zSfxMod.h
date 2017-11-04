@@ -143,6 +143,8 @@
 #define ERRC_SFXTEST					100
 
 #define CMDLINE_SFXCONFIG			_CFG_PARAM_TYPE"sfxconfig"
+#define CMDLINE_SFXCREATE			_CFG_PARAM_TYPE"sfxcreate"
+#define CMDLINE_SFXMANIFEST			_CFG_PARAM_TYPE"sfxmanifest"
 #define CMDLINE_SFXVERSION			_CFG_PARAM_TYPE"sfxversion"
 #define CMDLINE_SFXLANG				_CFG_PARAM_TYPE"sfxlang"
 #define	CMDLINE_SFXTEST				_CFG_PARAM_TYPE"sfxtest"
