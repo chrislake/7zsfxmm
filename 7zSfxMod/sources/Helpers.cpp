@@ -111,7 +111,6 @@ LPCWSTR LoadQuotedString( LPCWSTR lpwszSrc, CSfxStringU & result )
 	return lpwszSrc;
 }
 
-
 CSfxStringU SfxMultiByteToUnicodeString( const CSfxStringA &srcString, UINT codePage )
 {
 	CSfxStringU resultString;
@@ -124,7 +123,6 @@ CSfxStringU SfxMultiByteToUnicodeString( const CSfxStringA &srcString, UINT code
 	}
 	return resultString;
 }
-
 
 CSfxStringA SfxUnicodeStringToMultiByte( const CSfxStringU &srcString, UINT codePage )
 {
@@ -975,9 +973,9 @@ BOOL ReplaceVariablesInWindow( HWND hwnd )
 HWND RecreateAsRichEdit( HWND hwndStatic )
 {
 	char szClassName[64];
-	if( GetClassNameA(hwndStatic,szClassName,64) == 0 || lstrcmpiA(szClassName,"STATIC") != 0 )
+	if( GetClassNameA(hwndStatic, szClassName, 64) == 0 || lstrcmpiA(szClassName, "STATIC") != 0 )
 		return NULL;
-	if( (GetWindowLong(hwndStatic,GWL_STYLE)&SS_BITMAP) != 0 )
+	if( (GetWindowLong(hwndStatic, GWL_STYLE) & SS_TYPEMASK) != SS_BITMAP )
 		return NULL;
 
 	CSfxStringU wndText = GetWindowStringU( hwndStatic );
@@ -1115,9 +1113,9 @@ BOOL SetDlgControlImage( HWND hwndControl )
 	HBITMAP		hbm;
 
 	char szClassName[64];
-	if( GetClassNameA(hwndControl,szClassName,64) == 0 || lstrcmpiA(szClassName,"STATIC") != 0 )
+	if( GetClassNameA(hwndControl, szClassName, 64) == 0 || lstrcmpiA(szClassName, "STATIC") != 0 )
 		return FALSE;
-	if( (GetWindowLong(hwndControl,GWL_STYLE)&SS_BITMAP) == 0 )
+	if( (GetWindowLong(hwndControl, GWL_STYLE) & SS_TYPEMASK) != SS_BITMAP )
 		return FALSE;
 
 	void * data;
