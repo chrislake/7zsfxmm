@@ -290,7 +290,7 @@ HRESULT WINAPI CSfxExtractEngine::ExtractThread(CSfxExtractEngine *pThis)
 	result = gSfxArchive.GetHandler()->Extract( indices, num_indices, 0, pThis );
 #endif // _SFX_USE_TEST
 	if( GUIMode != GUIMODE_HIDDEN && hwndExtractDlg != NULL )
-		::EndDialog( hwndExtractDlg, 0 );
+		::SendNotifyMessage( hwndExtractDlg, WM_COMMAND, SDC_BUTTON1, 0 );
 
 	return result;
 }
