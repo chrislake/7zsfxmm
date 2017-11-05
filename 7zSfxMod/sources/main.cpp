@@ -514,9 +514,11 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	if (mz.e_lfanew < sizeof mz)
 		return false;
 	LONG e_lfanew = sizeof mz;
-	while (e_lfanew < mz.e_lfanew)
+	LONG const e_cb = 512UL * (mz.e_cp ? mz.e_cp - 1 : mz.e_cp) + mz.e_cblp;
+	// Could also set e_cb to e_lfanew to keep existing content between headers
+	while (e_lfanew < e_cb)
 	{
-		UInt32 remainingSize = mz.e_lfanew - e_lfanew;
+		UInt32 remainingSize = e_cb - e_lfanew;
 		if (remainingSize > sizeof buf)
 			remainingSize = sizeof buf;
 		if (!InFile.Read(buf, remainingSize, processedSize) || (processedSize != remainingSize))
@@ -525,6 +527,10 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 			return false;
 		e_lfanew += processedSize;
 	}
+	// Move to start of NT header
+	UInt64 newPosition;
+	if (!InFile.Seek(mz.e_lfanew, newPosition))
+		return false;
 	// Include config files as specified
 	while (LPCWSTR lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCONFIG))
 	{
@@ -622,7 +628,6 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 			return false;
 	}
 	// Append archives as specified
-	UInt64 newPosition;
 	if (!OutFile.Open(OutFileName, OPEN_EXISTING) || !OutFile.SeekToEnd(newPosition))
 		return false;
 	while (*lpwszValue)
