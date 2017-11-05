@@ -37,6 +37,9 @@
 #include "ExtractEngine.h"
 #include "archive.h"
 
+using NWindows::NFile::NIO::CInFile;
+using NWindows::NFile::NIO::COutFile;
+
 void DeleteSFX( CSfxStringU moduleName );
 
 CSfxStringU SfxMultiByteToUnicodeString( const CSfxStringA &srcString, UINT codePage );
@@ -230,25 +233,17 @@ LPCWSTR UpdateOverwriteMode( LPCWSTR lpwszText )
 
 bool SaveConfiguration( LPCWSTR lpwszFileName, CSfxStringA & CfgData )
 {
-	COutFileStream	cfg;
-	UInt32 writed;
-	static BYTE utf8prefix[4] = { 0xEF, 0xBB, 0xBF, 0 };
-	if( cfg.Create( lpwszFileName, true ) == false )
-	{
-		CSfxStringU filePath = lpwszFileName;
-		int nPos  = GetDirectorySeparatorPos( filePath );
-		if( nPos < 0 )
-			return false;
-		filePath.ReleaseBuffer( nPos );
-		if( CreateFolderTree( (LPCWSTR)filePath ) == FALSE || cfg.Create( lpwszFileName, true ) == false )
-			return false;
-	}
+	COutFile cfg;
+	UInt32 processedSize;
+	static char const utf8prefix[] = "\xEF\xBB\xBF";
+	if (!cfg.Open(lpwszFileName, CREATE_ALWAYS))
+		return false;
 	CSfxStringA fullCfg;
-	fullCfg = (char *)utf8prefix;
+	fullCfg = utf8prefix;
 	fullCfg += kSignatureConfigStart;
-	fullCfg += (LPCSTR)CfgData;
+	fullCfg += CfgData;
 	fullCfg += kSignatureConfigEnd;
-	if( cfg.Write(fullCfg, fullCfg.Len(), &writed) != S_OK || writed != fullCfg.Len() )
+	if (!cfg.Write(fullCfg, fullCfg.Len(), processedSize) || (processedSize != fullCfg.Len()))
 		return false;
 	return true;
 }
@@ -259,11 +254,11 @@ void ReplaceVariableInShortcut( CSfxStringU& strShortcut, CSfxStringU& strVarNam
 	for( int i = 0; i < (int)strShortcut.Len(); i++ )
 	{
 		if( strShortcut[i] == L'%' &&
-				MyStrincmp( ((const wchar_t *)strShortcut)+i+1, strVarName, nVarNameLength ) == 0 &&
-					strShortcut[i+nVarNameLength+1] == L'%' )
+			MyStrincmp( strShortcut.Ptr( i + 1 ), strVarName, nVarNameLength ) == 0 &&
+			strShortcut[i + nVarNameLength + 1] == L'%' )
 		{
 			// var found
-			strShortcut.Delete( i, nVarNameLength+2 );
+			strShortcut.Delete( i, nVarNameLength + 2 );
 			strShortcut.Insert( i, strVarValue );
 		}
 	}
@@ -496,9 +491,9 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	CSfxStringU OutFileName;
 	SKIP_WHITESPACES_W(lpwszValue);
 	lpwszValue = LoadQuotedString(lpwszValue, OutFileName);
-	NWindows::NFile::NIO::CInFile InFile;
-	NWindows::NFile::NIO::COutFile OutFile;
-	if (!InFile.Open(strModulePathName) || !OutFile.Create(OutFileName, CREATE_ALWAYS))
+	CInFile InFile;
+	COutFile OutFile;
+	if (!InFile.Open(strModulePathName) || !OutFile.Open(OutFileName, CREATE_ALWAYS))
 		return false;
 	UInt32 processedSize;
 	IMAGE_DOS_HEADER mz;
@@ -537,7 +532,7 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 		CSfxStringU InFileName;
 		SKIP_WHITESPACES_W(lpwszAhead);
 		lpwszValue = LoadQuotedString(lpwszAhead, InFileName);
-		NWindows::NFile::NIO::CInFile InFile;
+		CInFile InFile;
 		if (!InFile.Open(InFileName))
 			return false;
 		do
@@ -614,7 +609,7 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 		CSfxStringU InFileName;
 		SKIP_WHITESPACES_W(lpwszAhead);
 		lpwszValue = LoadQuotedString(lpwszAhead, InFileName);
-		NWindows::NFile::NIO::CInFile InFile;
+		CInFile InFile;
 		if (!InFile.Open(InFileName))
 			return false;
 		if (!InFile.Read(buf, sizeof buf, processedSize) || (processedSize == sizeof buf))
@@ -634,7 +629,7 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	{
 		CSfxStringU InFileName;
 		lpwszValue = LoadQuotedString(lpwszValue, InFileName);
-		NWindows::NFile::NIO::CInFile InFile;
+		CInFile InFile;
 		if (!InFile.Open(InFileName))
 			return false;
 		do
@@ -856,8 +851,8 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	if( nPos >= 0 )
 	{
 		strSfxFolder.ReleaseBuffer( nPos );
-		strSfxName = ((const wchar_t *)strModulePathName) + nPos + 1;
-		strTitle = ((const wchar_t *)strModulePathName)+nPos+1;
+		strSfxName = strModulePathName.Ptr( nPos + 1 );
+		strTitle = strModulePathName.Ptr( nPos + 1 );
 		if( (nPos = strTitle.ReverseFind( L'.' )) > 0 )
 			strTitle.ReleaseBuffer( nPos );
 		strErrorTitle = strTitle;
@@ -880,10 +875,9 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 
 	// Read SFX config
 	CSfxStringA	textConfig;
-	int	result;
 
 	gConfig.Clear();
-	if( (result=LoadAndParseConfig(gSfxArchive.GetStream(),FALSE,&textConfig)) != 0 )
+	if( int result = LoadAndParseConfig(gSfxArchive.GetStream(), FALSE, &textConfig) )
 		return result;
 
 #ifdef _SFX_USE_TEST

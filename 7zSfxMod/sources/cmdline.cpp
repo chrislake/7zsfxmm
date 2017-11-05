@@ -16,7 +16,7 @@ extern LPCWSTR lpwszCmdLine1End;
 
 LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 {
-	static LPCWSTR ConfigParams[] = {
+	static LPCWSTR const ConfigParams[] = {
 		CFG_TITLE,
 		CFG_ERRORTITLE,
 #ifdef _SFX_USE_WARNINGS
@@ -65,7 +65,7 @@ LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 		NULL
 	};
 
-	LPCWSTR * pParams = ConfigParams;
+	LPCWSTR const* pParams = ConfigParams;
 	while( *pParams != NULL )
 	{
 		LPCWSTR p = lpwszCommandLine;
@@ -116,8 +116,7 @@ void OverrideConfigParam( LPCWSTR lpwszName, LPCWSTR lpwszValue )
 
 LPCWSTR ParseCommandLineParameters()
 {
-	LPCWSTR		str;
-	str = gSfxArchive.GetCommandLine();
+	LPCWSTR str = gSfxArchive.GetCommandLine();
 #ifdef _SFX_USE_ENVIRONMENT_VARS
 	CSfxStringU	tmpstr;
 	LPCWSTR lpwszCmdLineStart = str;

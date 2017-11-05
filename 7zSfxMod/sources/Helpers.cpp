@@ -820,7 +820,7 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 	{
 		shortcutPath += dstFolder; shortcutPath += L'\\';
 	}
-	if( CreateFolderTree( (LPCWSTR)shortcutPath ) == FALSE )
+	if( CreateFolderTree( shortcutPath ) == FALSE )
 		return FALSE;
 	shortcutPath += shortcutName;
 	shortcutPath += L".lnk";

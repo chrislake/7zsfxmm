@@ -69,7 +69,7 @@ public:
 		STDMETHOD(CryptoGetTextPassword)(BSTR *password) { return CSfxArchive::CPassword::GetTextPassword(password); };
 #endif // SFX_CRYPTO
 		const Byte * GetData() { return m_outStreamSpec->GetBuffer(); };
-		UInt32 GetSize() { return m_outStreamSpec->GetSize(); };
+		size_t GetSize() { return m_outStreamSpec->GetSize(); };
 	private:
 		CDynBufSeqOutStream *	m_outStreamSpec;
 		CMyComPtr<ISequentialOutStream>	m_outStream;

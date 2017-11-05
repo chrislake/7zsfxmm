@@ -166,7 +166,7 @@ STDMETHODIMP CSfxExtractEngine::GetStream( UInt32 index, ISequentialOutStream **
 
 	if( m_processedFileInfo.IsDirectory != FALSE )
 	{
-		if( CreateFolderTree( (LPCWSTR)m_diskFilePath ) == FALSE )
+		if( CreateFolderTree( m_diskFilePath ) == FALSE )
 			return SetOperationResult( SfxErrors::seCreateFolder );
 		return S_OK;
 	}
@@ -189,7 +189,7 @@ STDMETHODIMP CSfxExtractEngine::GetStream( UInt32 index, ISequentialOutStream **
 		if( nPos < 0 )
 			return SayInternalError( SfxErrors::seCreateFile, dwLastError );
 		filePath.ReleaseBuffer( nPos );
-		if( CreateFolderTree( (LPCWSTR)filePath ) == FALSE )
+		if( CreateFolderTree( filePath ) == FALSE )
 			return SetOperationResult( SfxErrors::seCreateFolder );
 		if( m_outFileStreamSpec->Create( m_diskFilePath, true ) == false )
 			return SayInternalError( SfxErrors::seCreateFile, ::GetLastError() );
@@ -355,10 +355,10 @@ HRESULT ExtractArchive( const CSfxStringU &folderName )
 	}
 
 #ifdef _SFX_USE_TEST
-	if( nTestModeType != TMT_ARCHIVE && CreateFolderTree( (LPCWSTR)folderName ) == FALSE )
+	if( nTestModeType != TMT_ARCHIVE && CreateFolderTree( folderName ) == FALSE )
 		return E_FAIL;
 #else
-	if( CreateFolderTree( (LPCWSTR)folderName ) == FALSE )
+	if( CreateFolderTree( folderName ) == FALSE )
 		return E_FAIL;
 #endif // _SFX_USE_TEST
 
