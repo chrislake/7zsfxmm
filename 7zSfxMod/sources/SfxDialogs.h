@@ -55,7 +55,6 @@ protected:
 	virtual INT_PTR	ShowImpl( HWND hwndParent );
 	void	ResizeAndPositionButton( int nButtonID, LPCWSTR lpwszText );
 	void	SetDialogPos();
-	void	DisableXPStyles();
 	virtual BOOL	CalculateTextRect( LPCWSTR lpwszText, LPRECT lpRect, HFONT hFont, UINT uFormat ) sealed;
 	BOOL	EndDialog( INT_PTR nResult ) { return ::EndDialog( GetHwnd(), nResult ); };
 	HWND	GetDlgItem( int nItemID ) { return ::GetDlgItem( m_hWnd, nItemID );	};

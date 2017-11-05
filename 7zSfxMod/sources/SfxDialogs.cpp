@@ -449,8 +449,6 @@ BOOL CSfxDialog::OnInitDialog()
 			}
 		}
 #endif // _SFX_USE_IMAGES
-		if( (GUIFlags&GUIFLAGS_XPSTYLE) == 0 )
-			DisableXPStyles();
 		SetDialogPos();
 		return FALSE;
 	}
@@ -487,9 +485,6 @@ BOOL CSfxDialog::OnInitDialog()
 		m_fUseIcon = FALSE;
 		ShowControl( SDC_ICON, FALSE );
 	}
-
-	if( (GUIFlags&GUIFLAGS_XPSTYLE) == 0 )
-		DisableXPStyles();
 
 	CalculateDialogSize();
 	ResizeAndPosition();
@@ -695,23 +690,6 @@ void CSfxDialog::ResizeAndPositionButton( int nButtonID, LPCWSTR lpwszText )
 			int nExtra = (rc1.right-rc2.right+rc2.left+1)/2;
 			SetDlgItemPos( nButtonID, rc2.left-nExtra, rc2.top, (rc2.right-rc2.left+nExtra*2), rc2.bottom-rc2.top, 0 );
 		}
-	}
-}
-
-void CSfxDialog::DisableXPStyles()
-{
-	typedef HRESULT (WINAPI * SetWindowTheme_Proc)(HWND, LPCWSTR, LPCWSTR);
-	SetWindowTheme_Proc	procSetWindowTheme;
-
-	HWND hwnd;
-	HMODULE	hThemeDll = LoadLibraryA( "uxtheme" );
-	if( hThemeDll != NULL &&
-			(procSetWindowTheme = (SetWindowTheme_Proc)::GetProcAddress(hThemeDll,"SetWindowTheme")) != NULL &&
-				(hwnd = ::GetWindow(GetHwnd(), GW_CHILD)) != NULL )
-	{
-		do {
-			procSetWindowTheme( hwnd, L" ", L" " );
-		} while( (hwnd = ::GetWindow(hwnd,GW_HWNDNEXT)) != NULL );
 	}
 }
 

@@ -455,7 +455,7 @@ void ProcessPostExecuteSub( POST_EXECUTE_PROC pfnPostExecute,
 
 void ShowSfxVersion()
 {
-	GUIFlags = GUIFLAGS_XPSTYLE;
+	GUIFlags = 0;
 	CSfxDialog_Version dlg;
 	extern unsigned int g_NumCodecs;
 	extern const CCodecInfo *g_Codecs[]; 
