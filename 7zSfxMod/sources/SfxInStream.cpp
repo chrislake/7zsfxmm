@@ -1,11 +1,12 @@
 /*---------------------------------------------------------------------------*/
 /* File:        SfxInStream.cpp                                              */
-/* File:        Volumes.cpp                                                  */
 /* Created:     Sat, 20 Nov 2010 11:58:35 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 29 Dec 2015 05:31:38 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    1865                                                         */
+/* Updated:     Tue, 29 Dec 2015 05:31:38 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 #include "stdafx.h"
 
@@ -27,7 +28,6 @@ HRESULT CSfxInStream::OpenSubStream( LPCTSTR fileName, CSubStreamInfo * subStrea
 
 	WIN32_FIND_DATA	fd;
 	HANDLE hFind;
-	UInt64 size = 0;
 	if( (hFind = ::FindFirstFile( fileName, &fd )) != INVALID_HANDLE_VALUE )
 	{
 		((DWORD *)&subStream->Size)[0] = fd.nFileSizeLow;
@@ -72,7 +72,7 @@ static int GetVolumesName( CSfxStringU& baseName )
 	int nExtPos = ReverseFindOneOf( baseName, L".\\/" );
 	if( nExtPos <= 0 || baseName[nExtPos] != L'.' )
 		return -1;
-	baseName.ReleaseBuffer(nExtPos);
+	baseName.ReleaseBuf_SetEnd(nExtPos);
 #ifdef _SFX_USE_VOLUME_NAME_STYLE
 	switch( nVolumeNameStyle )
 	{
@@ -84,7 +84,7 @@ static int GetVolumesName( CSfxStringU& baseName )
 				CSfxStringU tmp = baseName.Mid(nExtPos1+1,2);
 				if( tmp == L"00" )
 				{
-					baseName.ReleaseBuffer(nExtPos1);
+					baseName.ReleaseBuf_SetEnd(nExtPos1);
 					return StringToLong(((const wchar_t *)baseName)+nExtPos1+1)+1;
 				}
 			}
@@ -98,7 +98,7 @@ static int GetVolumesName( CSfxStringU& baseName )
 		CSfxStringU tmp = baseName.Mid(nExtPos+1,2);
 		if( tmp == L"00" )
 		{
-			baseName.ReleaseBuffer(nExtPos);
+			baseName.ReleaseBuf_SetEnd(nExtPos);
 			return StringToLong(((const wchar_t *)baseName)+nExtPos+1)+1;
 		}
 #ifdef _SFX_USE_VOLUME_NAME_STYLE

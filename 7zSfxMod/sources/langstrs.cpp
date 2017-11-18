@@ -2,9 +2,11 @@
 /* File:        langstrs.cpp                                                 */
 /* Created:     Wed, 10 Jan 2007 23:44:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:44:42 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3369                                                         */
+/* Updated:     Fri, 01 Apr 2016 20:44:42 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1404                                                         */
 /* Updated:     Sun, 14 Nov 2010 01:04:46 GMT                                */
@@ -27,7 +29,7 @@
 #include "version.h"
 
 /* RU-russian */
-const UINT SfxSecondaryLangId = 0x419;
+const LANGID SfxSecondaryLangId = 0x419;
 
 LANGSTRING SfxLangStrings[] = {
 // Версия модуля
@@ -153,10 +155,6 @@ LANGSTRING SfxLangStrings[] = {
 	{ STR_BUTTON_NEXT,		"Next",		"Далее", NULL },
 	{ STR_BUTTON_FINISH,	"Finish",	"Готово", NULL },
 	{ STR_BUTTON_CANCEL2,	"Cancel",	"Отменить", NULL },
-#ifdef _SFX_USE_CUSTOM_EXCEPTIONS
-	{ ERR_SFX_EXCEPTION,		"Application error:\n\nException code:\n\t0x%08x\nAddress:\n\t0x%08x\nException data:\n",
-								"Ошибка приложения:\n\nКод исключения:\n\t0x%08x\nАдрес:\n\t0x%08x\nДанные исключения:\n" },
-#endif // _SFX_USE_CUSTOM_EXCEPTIONS
 
 // Added June 6, 2010: warnings dialogs
 #ifdef _SFX_USE_WARNINGS
@@ -176,8 +174,5 @@ LANGSTRING SfxLangStrings[] = {
 #ifdef SFX_CRYPTO
 	{ STR_PASSWORD_TEXT,		"Enter password:", "Введите пароль:", NULL },
 #endif // SFX_CRYPTO
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	{ STR_SFXAPI_PREPARE,		"Preparing...",	"Подготовка...", NULL },
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
 	{ 0, "", "", NULL }
 };

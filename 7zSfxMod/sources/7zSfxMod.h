@@ -2,9 +2,11 @@
 /* File:        7zSfxMod.h                                                   */
 /* Created:     Thu, 28 Jul 2005 02:44:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 02 Apr 2016 05:00:21 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3902                                                         */
+/* Updated:     Sat, 02 Apr 2016 05:00:21 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    2518                                                         */
 /* Updated:     Mon, 18 Jun 2012 06:00:51 GMT                                */
@@ -123,9 +125,6 @@
 #ifdef _SFX_USE_COMPRESSED_CONFIG
 	#define MISCFLAGS_NO_COMPRESSED_CONFIG	0x0040
 #endif // _SFX_USE_COMPRESSED_CONFIG
-#ifdef _SFX_USE_SFXAPI
-	#define MISCFLAGS_NO_SFXAPI			0x0080
-#endif // _SFX_USE_SFXAPI
 
 #define ERRC_NONE						0
 #define ERRC_GET_PATHNAME				1
@@ -144,10 +143,14 @@
 
 #define CMDLINE_SFXCONFIG			_CFG_PARAM_TYPE"sfxconfig"
 #define CMDLINE_SFXCREATE			_CFG_PARAM_TYPE"sfxcreate"
-#define CMDLINE_SFXMANIFEST			_CFG_PARAM_TYPE"sfxmanifest"
 #define CMDLINE_SFXVERSION			_CFG_PARAM_TYPE"sfxversion"
 #define CMDLINE_SFXLANG				_CFG_PARAM_TYPE"sfxlang"
 #define	CMDLINE_SFXTEST				_CFG_PARAM_TYPE"sfxtest"
+
+/* Specific options for CMDLINE_SFXCREATE */
+#define CMDLINE_SFXCREATE_CONFIG	_CFG_PARAM_TYPE"config"
+#define CMDLINE_SFXCREATE_ADJUNCT	_CFG_PARAM_TYPE"adjunct"
+#define CMDLINE_SFXCREATE_MANIFEST	_CFG_PARAM_TYPE"manifest"
 
 #ifdef _SFX_USE_TEST
 
@@ -163,10 +166,6 @@
 	#define TSD_HELPTEXT_FORCE		L'H'
 	#define TSD_EXTRACTPATH			L'p'
 	#define TSD_EXTRACTPATH_FORCE	L'P'
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	#define TSD_SFXAPI				L's'
-	#define TSD_SFXAPI_FORCE		L'S'
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
 	#define TSD_WARNING				L'w'
 #ifdef _SFX_USE_WARNINGS
 	#define TSD_WARNING_FORCE		L'W'
@@ -211,9 +210,6 @@
 #define IDD_FINISHMESSAGE               2005
 #define IDD_HELPTEXT                    2006
 #define IDD_PASSWORD                    2007
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	#define IDD_SFXAPI_PREPARE			2008
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
 
 #define SDC_ICON						1201
 #define SDC_TEXT						1202

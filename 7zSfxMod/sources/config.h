@@ -2,9 +2,11 @@
 /* File:        config.h                                                     */
 /* Created:     Sat, 23 Jan 2010 11:11:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:59:44 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    2261                                                         */
+/* Updated:     Fri, 01 Apr 2016 20:59:44 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    154                                                          */
 /* Updated:     Sat, 26 Jun 2010 04:15:20 GMT                                */
@@ -83,9 +85,7 @@
 #define SFXBUILD_OPTIONS4_VOLUME_NAME_STYLE		0x0100
 #define SFXBUILD_OPTIONS4_ENVIRONMENT_VARS		0x0200
 #define SFXBUILD_OPTIONS4_CONFIG_EARLY_EXECUTE	0x0400
-#define SFXBUILD_OPTIONS4_SFXAPI				0x0800
 #define SFXBUILD_OPTIONS4_EXTRACT_MASK			0x1000
-#define SFXBUILD_OPTIONS4_COMPRESSED_CONFIG		0x2000
 
 #define SFXBUILD_OPTIONS5_WIN7_PROGRESSBAR		0x001
 #define SFXBUILD_OPTIONS5_RTF_CONTROL			0x002
@@ -112,9 +112,7 @@
 	#define _SFX_USE_EARLY_PASSWORD			/* Prompt for password before any dialogs */
 	#define _SFX_USE_ENVIRONMENT_VARS		/* Environment variables 7zSfxVarXXX */
 	#define _SFX_USE_CONFIG_EARLY_EXECUTE	/* 'ExecuteOnLoad' & 'PreExtract' config param */
-	#define _SFX_USE_SFXAPI					/* 'sfxapi:' prefix and tools archive */
 	#define _SFX_USE_EXTRACT_MASK			/* 'ExtractMask' config parameter */
-	#define _SFX_USE_COMPRESSED_CONFIG		/* 3900: compresed config as part of SfxAPI */
 #endif // SFXBUILD_OPTIONS4
 
 /* SFXBUILD_OPTIONS5 (GUI options), defaults: all available */
@@ -182,7 +180,7 @@
 #if (SFXBUILD_OPTIONS2&SFXBUILD_OPTIONS2_COMPRESS_PPMD) != 0 && !defined(COMPRESS_PPMD)
 	#define COMPRESS_PPMD
 #endif
-#if (SFXBUILD_OPTIONS2&SFXBUILD_OPTIONS2_CRYPTO) == 0 && !defined(_NO_CRYPTO) && !defined(SFX_CRYPTO)
+#if (SFXBUILD_OPTIONS2&SFXBUILD_OPTIONS2_CRYPTO) == 0 && !defined(SFX_CRYPTO)
 	#define _NO_CRYPTO
 #else
 	#ifndef SFX_CRYPTO
@@ -363,19 +361,9 @@
 #if (SFXBUILD_OPTIONS4&SFXBUILD_OPTIONS4_CONFIG_EARLY_EXECUTE) != 0 && !defined(_SFX_USE_CONFIG_EARLY_EXECUTE)
 	#define _SFX_USE_CONFIG_EARLY_EXECUTE
 #endif
-#if (SFXBUILD_OPTIONS4&SFXBUILD_OPTIONS4_SFXAPI) != 0 && !defined(_SFX_USE_SFXAPI)
-	#define _SFX_USE_SFXAPI
-#endif
 #if (SFXBUILD_OPTIONS4&SFXBUILD_OPTIONS4_EXTRACT_MASK) != 0 && !defined(_SFX_USE_EXTRACT_MASK)
 	#define _SFX_USE_EXTRACT_MASK
 #endif
-#if (SFXBUILD_OPTIONS4&SFXBUILD_OPTIONS4_COMPRESSED_CONFIG) != 0 && !defined(_SFX_USE_COMPRESSED_CONFIG)
-	#define _SFX_USE_COMPRESSED_CONFIG
-#endif
-
-#ifdef _DEBUG1
-	#undef _SFX_USE_SFXAPI
-#endif // _DEBUG
 
 #ifndef _SFX_USE_TEST
 	#undef SFXBUILD_OPTIONS4_TEST
@@ -421,18 +409,10 @@
 	#undef SFXBUILD_OPTIONS4_CONFIG_EARLY_EXECUTE
 	#define SFXBUILD_OPTIONS4_CONFIG_EARLY_EXECUTE	0
 #endif // _SFX_USE_CONFIG_EARLY_EXECUTE
-#ifndef _SFX_USE_SFXAPI
-	#undef SFXBUILD_OPTIONS4_SFXAPI
-	#define SFXBUILD_OPTIONS4_SFXAPI				0
-#endif // _SFX_USE_SFXAPI
 #ifndef _SFX_USE_EXTRACT_MASK
 	#undef SFXBUILD_OPTIONS4_EXTRACT_MASK
 	#define SFXBUILD_OPTIONS4_EXTRACT_MASK			0
-#endif // _SFX_USE_SFXAPI
-#ifndef _SFX_USE_COMPRESSED_CONFIG
-	#undef SFXBUILD_OPTIONS4_COMPRESSED_CONFIG
-	#define SFXBUILD_OPTIONS4_COMPRESSED_CONFIG		0
-#endif // _SFX_USE_COMPRESSED_CONFIG
+#endif // _SFX_USE_EXTRACT_MASK
 
 #undef SFXBUILD_OPTIONS4
 #define SFXBUILD_OPTIONS4						\
@@ -447,9 +427,7 @@
 	SFXBUILD_OPTIONS4_VOLUME_NAME_STYLE		|	\
 	SFXBUILD_OPTIONS4_ENVIRONMENT_VARS		|	\
 	SFXBUILD_OPTIONS4_CONFIG_EARLY_EXECUTE	|	\
-	SFXBUILD_OPTIONS4_SFXAPI				|	\
 	SFXBUILD_OPTIONS4_EXTRACT_MASK			|	\
-	SFXBUILD_OPTIONS4_COMPRESSED_CONFIG		|	\
 	0
 
 
@@ -488,20 +466,6 @@
 		#define _SFX_USE_WARNINGS
 	#endif // defined(_SFX_USE_CHECK_FREE_SPACE) || defined(_SFX_USE_CHECK_RAM)
 #endif // _SFX_USE_WARNINGS
-
-#ifdef _SFX_MAINTAINER
-	/* Oleg_Sch: My customs optimizations */
-	#define _SFX_USE_CUSTOM_MSVCRT			/* msvcrt.dll */
-											/* require msvcrt.lib from old VC6 for x86 */
-											/* or new for x64 from the latest DDK */
-											/* see realization in 'config.cpp' */
-	#define _SFX_USE_CUSTOM_EXCEPTIONS		/* use custom realization of exceptions handlers */
-											/* see realization in 'config.cpp' */
-#ifndef _SFX_USE_TEST
-	#define _SFX_USE_TEST					/* internal use */
-#endif // _SFX_USE_TEST
-
-#endif // _SFX_MAINTAINER
 
 /* backward capability within 7zSfx... and Sfx... environment */
 #define _SFX_USE_ENVIRONMENT_OLD_VARS	1

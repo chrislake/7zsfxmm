@@ -2,17 +2,17 @@
 /* File:        cmdline.cpp                                                  */
 /* Created:     Sun, 06 Mar 2016 01:44:14 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Thu, 17 Mar 2016 06:22:46 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    12                                                           */
+/* Updated:     Thu, 17 Mar 2016 06:22:46 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 #include "stdafx.h"
 #include "7zSfxModInt.h"
 
-extern LPCWSTR lpwszCmdLine1End;
-
 #define IsCommandLineSwitch( lpwszCommandLine, lpwszSwitch )	\
-	(IsSubString( lpwszCommandLine+1, lpwszSwitch ) != NULL )
+	IsSubString( lpwszCommandLine + 1, lpwszSwitch )
 
 LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 {
@@ -68,16 +68,15 @@ LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 	LPCWSTR const* pParams = ConfigParams;
 	while( *pParams != NULL )
 	{
-		LPCWSTR p = lpwszCommandLine;
 		int nLen = lstrlen(*pParams);
-		if( MyStrincmp( lpwszCommandLine, *pParams, nLen ) == 0 && lpwszCommandLine[nLen] == L'=' )
+		if( _wcsnicmp( lpwszCommandLine, *pParams, nLen ) == 0 && lpwszCommandLine[nLen] == L'=' )
 		{
 			CSfxStringU str = lpwszCommandLine;
 			LPCWSTR p = str;
 			bool inQuotes=false;
 			while( *p )
 			{
-				if( *p <= L' ' && inQuotes == false )
+				if( unsigned(*p) <= L' ' && inQuotes == false )
 					break;
 				if( *p == L'\"' )
 				{
@@ -94,7 +93,7 @@ LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 				p++;
 			}
 			int nSwitchLen = (int)(p-(LPCWSTR)str);
-			str.ReleaseBuffer( nSwitchLen );
+			str.ReleaseBuf_SetEnd( nSwitchLen );
 			CSfxStringA	aStr= SfxUnicodeStringToMultiByte( str, CP_UTF8 );
 			if( GetTextConfig( aStr, true ) == false )
 				return (LPCWSTR)1;
@@ -114,9 +113,8 @@ void OverrideConfigParam( LPCWSTR lpwszName, LPCWSTR lpwszValue )
 	ParseConfigOverride( strParam );
 }
 
-LPCWSTR ParseCommandLineParameters()
+LPCWSTR ParseCommandLineParameters(LPCWSTR str)
 {
-	LPCWSTR str = gSfxArchive.GetCommandLine();
 #ifdef _SFX_USE_ENVIRONMENT_VARS
 	CSfxStringU	tmpstr;
 	LPCWSTR lpwszCmdLineStart = str;
@@ -125,9 +123,10 @@ LPCWSTR ParseCommandLineParameters()
 	SKIP_WHITESPACES_W( lpwszCmdLineStart );
 #endif // _SFX_USE_ENVIRONMENT_VARS
 
-	while( true )
+	switch( 0 ) for ( ;; )
 	{
 		while( ((unsigned)*str) > L' ' ) str++;
+	case 0: // first iteration starts here
 		SKIP_WHITESPACES_W( str );
 		if( str[0] != L'/' && str[0] != L'-' )
 			break;
@@ -142,14 +141,14 @@ LPCWSTR ParseCommandLineParameters()
 		}
 
 		// 'ai', 'aiX, 'aiXXX'
-		if( IsCommandLineSwitch( str, L"ai" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"ai" ) )
 		{
 			// first check batch mode
 			if( (str[3] >= L'0' && str[3] <= '9') ||
 				(str[3] >= L'a' && str[3] <= 'z') ||
 				(str[3] >= L'A' && str[3] <= 'Z') )
 			{
-				gSfxArchive.SetBatchInstall( str+3 );
+				gSfxArchive.SetBatchInstall( str + 3 );
 				gSfxArchive.SetAutoInstall(true);
 				gSfxArchive.SetAssumeYes(true);
 				continue;
@@ -166,39 +165,39 @@ LPCWSTR ParseCommandLineParameters()
 		}
 
 		// 'om' - Overwrite mode
-		if( IsCommandLineSwitch( str, L"om" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"om" ) )
 		{
-			OverrideConfigParam( CFG_OVERWRITE_MODE,str+3 );
+			OverrideConfigParam( CFG_OVERWRITE_MODE, str + 3 );
 			continue;
 		}
 
 		// 'gm' - GUI mode
-		if( IsCommandLineSwitch( str, L"gm" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"gm" ) )
 		{
-			if( str[3] >= L'0' && str[3] <= (L'0'+GUIMODE_MAX) && str[4] <= L' ' )
+			if( str[3] >= L'0' && str[3] <= (L'0' + GUIMODE_MAX) && str[4] <= L' ' )
 			{
-				OverrideConfigParam( CFG_GUIMODE,str+3 );
+				OverrideConfigParam( CFG_GUIMODE, str + 3 );
 				continue;
 			}
 			break;
 		}
 
 		// 'gf' - GUI flags
-		if( IsCommandLineSwitch( str, L"gf" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"gf" ) )
 		{
-			OverrideConfigParam( CFG_GUIFLAGS,str+3 );
+			OverrideConfigParam( CFG_GUIFLAGS, str + 3 );
 			continue;
 		}
 
 		// 'mf' - Misc flags
-		if( IsCommandLineSwitch( str, L"mf" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"mf" ) )
 		{
-			OverrideConfigParam( CFG_MISCFLAGS,str+3 );
+			OverrideConfigParam( CFG_MISCFLAGS, str + 3 );
 			continue;
 		}
 
 		// 'sd' - self delete
-		if( IsCommandLineSwitch( str, L"sd" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"sd" ) )
 		{
 			if( (str[3] == L'0' || str[3] == L'1') && ((unsigned)str[4]) <= L' ' )
 			{
@@ -209,7 +208,7 @@ LPCWSTR ParseCommandLineParameters()
 		}
 
 		// 'nr' - no run
-		if( IsCommandLineSwitch( str, L"nr" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"nr" ) )
 		{
 			if( ((unsigned)str[3]) <= L' ' )
 			{
@@ -220,11 +219,11 @@ LPCWSTR ParseCommandLineParameters()
 		}
 
 		// 'fm' - finish message
-		if( IsCommandLineSwitch( str, L"fm" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"fm" ) )
 		{
 			if( str[3] >= L'0' && str[3] <= L'9' )
 			{
-				FinishMessage = StringToLong( str+3 );
+				FinishMessage = StringToLong( str + 3 );
 				continue;
 			}
 			break;
@@ -232,9 +231,9 @@ LPCWSTR ParseCommandLineParameters()
 
 #ifdef _SFX_USE_BEGINPROMPTTIMEOUT
 		// 'bpt' - BeginPrompt timeout
-		if( IsCommandLineSwitch( str, L"bpt" ) != FALSE )
+		if( IsCommandLineSwitch( str, L"bpt" ) )
 		{
-			OverrideConfigParam( CFG_BEGINPROMPTTIMEOUT,str+4 );
+			OverrideConfigParam( CFG_BEGINPROMPTTIMEOUT, str + 4 );
 			continue;
 		}
 #endif // _SFX_USE_BEGINPROMPTTIMEOUT
@@ -242,7 +241,7 @@ LPCWSTR ParseCommandLineParameters()
 		if( str[1] == L'p' || str[1] == L'P' )
 		{
 			CSfxStringU password;
-			str = LoadQuotedString( str+2, password )-1;
+			str = LoadQuotedString( str + 2, password ) - 1;
 			CSfxArchive::CPassword::Set( password );
 			continue;
 		}
@@ -260,8 +259,8 @@ LPCWSTR ParseCommandLineParameters()
 			gSfxArchive.SetShowHelp(true);
 			continue;
 		}
-		LPCWSTR pnext = ParseConfigOverride( str+1 );
-		if( pnext != NULL )
+
+		if( LPCWSTR pnext = ParseConfigOverride( str + 1 ) )
 		{
 			if( pnext == (LPCWSTR)1 )
 				return NULL;
@@ -272,18 +271,16 @@ LPCWSTR ParseCommandLineParameters()
 	}
 
 #ifdef _SFX_USE_ENVIRONMENT_VARS
-	if( lpwszCmdLine1End == NULL ) lpwszCmdLine1End = str;
-	if( lpwszCmdLineStart != lpwszCmdLine1End )
-	{
-		tmpstr = CSfxStringU(lpwszCmdLineStart).Left((int)(lpwszCmdLine1End-lpwszCmdLineStart));
-		tmpstr.Trim();
-		SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_CMDLINE_1, (LPCWSTR)tmpstr );
-	}
-	else
-		SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_CMDLINE_1, L"" );
-	tmpstr = CSfxStringU(str).Left((int)(lpwszCmdLineEnd-str));
+	if( lpwszCmdLine1End == NULL )
+		lpwszCmdLine1End = str;
+	int tmpstrLen = static_cast<int>(lpwszCmdLine1End - lpwszCmdLineStart);
+	memcpy( tmpstr.GetBuf_SetEnd( tmpstrLen ), lpwszCmdLineStart, tmpstrLen * sizeof *lpwszCmdLineStart );
 	tmpstr.Trim();
-	SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_CMDLINE_2, (LPCWSTR)tmpstr );
+	SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_CMDLINE_1, tmpstr );
+	tmpstrLen = static_cast<int>(lpwszCmdLineEnd - str);
+	memcpy( tmpstr.GetBuf_SetEnd( tmpstrLen ), str, tmpstrLen * sizeof *str );
+	tmpstr.Trim();
+	SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_CMDLINE_2, tmpstr );
 #endif // _SFX_USE_ENVIRONMENT_VARS
 
 	return str;

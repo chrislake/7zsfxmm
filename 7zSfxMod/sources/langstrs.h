@@ -2,9 +2,11 @@
 /* File:        langstrs.h                                                   */
 /* Created:     Fri, 29 Jul 2005 23:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:43:21 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3899                                                         */
+/* Updated:     Fri, 01 Apr 2016 20:43:21 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1934                                                         */
 /* Updated:     Sun, 14 Nov 2010 01:04:08 GMT                                */
@@ -77,11 +79,6 @@
 #define STR_BUTTON_FINISH			37
 #define STR_BUTTON_CANCEL2			38
 
-#ifdef _SFX_USE_CUSTOM_EXCEPTIONS
-	// added February 5, 2010
-	#define ERR_SFX_EXCEPTION		39
-#endif // _SFX_USE_CUSTOM_EXCEPTIONS
-
 // added June 6, 2010
 #ifdef _SFX_USE_WARNINGS
 	#define STR_WARNING_TITLE		40
@@ -98,10 +95,6 @@
 	#define STR_PASSWORD_TEXT		44
 #endif // SFX_CRYPTO
 
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	#define STR_SFXAPI_PREPARE		45
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-
 LPCWSTR GetLanguageString( UINT id );
 void FreeLanguageStrings();
 
@@ -112,7 +105,7 @@ typedef struct tagLANGSTRING {
 	LPWSTR	lpszUnicode;
 } LANGSTRING, * PLANGSTRING, * LPLANGSTRING;
 
-extern const UINT SfxSecondaryLangId;
+extern const LANGID SfxSecondaryLangId;
 extern LANGSTRING SfxLangStrings[];
 
 

@@ -2,9 +2,11 @@
 /* File:        SfxTest.cpp                                                  */
 /* Created:     Sun, 25 Feb 2007 09:13:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 02 Apr 2016 04:54:06 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3324                                                         */
+/* Updated:     Sat, 02 Apr 2016 04:54:06 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1197                                                         */
 /* Updated:     Sun, 06 Jun 2010 09:05:47 GMT                                */
@@ -72,7 +74,7 @@ int TestSfxDialogs()
 		case TSD_EXTRACT:
 		case TSD_EXTRACT_FORCE:
 			if( GUIMode != GUIMODE_HIDDEN || *lpwszFlags == TSD_EXTRACT_FORCE )
-				ExtractDialog();
+				ExtractDialog(NULL);
 			else
 				nExitCode = ERRC_SFXTEST;
 			break;
@@ -117,13 +119,6 @@ int TestSfxDialogs()
 				dlg.Show( SD_OK|SD_ICONINFORMATION, lpwszTitle, lpwszValue );
 			}
 			break;
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-		case TSD_SFXAPI:
-		case TSD_SFXAPI_FORCE:
-			gSfxArchive.ShowPrepareDialog();
-			do ::Sleep(100); while( gSfxArchive.IsPrepareDialog() != false );
-			break;
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
 #ifdef _SFX_USE_WARNINGS
 		case TSD_WARNING:
 		case TSD_WARNING_FORCE:

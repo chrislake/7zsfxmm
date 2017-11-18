@@ -2,9 +2,11 @@
 /* File:        archive.h                                                    */
 /* Created:     Sat, 05 Mar 2016 22:37:28 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Fri, 01 Apr 2016 20:32:01 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    27                                                           */
+/* Updated:     Fri, 01 Apr 2016 20:32:01 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 #ifndef _SFXARCHIVE_H_INCLUDED_
 #define _SFXARCHIVE_H_INCLUDED_
@@ -96,26 +98,8 @@ public:
 	bool GetNoRun() { return m_fNoRun; };
 	void SetShowHelp( bool enable ) { m_fShowHelp = enable; };
 	bool GetShowHelp() { return m_fShowHelp; };
-	void SetCommandLine( LPCWSTR lpwszCommandLine ) { m_strCommandLine = L" "; m_strCommandLine += lpwszCommandLine; };
-	LPCWSTR GetCommandLine() { return m_strCommandLine; };
-#ifdef _SFX_USE_ENVIRONMENT_VARS
-	LPCWSTR	GetCommandLine1() { return (LPCWSTR)m_strCommandLine1; };
-	LPCWSTR	GetCommandLine2() { return (LPCWSTR)m_strCommandLine2; };
-#endif // _SFX_USE_ENVIRONMENT_VARS
-#ifdef _SFX_USE_COMPRESSED_CONFIG
-	bool LoadAndParseCompressedConfig();
-#else
-	#define LoadAndParseCompressedConfig	(void)
-#endif // _SFX_USE_COMPRESSED_CONFIG
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	void ShowPrepareDialog() { m_dlgPrepare.Show(); };
-	void HidePrepareDialog() { m_dlgPrepare.Hide(); };
-	bool IsPrepareDialog() { return m_dlgPrepare.IsWindow() ? true : false; };
-	void SetOperationBegin() { m_dwTics = ::GetTickCount(); };
-	DWORD GetOperationDuration() { return ::GetTickCount()-m_dwTics; };
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
 #ifdef SFX_CRYPTO
-	void	SetPassword( LPCWSTR lpwszPassword ) { CSfxArchive::CPassword::Set(lpwszPassword); };
+	void SetPassword( LPCWSTR lpwszPassword ) { CSfxArchive::CPassword::Set(lpwszPassword); };
 #endif // SFX_CRYPTO
 
 private:
@@ -129,14 +113,5 @@ private:
 	bool		m_fAssumeYes;
 	bool		m_fNoRun;
 	bool		m_fShowHelp;
-	CSfxStringU	m_strCommandLine;
-#ifdef _SFX_USE_ENVIRONMENT_VARS
-	CSfxStringU	m_strCommandLine1;
-	CSfxStringU	m_strCommandLine2;
-#endif // _SFX_USE_ENVIRONMENT_VARS
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	CSfxDialog_SfxApiPrepare	m_dlgPrepare;
-	DWORD	m_dwTics;
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
 };
 #endif // _SFXARCHIVE_H_INCLUDED_

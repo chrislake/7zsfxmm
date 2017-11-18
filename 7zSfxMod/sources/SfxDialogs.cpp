@@ -2,7 +2,7 @@
 /* File:        SfxDialogs.cpp                                               */
 /* Created:     Sat, 13 Jan 2007 02:03:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3367                                                         */
 /* Updated:     Fri, 01 Apr 2016 20:42:56 GMT                                */
@@ -78,24 +78,23 @@ BYTE const CSfxDialog::m_DialogsTemplate[] = {
 };
 
 
-POINT	CSfxDialog::m_ptCenter={0,0};
-CSfxDialog * CSfxDialog::m_pActiveDialog = NULL;
-HHOOK	CSfxDialog::m_hMouseHook = NULL;
-HHOOK	CSfxDialog::m_hKeyboardHook = NULL;
-BOOL	CSfxDialog::m_fTimedOut = FALSE;
+POINT CSfxDialog::m_ptCenter =
+{
+	::GetSystemMetrics( SM_CXFULLSCREEN ) / 2,
+	::GetSystemMetrics( SM_CYFULLSCREEN ) / 2
+};
+
+CSfxDialog *CSfxDialog::m_pActiveDialog = NULL;
+HHOOK CSfxDialog::m_hMouseHook = NULL;
+HHOOK CSfxDialog::m_hKeyboardHook = NULL;
+BOOL CSfxDialog::m_fTimedOut = FALSE;
 
 CSfxDialog::CSfxDialog()
 {
 	m_hWnd = NULL;
 	m_uType = 0;
-	m_lpwszCaption = m_lpwszText = NULL;
 	m_nCaptionWidthExtra = 24;
 	m_uDlgResourceId = 0;
-	if( m_ptCenter.x == 0 && m_ptCenter.y == 0 )
-	{
-		m_ptCenter.x = ::GetSystemMetrics( SM_CXFULLSCREEN )/2;
-		m_ptCenter.y = ::GetSystemMetrics( SM_CYFULLSCREEN )/2;
-	}
 }
 
 CSfxDialog::~CSfxDialog()
@@ -133,9 +132,9 @@ LRESULT CALLBACK CSfxDialog::hookMouseProc( int code, WPARAM wParam, LPARAM lPar
 				{
 					RECT rc;
 					LPMOUSEHOOKSTRUCT lpmhs = (LPMOUSEHOOKSTRUCT)lParam;
-					ScreenToClient( m_pActiveDialog->GetHwnd(), &lpmhs->pt );
+					ScreenToClient( m_pActiveDialog->m_hWnd, &lpmhs->pt );
 					m_pActiveDialog->GetClientRect( &rc );
-					if( PtInRect(&rc, lpmhs->pt) != FALSE )
+					if( PtInRect(&rc, lpmhs->pt) )
 						m_pActiveDialog->DisableTimer();
 					break;
 				}
@@ -170,15 +169,16 @@ void CSfxDialog::SetButtonTimer( int nTimer )
 	m_pActiveDialog = this;
 	m_nTimer = nTimer;
 	m_nDefButtonID = uButtonID;
-	m_strDefButtonText = GetDlgItemText( uButtonID );
+	GetDlgItemText( uButtonID, m_strDefButtonText );
 	SetButtonTimerText();
 	SetDefaultButton( uButtonID );
 	if( m_uDlgResourceId == 0 )
 	{
-		CSfxStringU str = GetDlgItemText( uButtonID );
+		CSfxStringU str;
+		GetDlgItemText( uButtonID, str );
 		ResizeAndPositionButton( uButtonID, str );
 	}
-	SetTimer( GetHwnd(), 1, 1000, NULL );
+	SetTimer( m_hWnd, 1, 1000, NULL );
 }
 
 void CSfxDialog::OnTimer()
@@ -204,7 +204,7 @@ INT_PTR CALLBACK CSfxDialog::SfxDialogProc( HWND hwnd, UINT uMsg, WPARAM wParam,
 	if( pThis == NULL && uMsg == WM_INITDIALOG )
 	{
 		pThis = (CSfxDialog *)lParam;
-		::SetWindowLongPtr( hwnd, GWLP_USERDATA, (LONG_PTR)pThis );
+		::SetWindowLongPtr( hwnd, GWLP_USERDATA, lParam );
 		pThis->m_hWnd = hwnd;
 		pThis->m_hFont = (HFONT)::SendMessage( hwnd, WM_GETFONT, 0, 0 );
 	}
@@ -218,12 +218,12 @@ void CSfxDialog::DisableTimer()
 {
 	if( m_nTimer == 0 )
 		return;
-	::KillTimer( GetHwnd(), 1 );
+	::KillTimer( m_hWnd, 1 );
 	m_nTimer = 0;
 	SetButtonTimerText();
 }
 
-INT_PTR CSfxDialog::DialogProc(UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CSfxDialog::DialogProc(UINT uMsg, WPARAM wParam, LPARAM /*lParam*/)
 {
 	switch( uMsg )
 	{
@@ -257,7 +257,7 @@ void CSfxDialog::OnDestroy()
 {
 	// save center
 	RECT rc;
-	GetWindowRect( GetHwnd(), &rc );
+	GetWindowRect( m_hWnd, &rc );
 	m_ptCenter.x = (rc.right-rc.left)/2+rc.left;
 	m_ptCenter.y = (rc.bottom-rc.top)/2+rc.top;
 	m_hWnd = NULL;
@@ -283,7 +283,7 @@ void CSfxDialog::OnCommand( int nControlID )
 void CSfxDialog::OnCancel()
 {
 	CSfxDialog_CancelPrompt	CancelPromptDlg;
-	if( CancelPromptDlg.IsCancel( this ) != FALSE )
+	if( CancelPromptDlg.IsCancel( m_hWnd ) )
 		EndDialog(FALSE);
 }
 
@@ -298,21 +298,21 @@ void CSfxDialog::SetDefaultButton( int nButtonID )
 
 BOOL CSfxDialog::CalculateTitleSize( LPCWSTR lpwszText, LPSIZE size )
 {
-	BOOL	Ret = FALSE;
+	BOOL Ret = FALSE;
 
-	RECT	rc;
-	NONCLIENTMETRICS	ncm;
+	RECT rc;
+	NONCLIENTMETRICS ncm;
 	ncm.cbSize = sizeof(ncm);
-	if( SystemParametersInfo( SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0 ) != FALSE )
+	if( SystemParametersInfo( SPI_GETNONCLIENTMETRICS, sizeof(ncm), &ncm, 0 ) )
 	{
 		int nTitleWidth = ncm.iCaptionWidth + m_nCaptionWidthExtra - (SDM_BORDER_LEFT+SDM_BORDER_RIGHT);
-		if( (GUIFlags&GUIFLAGS_NO_TITLE_ICON) == 0 )
+		if( (GUIFlags & GUIFLAGS_NO_TITLE_ICON) == 0 )
 			nTitleWidth += ::GetSystemMetrics( SM_CXSMICON );
 
 		HFONT hTitleFont = ::CreateFontIndirect( &ncm.lfCaptionFont );
 		if( hTitleFont != NULL )
 		{
-			if( CalculateTextRect( lpwszText, &rc, hTitleFont, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_EXPANDTABS ) != FALSE )
+			if( CalculateTextRect( lpwszText, &rc, hTitleFont, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE|DT_EXPANDTABS ) )
 			{
 				nTitleWidth += rc.right;
 				Ret = TRUE;
@@ -328,49 +328,45 @@ BOOL CSfxDialog::CalculateTitleSize( LPCWSTR lpwszText, LPSIZE size )
 
 void CSfxDialog::CalculateDialogSize()
 {
-	int cx, cy;
-	cx = cy = 0;
+	m_dlgSize.cx = m_dlgSize.cy = 0;
 	m_rcText.left = m_rcText.top = m_rcText.right = m_rcText.bottom = 0;
 
-	if( m_fUseIcon != FALSE )
+	if( m_fUseIcon )
 	{
-		cx += ::GetSystemMetrics(SM_CXICON) + SDM_ICON_TO_TEXT_SPACING + SDM_ICON_OFFSET_CX;
-		cy += ::GetSystemMetrics(SM_CYICON) + SDM_ICON_OFFSET_CY;
+		m_dlgSize.cx += ::GetSystemMetrics(SM_CXICON) + SDM_ICON_TO_TEXT_SPACING + SDM_ICON_OFFSET_CX;
+		m_dlgSize.cy += ::GetSystemMetrics(SM_CYICON) + SDM_ICON_OFFSET_CY;
 	}
 
 	// dialog text
-	if( CalculateTextRect( m_lpwszText, &m_rcText, m_hFont, DT_LEFT|DT_NOPREFIX|DT_WORDBREAK|DT_EXPANDTABS ) != FALSE )
+	if( CalculateTextRect( m_strText, &m_rcText, m_hFont, DT_LEFT|DT_NOPREFIX|DT_WORDBREAK|DT_EXPANDTABS ) )
 	{
-		cx += m_rcText.right;
-		if( m_rcText.bottom > cy )
-			cy = m_rcText.bottom;
+		m_dlgSize.cx += m_rcText.right;
+		if( m_dlgSize.cy < m_rcText.bottom )
+			m_dlgSize.cy = m_rcText.bottom;
 	}
 
 	// title
-	SIZE	sizeTitle;
-	if( CalculateTitleSize( m_lpwszCaption, &sizeTitle ) != FALSE )
+	SIZE sizeTitle;
+	if( CalculateTitleSize( m_strCaption, &sizeTitle ) )
 	{
-		if( sizeTitle.cx > cx )
-			cx = sizeTitle.cx;
-		cy += sizeTitle.cy;
+		if( m_dlgSize.cx < sizeTitle.cx )
+			m_dlgSize.cx = sizeTitle.cx;
+		m_dlgSize.cy += sizeTitle.cy;
 	}
 
-	RECT	rc;
-	cx += SDM_BORDER_LEFT + SDM_BORDER_RIGHT;
+	RECT rc;
+	m_dlgSize.cx += SDM_BORDER_LEFT + SDM_BORDER_RIGHT;
 	GetDlgItemRect( SDC_BUTTON1, &rc );
-	cy += SDM_BORDER_TOP + SDM_BORDER_BOTTOM + SDM_BUTTONS_CY_SPACING + (rc.bottom-rc.top);
-
-	m_dlgSize.cx = cx;
-	m_dlgSize.cy = cy;
+	m_dlgSize.cy += SDM_BORDER_TOP + SDM_BORDER_BOTTOM + SDM_BUTTONS_CY_SPACING + (rc.bottom - rc.top);
 }
 
 void CSfxDialog::SetDialogPos()
 {
-	if( GetParent(GetHwnd()) == NULL )
+	if( GetParent(m_hWnd) == NULL )
 	{
-		RECT	rc;
-		GetWindowRect( GetHwnd(), &rc );
-		SetWindowPos( GetHwnd(), NULL,
+		RECT rc;
+		GetWindowRect( m_hWnd, &rc );
+		SetWindowPos( m_hWnd, NULL,
 						m_ptCenter.x-(rc.right-rc.left)/2, m_ptCenter.y-(rc.bottom-rc.top)/2,
 						0,0, SWP_NOZORDER|SWP_NOSIZE );
 	}
@@ -378,7 +374,7 @@ void CSfxDialog::SetDialogPos()
 BOOL CSfxDialog::OnInitDialog()
 {
 	fUseBackward = false;
-	if( (GUIFlags&GUIFLAGS_NO_TITLE_ICON) == 0 )
+	if( (GUIFlags & GUIFLAGS_NO_TITLE_ICON) == 0 )
 	{
 		HICON hBigIcon = ::LoadIcon( ::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_7ZSFX) );
 		HICON hSmallIcon = (HICON)::LoadImage( ::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_7ZSFX), IMAGE_ICON,
@@ -388,14 +384,14 @@ BOOL CSfxDialog::OnInitDialog()
 		SendMessage( WM_SETICON, ICON_SMALL, (LPARAM)hSmallIcon );
 	}
 
-	if( GUIFlags&GUIFLAGS_ALLOW_AMPERSAND )
+	if( GUIFlags & GUIFLAGS_ALLOW_AMPERSAND )
 	{
 		::SetWindowLongPtr( GetDlgItem(SDC_TEXT), GWL_STYLE, ::GetWindowLongPtr(GetDlgItem(SDC_TEXT),GWL_STYLE)|SS_NOPREFIX );
 		::SetWindowLongPtr( GetDlgItem(SDC_TEXT2), GWL_STYLE, ::GetWindowLongPtr(GetDlgItem(SDC_TEXT2),GWL_STYLE)|SS_NOPREFIX );
 	}
 
-	SetDlgItemText( SDC_TEXT, m_lpwszText );
-	SetCaption( m_lpwszCaption );
+	SetDlgItemText( SDC_TEXT, m_strText );
+	SetCaption( m_strCaption );
 
 	switch( m_uType&SD_BUTTONS_MASK )
 	{
@@ -420,35 +416,34 @@ BOOL CSfxDialog::OnInitDialog()
 
 	if( m_uDlgResourceId != 0 )
 	{
-		HWND hwndChild=GetWindow(m_hWnd,GW_CHILD);
+		HWND hwndChild = ::GetWindow( m_hWnd, GW_CHILD );
 		while( hwndChild != NULL )
 		{
+			HWND hwndNext = ::GetWindow( hwndChild, GW_HWNDNEXT );
 			ReplaceVariablesInWindow( hwndChild );
-			hwndChild = GetWindow(hwndChild,GW_HWNDNEXT);
-		}
-
-#ifdef _SFX_USE_RTF_CONTROL
-		{
-			hwndChild=GetWindow(m_hWnd,GW_CHILD);
-			while( hwndChild != NULL )
+#			if defined(_SFX_USE_IMAGES) || defined(_SFX_USE_RTF_CONTROL)
 			{
-				if( RecreateAsRichEdit( hwndChild ) != NULL )
-					hwndChild=GetWindow(m_hWnd,GW_CHILD);
-				else
-					hwndChild = GetWindow(hwndChild,GW_HWNDNEXT);
+				LRESULT dlgcode = ::SendMessage( hwndChild, WM_GETDLGCODE, 0, 0 );
+				if( dlgcode & DLGC_STATIC )
+				{
+					LONG style = ::GetWindowLong( hwndChild, GWL_STYLE );
+					if( (style & SS_TYPEMASK) == SS_BITMAP )
+					{
+#						if defined(_SFX_USE_IMAGES)
+						SetDlgControlImage( hwndChild );
+#						endif // _SFX_USE_IMAGES
+					}
+					else
+					{
+#						if defined(_SFX_USE_RTF_CONTROL)
+						RecreateAsRichEdit( hwndChild );
+#						endif // _SFX_USE_RTF_CONTROL
+					}
+				}
 			}
+#			endif
+			hwndChild = hwndNext;
 		}
-#endif // _SFX_USE_RTF_CONTROL
-#ifdef _SFX_USE_IMAGES
-		{
-			HWND hwndChild=GetWindow(m_hWnd,GW_CHILD);
-			while( hwndChild != NULL )
-			{
-				SetDlgControlImage( hwndChild );
-				hwndChild = GetWindow(hwndChild,GW_HWNDNEXT);
-			}
-		}
-#endif // _SFX_USE_IMAGES
 		SetDialogPos();
 		return FALSE;
 	}
@@ -501,57 +496,50 @@ void CSfxDialog::SetWindowText( HWND hwnd, LPCWSTR lpwszText )
 
 void CSfxDialog::GetDlgItemRect( int nIDItem, LPRECT rc )
 {
-	GetChildRect( ::GetDlgItem(GetHwnd(),nIDItem), rc );
+	if ( HWND hwndControl = GetDlgItem(nIDItem) )
+	{
+		::GetWindowRect( hwndControl, rc );
+		::MapWindowPoints( NULL, m_hWnd, reinterpret_cast<LPPOINT>(rc), 2 );
+	}
 }
 
 INT_PTR CSfxDialog::Show( UINT uType, LPCWSTR lpwszCaption, LPCWSTR lpwszText, HWND hwndParent /* = NULL  */ )
 {
 	if( lpwszCaption == NULL || lpwszText == NULL )
 		return FALSE;
-	CSfxStringU ustrText = lpwszText;
-	CSfxStringU ustrCaption = lpwszCaption;
-	ReplaceVariablesEx( ustrText );
-	ReplaceVariablesEx( ustrCaption );
+	m_strText = lpwszText;
+	m_strCaption = lpwszCaption;
+	ReplaceVariablesEx( m_strText );
+	ReplaceVariablesEx( m_strCaption );
 	m_uType = uType;
-	m_lpwszCaption = ustrCaption;
-	m_lpwszText = ustrText;
 	return ShowImpl( hwndParent );
 }
 
-BOOL CSfxDialog::ShowControl( int nControlID, BOOL fShow )
+void CSfxDialog::ShowControl( int nControlID, BOOL fShow )
 {
-	if( m_uDlgResourceId == 0 )
-	{
-		HWND hwndContfol = GetDlgItem( nControlID );
-		if( hwndContfol == NULL )
-			return FALSE;
-		return ::ShowWindow( hwndContfol, (fShow == FALSE) ? SW_HIDE: SW_SHOW );
-	}
-	return TRUE;
+	if( m_uDlgResourceId != 0 )
+		return;
+	if ( HWND hwndControl = GetDlgItem( nControlID ) )
+		::ShowWindow( hwndControl, fShow ? SW_SHOW : SW_HIDE );
 }
 
 BOOL CSfxDialog::CalculateTextRect(LPCWSTR lpwszText, LPRECT lpRect, HFONT hFont, UINT uFormat)
 {
 	BOOL bRet = FALSE;
-	HDC hDC = ::GetDC( GetHwnd() );
-	if( hDC != NULL )
+	if( HDC hDC = ::GetDC( m_hWnd ) )
 	{
-#ifdef _DEBUG
-//		CSfxStringA SfxUnicodeStringToMultiByte( const CSfxStringU &srcString, UINT codePage );
-		CSfxStringA tmp = SfxUnicodeStringToMultiByte( CSfxStringU(lpwszText), CP_ACP );
-#endif // _DEBUG
 		int nMaxWindowWidth = ::GetSystemMetrics(SM_CXMAXIMIZED) - ::GetSystemMetrics(SM_CXICON) - 60;
 		int nMaxWindowHeight = ::GetSystemMetrics(SM_CYMAXIMIZED) - 120;
 		lpRect->left = lpRect->top = lpRect->bottom = 0;
 		lpRect->right = nMaxWindowWidth;
 		HFONT hOldFont = (HFONT)::SelectObject( hDC, hFont );
-		bRet = (::DrawText( hDC, lpwszText, -1, lpRect, uFormat|DT_CALCRECT ) > 0) ? TRUE : FALSE;
+		bRet = ::DrawText( hDC, lpwszText, -1, lpRect, uFormat | DT_CALCRECT ) > 0;
 		if( nMaxWindowWidth < lpRect->right )
 			lpRect->right = nMaxWindowWidth;
 		if( nMaxWindowHeight < lpRect->bottom )
 			lpRect->bottom = nMaxWindowHeight;
 		::SelectObject( hDC, hOldFont );
-		::ReleaseDC( GetHwnd(), hDC );
+		::ReleaseDC( m_hWnd, hDC );
 	}
 	return bRet;
 }
@@ -569,87 +557,73 @@ void CSfxDialog::SetButtonText( int nButtonID, LPCWSTR lpwszText )
 
 void CSfxDialog::ResizeAndPosition()
 {
-	RECT	rc;
-
+	RECT rc;
 	int nOneButtonID = 0;
-	int nButton1width, nButton2width;
-	int nButtonsWidth, nButtonsHeight;
-	nButton1width = nButton2width = nButtonsWidth = 0;
-	if( (::GetWindowLongPtr( GetDlgItem(SDC_BUTTON1), GWL_STYLE ) & WS_VISIBLE) != FALSE )
+	int nButton1width = 0;
+	int nButton2width = 0;
+	int nButtonsWidth = 0;
+	int nButtonsHeight = 0;
+	if( (::GetWindowLongPtr( GetDlgItem(SDC_BUTTON1), GWL_STYLE ) & WS_VISIBLE) != 0 )
 	{
 		GetDlgItemRect( SDC_BUTTON1, &rc );
-		nButton1width = rc.right-rc.left;
+		nButton1width = rc.right - rc.left;
 		nButtonsHeight = rc.bottom - rc.top;
 		nOneButtonID = SDC_BUTTON1;
 	}
-	if( (::GetWindowLongPtr( GetDlgItem(SDC_BUTTON2), GWL_STYLE ) & WS_VISIBLE) != FALSE )
+	if( (::GetWindowLongPtr( GetDlgItem(SDC_BUTTON2), GWL_STYLE ) & WS_VISIBLE) != 0 )
 	{
 		GetDlgItemRect( SDC_BUTTON2, &rc );
-		nButton2width = rc.right-rc.left;
+		nButton2width = rc.right - rc.left;
 		nButtonsHeight = rc.bottom - rc.top;
 		nOneButtonID = SDC_BUTTON2;
 	}
-	if( nButton1width > 0 && nButton2width > 0 )
+	if( nButton1width != 0 && nButton2width != 0 )
 	{
-		if( nButton2width > nButton1width )
+		if( nButton1width < nButton2width )
 			nButton1width = nButton2width;
 		else
 			nButton2width = nButton1width;
+		nButtonsWidth += SDM_BUTTONS_CX_SPACING;
 	}
-	if( nOneButtonID != 0 )
-	{
-		if( nButton1width != 0 && nButton2width != 0 )
-		{
-			// 2 buttons
-			nButtonsWidth = nButton1width + nButton2width + SDM_BUTTONS_CX_SPACING;
-		}
-		else
-		{
-			// 1 button
-			nButtonsWidth = (nButton1width == 0) ? nButton2width : nButton1width;
-		}
-	}
-	nButtonsWidth += (SDM_BORDER_LEFT + SDM_BORDER_RIGHT);
-	if( nButtonsWidth > m_dlgSize.cx )
-		m_dlgSize.cx = nButtonsWidth;
-	nButtonsWidth -= (SDM_BORDER_LEFT + SDM_BORDER_RIGHT);
-
-	int nDesktopWidth = ::GetSystemMetrics( SM_CXFULLSCREEN );
-	int nDesktopHeight = ::GetSystemMetrics( SM_CYFULLSCREEN );
-	m_dlgSize.cx += ::GetSystemMetrics( SM_CYDLGFRAME );
-	m_dlgSize.cy += ::GetSystemMetrics( SM_CXDLGFRAME );
-	int x = (nDesktopWidth-m_dlgSize.cx)/2;
-	int y = (nDesktopHeight-m_dlgSize.cy)/2;
-	HWND hwndParent;
-	if( (hwndParent = GetParent(GetHwnd())) != NULL )
+	nButtonsWidth += nButton1width + nButton2width;
+	int cxMin = nButtonsWidth + SDM_BORDER_LEFT + SDM_BORDER_RIGHT;
+	if( m_dlgSize.cx < cxMin )
+		m_dlgSize.cx = cxMin;
+	int const nDesktopWidth = ::GetSystemMetrics( SM_CXFULLSCREEN );
+	int const nDesktopHeight = ::GetSystemMetrics( SM_CYFULLSCREEN );
+	int const nDlgWidth = m_dlgSize.cx + ::GetSystemMetrics( SM_CXDLGFRAME );
+	int const nDlgHeight = m_dlgSize.cy + ::GetSystemMetrics( SM_CYDLGFRAME );
+	int x = (nDesktopWidth - nDlgWidth) / 2;
+	int y = (nDesktopHeight - nDlgHeight) / 2;
+	if( HWND hwndParent = GetParent(m_hWnd) )
 	{
 		::GetClientRect( hwndParent, &rc );
-		::ClientToScreen( hwndParent, (LPPOINT)(&rc.left) );
-		::ClientToScreen( hwndParent, (LPPOINT)(&rc.right) );
-		x = rc.left; y = rc.top;
-		if( (rc.right-rc.left) > m_dlgSize.cx )
-			x += ((rc.right-rc.left-m_dlgSize.cx)/2);
-		if( (rc.bottom-rc.top) > m_dlgSize.cy )
-			y += ((rc.bottom-rc.top-m_dlgSize.cy)/2);
+		::MapWindowPoints( hwndParent, NULL, reinterpret_cast<LPPOINT>(&rc), 2 );
+		x = rc.left;
+		y = rc.top;
+		if( (rc.right - rc.left) > nDlgWidth )
+			x += (rc.right - rc.left - nDlgWidth) / 2;
+		if( (rc.bottom - rc.top) > nDlgHeight )
+			y += (rc.bottom - rc.top - nDlgHeight) / 2;
 
 		x += SDM_PARENT_OFFSET_X;
 		y += SDM_PARENT_OFFSET_Y;
 	}
-	::SetWindowPos( GetHwnd(), NULL, x, y, m_dlgSize.cx, m_dlgSize.cy, SWP_NOZORDER );
+	::SetWindowPos( m_hWnd, NULL, x, y, nDlgWidth, nDlgHeight, SWP_NOZORDER );
 	
-	if( m_fUseIcon != FALSE )
+	if( m_fUseIcon )
 	{
 		SetDlgItemPos( SDC_ICON, SDM_BORDER_LEFT+SDM_ICON_OFFSET_CX, SDM_BORDER_TOP+SDM_ICON_OFFSET_CY, 0,0, SWP_NOSIZE );
 		GetDlgItemRect( SDC_ICON, &rc );
 		rc.bottom -= (rc.top-SDM_ICON_OFFSET_CY);
-		int nTextTop = (m_rcText.bottom < rc.bottom) ? ((rc.bottom-m_rcText.bottom)/2) : 0;
-//		SetDlgItemPos( SDC_TEXT, rc.right+SDM_ICON_TO_TEXT_SPACING, nTextTop+SDM_BORDER_TOP, m_rcText.right+SDM_BORDER_RIGHT-1, m_rcText.bottom+1, 0 );
-		SetDlgItemPos( SDC_TEXT, rc.right+SDM_ICON_TO_TEXT_SPACING, nTextTop+SDM_BORDER_TOP, m_rcText.right+1, m_rcText.bottom+1, 0 );
+		int nTextTop = (m_rcText.bottom < rc.bottom) ? (rc.bottom - m_rcText.bottom) / 2 : 0;
+//		SetDlgItemPos( SDC_TEXT, rc.right + SDM_ICON_TO_TEXT_SPACING, nTextTop + SDM_BORDER_TOP, m_rcText.right + SDM_BORDER_RIGHT - 1, m_rcText.bottom + 1, 0 );
+		SetDlgItemPos( SDC_TEXT, rc.right + SDM_ICON_TO_TEXT_SPACING, nTextTop + SDM_BORDER_TOP, m_rcText.right + 1, m_rcText.bottom + 1, 0 );
 	}
 	else
 	{
-//		SetDlgItemPos( SDC_TEXT, SDM_BORDER_LEFT, SDM_BORDER_TOP, m_rcText.right+SDM_BORDER_RIGHT-1, m_rcText.bottom+1, 0 );
-		SetDlgItemPos( SDC_TEXT, SDM_BORDER_LEFT, SDM_BORDER_TOP, m_rcText.right+1, m_rcText.bottom+1, 0 );
+//		SetDlgItemPos( SDC_TEXT, SDM_BORDER_LEFT, SDM_BORDER_TOP, m_rcText.right + SDM_BORDER_RIGHT - 1, m_rcText.bottom + 1, 0 );
+		SetDlgItemPos( SDC_TEXT, SDM_BORDER_LEFT, SDM_BORDER_TOP, m_rcText.right + 1, m_rcText.bottom + 1, 0 );
 	}
 
 	// Reposition button(s)
@@ -660,11 +634,11 @@ void CSfxDialog::ResizeAndPosition()
 		{
 			// 2 buttons
 			SetDlgItemPos( SDC_BUTTON1,
-				(rc.right-nButtonsWidth)/2, rc.bottom-SDM_BORDER_BOTTOM-nButtonsHeight,
+				(rc.right - nButtonsWidth)/2, rc.bottom - SDM_BORDER_BOTTOM - nButtonsHeight,
 				nButton1width, nButtonsHeight, 0 );
 			GetDlgItemRect( SDC_BUTTON1, &rc );
 			SetDlgItemPos( SDC_BUTTON2,
-				rc.right+SDM_BUTTONS_CX_SPACING, rc.top,
+				rc.right + SDM_BUTTONS_CX_SPACING, rc.top,
 				nButton2width, nButtonsHeight, 0 );
 		}
 		else
@@ -673,15 +647,12 @@ void CSfxDialog::ResizeAndPosition()
 			SetDlgItemPos( nOneButtonID, (rc.right-nButtonsWidth)/2, rc.bottom-SDM_BORDER_BOTTOM-nButtonsHeight, 0,0, SWP_NOSIZE );
 		}
 	}
-	m_dlgSize.cx -= ::GetSystemMetrics( SM_CYDLGFRAME );
-	m_dlgSize.cy -= ::GetSystemMetrics( SM_CXDLGFRAME );
 }
 
 void CSfxDialog::ResizeAndPositionButton( int nButtonID, LPCWSTR lpwszText )
 {
-	RECT	rc1;
-	RECT	rc2;
-	if( CalculateTextRect( lpwszText, &rc1, m_hFont, DT_SINGLELINE ) != FALSE )
+	RECT rc1, rc2;
+	if( CalculateTextRect( lpwszText, &rc1, m_hFont, DT_SINGLELINE ) )
 	{
 		rc1.right += 32;
 		GetDlgItemRect( nButtonID, &rc2 );
@@ -699,7 +670,7 @@ INT_PTR CSfxDialog::ShowImpl( HWND hwndParent )
 	memcpy( LocalDlgTemplate, m_DialogsTemplate, sizeof(m_DialogsTemplate) );
 	NONCLIENTMETRICS	ncm;
 	ncm.cbSize = sizeof(ncm);
-	if( SystemParametersInfo( SPI_GETNONCLIENTMETRICS, 0, &ncm, 0 ) != FALSE )
+	if( SystemParametersInfo( SPI_GETNONCLIENTMETRICS, 0, &ncm, 0 ) )
 	{
 		HDC hdc = ::GetDC( NULL );
 		int nHeight = -MulDiv( ncm.lfMessageFont.lfHeight, 72, GetDeviceCaps(hdc, LOGPIXELSY) );
@@ -716,13 +687,11 @@ INT_PTR CSfxDialog::ShowImpl( HWND hwndParent )
 #ifdef _SFX_USE_LANG
 		lpDlgTemplate = (LPCDLGTEMPLATE)LoadInterfaceResource( (LPCSTR)RT_DIALOG, MAKEINTRESOURCEA(m_uDlgResourceId) );
 #else
-		HRSRC hRsrc = FindResourceA( hRsrcModule, MAKEINTRESOURCEA(m_uDlgResourceId), (LPCSTR)RT_DIALOG );
-		if( hRsrc != NULL )
+		if( HRSRC hRsrc = FindResource( hRsrcModule, MAKEINTRESOURCE(m_uDlgResourceId), RT_DIALOG ) )
 		{
-			HGLOBAL hGb = LoadResource( hRsrcModule, hRsrc );
-			if( hGb != NULL )
+			if( HGLOBAL hGb = LoadResource( hRsrcModule, hRsrc ) )
 			{
-				lpDlgTemplate = (LPCDLGTEMPLATE)LockResource( hGb );
+				lpDlgTemplate = static_cast<LPCDLGTEMPLATE>( LockResource( hGb ) );
 			}
 		}
 #endif // _SFX_USE_LANG
@@ -746,7 +715,7 @@ void CSfxDialog::SetCaption( LPCWSTR lpwszCaption )
 			ustrCaption += *lpwszCaption;
 		lpwszCaption++;
 	}
-	SetWindowText( GetHwnd(), ustrCaption );
+	SetWindowText( m_hWnd, ustrCaption );
 }
 /*--------------------------------------------------------------------------*/
 // CSfxDialog_BeginPromptClassic
@@ -795,15 +764,15 @@ BOOL CSfxDialog_CancelPrompt::OnInitDialog()
 	return FALSE;
 }
 
-BOOL CSfxDialog_CancelPrompt::IsCancel( CSfxDialog * pParent )
+INT_PTR CSfxDialog_CancelPrompt::IsCancel( HWND hParentWnd )
 {
-	if( (GUIFlags&GUIFLAGS_CONFIRM_CANCEL) == 0 )
+	if( (GUIFlags & GUIFLAGS_CONFIRM_CANCEL) == 0 )
 		return TRUE;
 #ifdef _SFX_USE_TEST
-	if( pParent != NULL && TSD_Flags.IsEmpty() == false )
+	if( hParentWnd != NULL && !TSD_Flags.IsEmpty() )
 		return TRUE;
 #endif // _SFX_USE_TEST
-	return (BOOL)CSfxDialog::Show( SD_YESNO|SD_ICONQUESTION, lpwszTitle, lpwszCancelPrompt, (pParent == NULL) ? NULL : pParent->GetHwnd() );
+	return CSfxDialog::Show( SD_YESNO|SD_ICONQUESTION, lpwszTitle, lpwszCancelPrompt, hParentWnd );
 }
 
 
@@ -812,22 +781,15 @@ BOOL CSfxDialog_CancelPrompt::IsCancel( CSfxDialog * pParent )
 /*--------------------------------------------------------------------------*/
 BOOL CSfxDialog_ExtractPath::OnInitDialog()
 {
-	BOOL	retValue;
-	RECT	rc;
-	GetDlgItemRect( SDC_EXTRACTPATHEDIT, &rc );
-	m_nBrowseButtonSize = rc.bottom-rc.top+2;
 	ShowControl( SDC_EXTRACTPATHEDIT, TRUE );
 	ShowControl( SDC_EXTRACTPATHBROWSE, TRUE );
 	
-	TCHAR		szPath[MAX_PATH+1];
-	SHFILEINFO	shfi = { 0 };
-
-	GetSystemDirectory( szPath, MAX_PATH );
-	SHGetFileInfo( szPath, 0, &shfi, sizeof(shfi), SHGFI_ICON|SHGFI_SMALLICON|SHGFI_OPENICON );
+	SHFILEINFO shfi = { 0 };
+	SHGetFileInfo( L"~", FILE_ATTRIBUTE_DIRECTORY, &shfi, sizeof shfi, SHGFI_ICON | SHGFI_SMALLICON | SHGFI_OPENICON | SHGFI_USEFILEATTRIBUTES );
 	m_hBrowseIcon = shfi.hIcon;
 
 	m_pfnOldButtonProc = (WNDPROC)::SetWindowLongPtr( GetDlgItem(SDC_EXTRACTPATHBROWSE), GWLP_WNDPROC, (LONG_PTR)ButtonIconProc );
-	retValue = CSfxDialog::OnInitDialog();
+	BOOL retValue = CSfxDialog::OnInitDialog();
 	SetPathText();
 	return retValue;
 }
@@ -835,61 +797,51 @@ BOOL CSfxDialog_ExtractPath::OnInitDialog()
 void CSfxDialog_ExtractPath::CalculateDialogSize()
 {
 	CSfxDialog::CalculateDialogSize();
-
-	RECT	rc;
-
-	if( m_dlgSize.cx < (ExtractPathWidth-::GetSystemMetrics(SM_CXDLGFRAME)) )
-		m_dlgSize.cx = ExtractPathWidth-::GetSystemMetrics(SM_CXDLGFRAME);
+	int cxMin = ExtractPathWidth - ::GetSystemMetrics(SM_CXDLGFRAME);
+	if( m_dlgSize.cx < cxMin )
+		m_dlgSize.cx = cxMin;
+	RECT rc;
 	GetDlgItemRect( SDC_EXTRACTPATHEDIT, &rc );
-	m_dlgSize.cy += (rc.bottom-rc.top) + SDM_EXTRACTPATH_SPACING;
+	m_dlgSize.cy += (rc.bottom - rc.top) + SDM_EXTRACTPATH_SPACING;
 }
 
 void CSfxDialog_ExtractPath::ResizeAndPosition()
 {
 	CSfxDialog::ResizeAndPosition();
-
-	RECT	rc1;
-	RECT	rc2;
-
+	RECT rc1, rc2;
 	GetDlgItemRect( SDC_BUTTON1, &rc1 );
 	GetDlgItemRect( SDC_EXTRACTPATHEDIT, &rc2 );
-	rc1.top -= (rc2.bottom-rc2.top+SDM_BUTTONS_CY_SPACING);
-	rc1.bottom = rc1.top + (rc2.bottom-rc2.top);
+	int nBrowseButtonSize = rc2.bottom - rc2.top + 2;
+	rc1.top -= (rc2.bottom - rc2.top + SDM_BUTTONS_CY_SPACING);
+	rc1.bottom = rc1.top + (rc2.bottom - rc2.top);
 	rc1.left = SDM_BORDER_LEFT;
 	GetClientRect( &rc2 );
-	rc1.right = rc2.right - m_nBrowseButtonSize - SDM_BORDER_RIGHT+1;
-	SetDlgItemPos( SDC_EXTRACTPATHEDIT, rc1.left, rc1.top, rc1.right-rc1.left, rc1.bottom-rc1.top, 0 );
-	SetDlgItemPos( SDC_EXTRACTPATHBROWSE, rc2.right-m_nBrowseButtonSize-SDM_BORDER_RIGHT+3, rc1.top-1,
-					m_nBrowseButtonSize, m_nBrowseButtonSize, 0 );
+	rc1.right = rc2.right - nBrowseButtonSize - SDM_BORDER_RIGHT + 1;
+	SetDlgItemPos( SDC_EXTRACTPATHEDIT, rc1.left, rc1.top, rc1.right - rc1.left, rc1.bottom - rc1.top, 0 );
+	SetDlgItemPos( SDC_EXTRACTPATHBROWSE, rc2.right - nBrowseButtonSize - SDM_BORDER_RIGHT + 3, rc1.top - 1,
+					nBrowseButtonSize, nBrowseButtonSize, 0 );
 }
 
-INT_PTR CALLBACK CSfxDialog_ExtractPath::ButtonIconProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
+LRESULT CALLBACK CSfxDialog_ExtractPath::ButtonIconProc( HWND hwnd, UINT message, WPARAM wParam, LPARAM lParam )
 {
-	CSfxDialog_ExtractPath * pThis = (CSfxDialog_ExtractPath *)GetWindowLongPtr( GetParent(hwnd), GWLP_USERDATA );
-	if( pThis == NULL )
-		return DefWindowProc( hwnd, message, wParam, lParam );
-	
-	INT_PTR Result = 0;
-	if( pThis->m_pfnOldButtonProc != NULL )
-		Result = ::CallWindowProc( pThis->m_pfnOldButtonProc, hwnd, message, wParam, lParam );
-	
-	HDC		hDC;
-	RECT	rc;
-	int		nIconCx = ::GetSystemMetrics( SM_CXSMICON );
-	int		nIconCy = ::GetSystemMetrics( SM_CYSMICON );
+	CSfxDialog_ExtractPath *pThis = (CSfxDialog_ExtractPath *)GetWindowLongPtr( GetParent(hwnd), GWLP_USERDATA );
+	LRESULT Result = ::CallWindowProc( pThis->m_pfnOldButtonProc, hwnd, message, wParam, lParam );
 	switch( message )
 	{
 	case WM_PAINT:
-		hDC = ::GetWindowDC( hwnd );
-		::GetWindowRect( hwnd, &rc );
-		::DrawIconEx( hDC, (rc.right-rc.left-nIconCx)/2,(rc.bottom-rc.top-nIconCy)/2, pThis->m_hBrowseIcon, nIconCx, nIconCy, 0, NULL, DI_MASK|DI_IMAGE );
-		::ReleaseDC( hwnd, hDC );
-		break;
-	case WM_DESTROY:
-		::SetWindowLongPtr( hwnd, GWLP_WNDPROC, (LONG_PTR)pThis->m_pfnOldButtonProc );
+		if ( HDC hDC = ::GetDC( hwnd ) )
+		{
+			RECT rc;
+			::GetClientRect( hwnd, &rc );
+			int const w = ::GetSystemMetrics( SM_CXSMICON );
+			int const h = ::GetSystemMetrics( SM_CYSMICON );
+			int const x = (rc.right - rc.left - w) / 2;
+			int const y = (rc.bottom - rc.top - h) / 2;
+			::DrawIconEx( hDC, x, y, pThis->m_hBrowseIcon, w, h, 0, NULL, DI_MASK | DI_IMAGE );
+			::ReleaseDC( hwnd, hDC );
+		}
 		break;
 	}
-
 	return Result;
 }
 
@@ -906,11 +858,10 @@ void CSfxDialog_ExtractPath::OnCommand( int nControlID )
 	{
 		BrowseExtractPath();
 	}
-	else
-		if( nControlID == SDC_BUTTON1 )
-		{
-			extractPath = GetDlgItemText(SDC_EXTRACTPATHEDIT);
-		}
+	else if( nControlID == SDC_BUTTON1 )
+	{
+		GetDlgItemText( SDC_EXTRACTPATHEDIT, extractPath );
+	}
 	CSfxDialog::OnCommand( nControlID );
 }
 
@@ -920,17 +871,17 @@ void CSfxDialog_ExtractPath::BrowseExtractPath()
 	TCHAR		szPath[MAX_PATH+1];
 
 	memset( &bi, 0, sizeof(bi) );
-	bi.hwndOwner = GetHwnd();
+	bi.hwndOwner = m_hWnd;
 	bi.ulFlags = BIF_RETURNONLYFSDIRS|BIF_NEWDIALOGSTYLE;
 	
-	LPITEMIDLIST pidl = safe_SHBrowseForFolder( &bi );
+	LPITEMIDLIST pidl = SHBrowseForFolder( &bi );
 
 	if( pidl == NULL )
 		return;
 
 	szPath[0] = '\0';
 
-	if( SHGetPathFromIDList( pidl, szPath ) != FALSE )
+	if( SHGetPathFromIDList( pidl, szPath ) )
 	{
 		extractPath = szPath;
 		SetPathText();
@@ -943,7 +894,6 @@ void CSfxDialog_ExtractPath::BrowseExtractPath()
 		pMalloc->Release(); 
 	}
 }
-
 
 /*--------------------------------------------------------------------------*/
 // CSfxDialog_BeginPromptWithExtractPath
@@ -971,11 +921,13 @@ void CSfxDialog_BeginPromptWithExtractPath::CalculateDialogSize()
 
 	m_rcExtractPathText.left = m_rcExtractPathText.top =
 		m_rcExtractPathText.right = m_rcExtractPathText.bottom = 0;
-	CSfxStringU ustrExtractPathText = GetDlgItemText(SDC_TEXT2);
-	if( CalculateTextRect( (LPCWSTR)ustrExtractPathText, &m_rcExtractPathText, m_hFont, DT_LEFT|DT_NOPREFIX|DT_WORDBREAK|DT_EXPANDTABS ) != FALSE )
+	CSfxStringU ustrExtractPathText;
+	GetDlgItemText( SDC_TEXT2, ustrExtractPathText );
+	if( CalculateTextRect( ustrExtractPathText, &m_rcExtractPathText, m_hFont, DT_LEFT|DT_NOPREFIX|DT_WORDBREAK|DT_EXPANDTABS ) )
 	{
-		if( (m_rcExtractPathText.right+SDM_BORDER_LEFT+SDM_BORDER_RIGHT) > m_dlgSize.cx )
-			m_dlgSize.cx = m_rcExtractPathText.right+SDM_BORDER_LEFT+SDM_BORDER_RIGHT;
+		int cxMin = m_rcExtractPathText.right + SDM_BORDER_LEFT + SDM_BORDER_RIGHT;
+		if( m_dlgSize.cx < cxMin )
+			m_dlgSize.cx = cxMin;
 		m_dlgSize.cy += m_rcExtractPathText.bottom + SDM_EXTRACT_PATH_SPACE_TO_TEXT +
 							SDM_EXTRACT_PATH_SPACE_TO_EDIT - SDM_EXTRACTPATH_SPACING;
 	}
@@ -985,11 +937,11 @@ void CSfxDialog_BeginPromptWithExtractPath::ResizeAndPosition()
 {
 	CSfxDialog_ExtractPath::ResizeAndPosition();
 
-	RECT	rc;
+	RECT rc;
 	GetDlgItemRect( SDC_EXTRACTPATHEDIT, &rc );
 	SetDlgItemPos( SDC_TEXT2, rc.left, rc.top - m_rcExtractPathText.bottom - SDM_EXTRACT_PATH_SPACE_TO_EDIT,
-//										m_rcExtractPathText.right+SDM_BORDER_RIGHT-1, m_rcExtractPathText.bottom+1, 0 );
-										m_rcExtractPathText.right+1, m_rcExtractPathText.bottom+1, 0 );
+//										m_rcExtractPathText.right + SDM_BORDER_RIGHT - 1, m_rcExtractPathText.bottom + 1, 0 );
+										m_rcExtractPathText.right + 1, m_rcExtractPathText.bottom + 1, 0 );
 	SetPathText();
 }
 
@@ -1011,22 +963,22 @@ BOOL CSfxDialog_FinishMessage::OnInitDialog()
 // CSfxDialog_Extract
 /*--------------------------------------------------------------------------*/
 HWND hwndExtractDlg = NULL;
-CSfxDialog_Extract * pwndExtractDialog = NULL;
+CSfxDialog_Extract *pwndExtractDialog = NULL;
 BOOL fCancelExtract = FALSE;
 
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
-	void CSfxDialog_Extract::SetTaskbarState( TBPFLAG tbpFlags )
-	{
-		if( m_pTaskbarList != NULL )
-			m_pTaskbarList->SetProgressState( GetHwnd(), tbpFlags );
-	}
+void CSfxDialog_Extract::SetTaskbarState( TBPFLAG tbpFlags )
+{
+	if( m_pTaskbarList )
+		m_pTaskbarList->SetProgressState( m_hWnd, tbpFlags );
+}
 #endif // _SFX_USE_WIN7_PROGRESSBAR
 
 void CSfxDialog_Extract::SetPercentTextFont()
 {
-	if( (GUIFlags&GUIFLAGS_PERCENT_BOLD) != 0 )
+	if( (GUIFlags & GUIFLAGS_PERCENT_BOLD) != 0 )
 	{
-		LOGFONT	logFont;
+		LOGFONT logFont;
 		if( ::GetObject( m_hFont,sizeof(LOGFONT),&logFont ) != 0 )
 		{
 			logFont.lfWeight = FW_BOLD;
@@ -1039,7 +991,7 @@ void CSfxDialog_Extract::SetPercentTextFont()
 
 BOOL CSfxDialog_Extract::OnInitDialog()
 {
-	hwndExtractDlg = GetHwnd();
+	hwndExtractDlg = m_hWnd;
 	pwndExtractDialog = this;
 	ShowControl(SDC_PROGRESS, TRUE);
 	SendDlgItemMessage(SDC_PROGRESS, PBM_SETRANGE, 0, MAKELPARAM(0, MAX_PROGRESS_VALUE));
@@ -1048,18 +1000,18 @@ BOOL CSfxDialog_Extract::OnInitDialog()
 		ResizeAndPositionButton(SDC_BUTTON2, lpwszCancelText);
 		SetDlgItemText(SDC_BUTTON2, lpwszCancelText);
 	}
-	if ((GUIFlags&GUIFLAGS_PERCENT_TEXT) != 0)
+	if ((GUIFlags & GUIFLAGS_PERCENT_TEXT) != 0)
 	{
 		ShowControl(SDC_TEXT2, TRUE);
-		LONG_PTR dwStyle = ::GetWindowLongPtr(GetDlgItem(SDC_TEXT2), GWL_STYLE);
-		dwStyle &= (~SS_LEFT); dwStyle |= SS_CENTER;
-		::SetWindowLongPtr(GetDlgItem(SDC_TEXT2), GWL_STYLE, dwStyle);
+		HWND hwndControl = GetDlgItem(SDC_TEXT2);
+		LONG lStyle = ::GetWindowLong(hwndControl, GWL_STYLE);
+		::SetWindowLong(hwndControl, GWL_STYLE, lStyle | SS_CENTER | SS_CENTERIMAGE);
 		SetPercentTextFont();
 	}
 	if (GUIMode == GUIMODE_NOCANCEL)
 	{
 		ShowControl(SDC_BUTTON2, FALSE);
-		HMENU hMenu = GetSystemMenu(GetHwnd(), FALSE);
+		HMENU hMenu = GetSystemMenu(m_hWnd, FALSE);
 		if (hMenu != NULL)
 			EnableMenuItem(hMenu, SC_CLOSE, MF_GRAYED | MF_BYCOMMAND);
 	}
@@ -1071,54 +1023,56 @@ BOOL CSfxDialog_Extract::OnInitDialog()
 	{
 		m_i64TestCurrent = 0;
 		m_i64ProgressTotal = 100;
-		SetTimer(GetHwnd(), 1, TSD_ExtractTimeout * 10, NULL);
+		SetTimer(m_hWnd, 1, TSD_ExtractTimeout * 10, NULL);
 	}
 #endif // _SFX_USE_TEST
 
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
-	m_pTaskbarList = NULL;
-	if ((GUIFlags&GUIFLAGS_NO_WIN7_PROGRESSBAR) == 0 &&
-			CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_pTaskbarList)) == S_OK )
-	{
-		SetTaskbarState( TBPF_INDETERMINATE );
-	}
+	if ((GUIFlags & GUIFLAGS_NO_WIN7_PROGRESSBAR) == 0)
+		::CoCreateInstance(CLSID_TaskbarList, NULL, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&m_pTaskbarList));
+	SetTaskbarState( TBPF_INDETERMINATE );
 #endif // _SFX_USE_WIN7_PROGRESSBAR
 
 	if( GUIMode == GUIMODE_NOCANCEL )
 	{
-		if( ::IsWindow( GetDlgItem(IDCANCEL) ) != FALSE )
-			EnableWindow( GetDlgItem(IDCANCEL), FALSE );
+		if( HWND hwndControl = GetDlgItem(IDCANCEL) )
+			EnableWindow( hwndControl, FALSE );
 	}
-	if( (GUIFlags&GUIFLAGS_PERCENT_TEXT) == 0 )
+	if( (GUIFlags & GUIFLAGS_PERCENT_TEXT) == 0 )
 		ShowWindow( GetDlgItem(SDC_TEXT2), SW_HIDE );
 	__int64 i64Init = 0;
 	SetPercents( (LPARAM)(&i64Init) );
+
+	if (m_pSfxExtractEngine)
+	{
+		if (HANDLE hExtractThread = m_pSfxExtractEngine->GetExtractThread())
+			::ResumeThread(hExtractThread);
+	}
+
 	return CSfxDialog::OnInitDialog();
 }
 
 void CSfxDialog_Extract::CalculateDialogSize()
 {
 #define PERCENTS_100	L" 100%% "
-
 	CSfxDialog::CalculateDialogSize();
-
-	if( m_dlgSize.cx < (ExtractDialogWidth-::GetSystemMetrics(SM_CXDLGFRAME)) )
-		m_dlgSize.cx = ExtractDialogWidth-::GetSystemMetrics(SM_CXDLGFRAME);
-
+	int cxMin = ExtractDialogWidth - ::GetSystemMetrics(SM_CXDLGFRAME);
+	if( m_dlgSize.cx < cxMin )
+		m_dlgSize.cx = cxMin;
 	// title
-	SIZE	sizeTitle;
-	CSfxStringU strFullTitle = m_lpwszCaption;
-	if( (GUIFlags&GUIFLAGS_TITLE_PERCENT_NONE) == 0 )
+	SIZE sizeTitle;
+	CSfxStringU strFullTitle = m_strCaption;
+	if( (GUIFlags & GUIFLAGS_TITLE_PERCENT_NONE) == 0 )
 		strFullTitle += PERCENTS_100;
-	if( CalculateTitleSize( strFullTitle, &sizeTitle ) != FALSE && sizeTitle.cx > m_dlgSize.cx )
+	if( CalculateTitleSize( strFullTitle, &sizeTitle ) && sizeTitle.cx > m_dlgSize.cx )
 		m_dlgSize.cx = sizeTitle.cx;
 
-	RECT	rc;
+	RECT rc;
 	GetDlgItemRect( SDC_PROGRESS, &rc );
-	m_dlgSize.cy += (rc.bottom-rc.top) + SDM_PROGRESS_TO_TEXT;
-	if( (GUIFlags&GUIFLAGS_PERCENT_TEXT) != 0 )
+	m_dlgSize.cy += (rc.bottom - rc.top) + SDM_PROGRESS_TO_TEXT;
+	if( (GUIFlags & GUIFLAGS_PERCENT_TEXT) != 0 )
 	{
-		if( CalculateTextRect( PERCENTS_100, &m_rcPercentText, m_hFont, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE ) != FALSE )
+		if( CalculateTextRect( PERCENTS_100, &m_rcPercentText, m_hFont, DT_LEFT|DT_NOPREFIX|DT_SINGLELINE ) )
 		{
 			m_dlgSize.cy += m_rcPercentText.bottom;
 		}
@@ -1128,7 +1082,7 @@ void CSfxDialog_Extract::CalculateDialogSize()
 	if( GUIMode == GUIMODE_NOCANCEL )
 	{
 		GetDlgItemRect( SDC_BUTTON2, &rc );
-		m_dlgSize.cy -= (rc.bottom-rc.top);
+		m_dlgSize.cy -= rc.bottom - rc.top;
 	}
 	else
 	{
@@ -1155,7 +1109,7 @@ void CSfxDialog_Extract::ResizeAndPosition()
 
 	GetClientRect( &rc );
 	int nClientWidth = rc.right - SDM_BORDER_LEFT - SDM_BORDER_RIGHT + 2;
-	if( (GUIFlags&GUIFLAGS_PERCENT_TEXT) != 0 )
+	if( (GUIFlags & GUIFLAGS_PERCENT_TEXT) != 0 )
 	{
 		nBottom -= m_rcPercentText.bottom;
 		SetDlgItemPos( SDC_TEXT2, SDM_BORDER_LEFT, nBottom, nClientWidth, m_rcPercentText.bottom+1, 0 );
@@ -1181,14 +1135,14 @@ void CSfxDialog_Extract::SetPercents( LPARAM lPercents )
 		ipos = MAX_PROGRESS_VALUE;
 	SendDlgItemMessage( SDC_PROGRESS, PBM_SETPOS, ipos, 0 );
 	wsprintf( wszPercentText, L"%d%%", (ipos+((MAX_PROGRESS_VALUE/100)-1))/(MAX_PROGRESS_VALUE/100) );
-	if( (GUIFlags&GUIFLAGS_PERCENT_TEXT) != 0 )
+	if( (GUIFlags & GUIFLAGS_PERCENT_TEXT) != 0 )
 	{
 		SetDlgItemText( SDC_TEXT2, wszPercentText );
 	}
-	if( (GUIFlags&GUIFLAGS_TITLE_PERCENT_NONE) == 0 )
+	if( (GUIFlags & GUIFLAGS_TITLE_PERCENT_NONE) == 0 )
 	{
 		// percents in title present
-		if( (GUIFlags&GUIFLAGS_TITLE_PERCENT_RIGHT) != 0 )
+		if( (GUIFlags & GUIFLAGS_TITLE_PERCENT_RIGHT) != 0 )
 		{
 			// percents on right
 			Title = lpwszExtractTitle;
@@ -1205,10 +1159,10 @@ void CSfxDialog_Extract::SetPercents( LPARAM lPercents )
 		SetCaption( Title );
 	}
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
-	if( m_pTaskbarList != NULL )
+	if( m_pTaskbarList )
 	{
-		m_pTaskbarList->SetProgressState( GetHwnd(), TBPF_NORMAL );
-		m_pTaskbarList->SetProgressValue( GetHwnd(), *((__int64 *)lPercents), m_i64ProgressTotal );
+		m_pTaskbarList->SetProgressState( m_hWnd, TBPF_NORMAL );
+		m_pTaskbarList->SetProgressValue( m_hWnd, *((__int64 *)lPercents), m_i64ProgressTotal );
 	}
 #endif // _SFX_USE_WIN7_PROGRESSBAR
 }
@@ -1228,28 +1182,38 @@ INT_PTR CSfxDialog_Extract::DialogProc( UINT uMsg, WPARAM wParam, LPARAM lParam 
 	case WM_7ZSFX_SETTOTAL:
 		m_i64ProgressTotal = *((__int64 *)lParam);
 		#ifdef _SFX_USE_WIN7_PROGRESSBAR
-			if( m_pTaskbarList != NULL )
+			if( m_pTaskbarList )
 			{
-				m_pTaskbarList->SetProgressState( GetHwnd(), TBPF_NORMAL );
-				m_pTaskbarList->SetProgressValue( GetHwnd(), 0, m_i64ProgressTotal );
+				m_pTaskbarList->SetProgressState( m_hWnd, TBPF_NORMAL );
+				m_pTaskbarList->SetProgressValue( m_hWnd, 0, m_i64ProgressTotal );
 			}
 		#endif // _SFX_USE_WIN7_PROGRESSBAR
 		break;
 	case WM_7ZSFX_SETCOMPLETED:
 		SetPercents( lParam );
 		break;
+	case WM_DESTROY:
+		hwndExtractDlg = NULL;
+		pwndExtractDialog = NULL;
+#ifdef _SFX_USE_WIN7_PROGRESSBAR
+		if( m_pTaskbarList )
+		{
+			m_pTaskbarList->Release();
+			m_pTaskbarList = NULL;
+		}
+#endif
+		break;
 	}
-	
 	return CSfxDialog::DialogProc( uMsg, wParam, lParam );
 }
 
-BOOL CSfxDialog_Extract::IsCancel()
+INT_PTR CSfxDialog_Extract::IsCancel()
 {
 	CSfxDialog_CancelPrompt	cancelPrompt;
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
 	SetTaskbarState( TBPF_PAUSED );
 #endif // _SFX_USE_WIN7_PROGRESSBAR
-	BOOL bRet = cancelPrompt.IsCancel(this);
+	INT_PTR bRet = cancelPrompt.IsCancel( m_hWnd );
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
 	SetTaskbarState( TBPF_NORMAL );
 #endif // _SFX_USE_WIN7_PROGRESSBAR
@@ -1263,38 +1227,37 @@ BOOL CSfxDialog_Extract::IsCancel()
 void CSfxDialog_Extract::OnCancel()
 {
 #ifdef _SFX_USE_TEST
-	if( TSD_Flags.IsEmpty() == false )
+	if( !TSD_Flags.IsEmpty() )
 		EndDialog( FALSE );
 	if( TSD_ExtractTimeout != 0 )
 	{
-		KillTimer( GetHwnd(), 1 );
-		if( (GUIFlags&GUIFLAGS_CONFIRM_CANCEL) == 0 || IsCancel() != FALSE )
+		KillTimer( m_hWnd, 1 );
+		if( (GUIFlags & GUIFLAGS_CONFIRM_CANCEL) == 0 || IsCancel() )
 		{
 			EndDialog( FALSE );
 			return;
 		}
-		SetTimer( GetHwnd(), 1, TSD_ExtractTimeout * 10, NULL );
+		SetTimer( m_hWnd, 1, TSD_ExtractTimeout * 10, NULL );
 	}
 #endif // _SFX_USE_TEST
 
-	if( GUIMode == GUIMODE_NOCANCEL )
-		return;
-	HANDLE hExtractThread = SfxExtractEngine->GetExtractThread();
-	if( hExtractThread == NULL )
-		return;
-	::SuspendThread( hExtractThread );
-	if( (GUIFlags&GUIFLAGS_CONFIRM_CANCEL) == 0 || IsCancel() != FALSE )
+	if( m_pSfxExtractEngine && (GUIMode != GUIMODE_NOCANCEL) )
 	{
-		fCancelExtract = TRUE;
-		::TerminateThread( hExtractThread, 22 );
-		EndDialog(FALSE);
-		return;
+		HANDLE hExtractThread = m_pSfxExtractEngine->GetExtractThread();
+		if( hExtractThread == NULL )
+			return;
+		::SuspendThread( hExtractThread );
+		if( (GUIFlags & GUIFLAGS_CONFIRM_CANCEL) == 0 || IsCancel() )
+		{
+			fCancelExtract = TRUE;
+			::TerminateThread( hExtractThread, 22 );
+			EndDialog(FALSE);
+		}
+		else
+		{
+			::ResumeThread( hExtractThread );
+		}
 	}
-	else
-	{
-		::ResumeThread( hExtractThread );
-	}
-	return;
 }
 
 #if defined(_MSC_VER) && _MSC_VER == 1900
@@ -1308,10 +1271,7 @@ void CSfxDialog_Extract::OnCancel()
 BOOL CSfxDialog_Password::OnInitDialog()
 {
 	CSfxDialog_ExtractPath::OnInitDialog();
-
-	RECT	rc1;
-	RECT	rc2;
-
+	RECT rc1, rc2;
 	ShowControl( SDC_EXTRACTPATHBROWSE, FALSE );
 	GetDlgItemRect( SDC_EXTRACTPATHBROWSE, &rc2 );
 	GetDlgItemRect( SDC_PASSWORDEDIT, &rc1 );
@@ -1320,7 +1280,7 @@ BOOL CSfxDialog_Password::OnInitDialog()
 						WC_EDITA, "",
 						WS_CHILD|WS_VISIBLE|WS_TABSTOP|ES_PASSWORD|ES_LEFT|ES_AUTOHSCROLL,
 						rc1.left,rc1.top, rc2.right-rc1.left, rc1.bottom-rc1.top,
-						GetHwnd(), (HMENU)SDC_PASSWORDEDIT, NULL, NULL );
+						m_hWnd, (HMENU)SDC_PASSWORDEDIT, NULL, NULL );
 	SendDlgItemMessage( SDC_PASSWORDEDIT, WM_SETFONT, SendMessage(WM_GETFONT,0,0), 1 );
 	SetFocus( GetDlgItem(SDC_PASSWORDEDIT) );
 	return 0;
@@ -1329,7 +1289,7 @@ BOOL CSfxDialog_Password::OnInitDialog()
 void CSfxDialog_Password::OnCommand( int nControlID )
 {
 	if( nControlID == SDC_BUTTON1 )
-		m_strPassword = GetDlgItemText(SDC_PASSWORDEDIT);
+		GetDlgItemText( SDC_PASSWORDEDIT, m_strPassword );
 	CSfxDialog::OnCommand( nControlID );
 }
 #endif // SFX_CRYPTO
@@ -1337,19 +1297,19 @@ void CSfxDialog_Password::OnCommand( int nControlID )
 ///////////////////////////////////////////////////////////////////////////////
 BOOL SfxBeginPrompt( LPCWSTR lpwszCaption, LPCWSTR lpwszText )
 {
-	UINT uType = (GUIFlags&GUIFLAGS_BP_OKCANCEL) != 0 ? SD_OKCANCEL : SD_YESNO;
-	if( (GUIFlags&GUIFLAGS_BP_MODULEICON) != 0 )
+	UINT uType = (GUIFlags & GUIFLAGS_BP_OKCANCEL) != 0 ? SD_OKCANCEL : SD_YESNO;
+	if( (GUIFlags & GUIFLAGS_BP_MODULEICON) != 0 )
 	{
 		uType += SD_ICONMODULE;
 	}
 	else
 	{
-		if( (GUIFlags&GUIFLAGS_BP_OKCANCEL) != 0 )
+		if( (GUIFlags & GUIFLAGS_BP_OKCANCEL) != 0 )
 			uType += SD_ICONINFORMATION;
 		else
 			uType += SD_ICONQUESTION;
 	}
-	if( (GUIFlags&GUIFLAGS_EXTRACT_PATH1) == 0 )
+	if( (GUIFlags & GUIFLAGS_EXTRACT_PATH1) == 0 )
 	{
 		CSfxDialog_BeginPromptClassic bp;
 		return (BOOL)bp.Show( uType, lpwszCaption, lpwszText );
@@ -1364,7 +1324,7 @@ BOOL SfxBeginPrompt( LPCWSTR lpwszCaption, LPCWSTR lpwszText )
 BOOL SfxExtractPathDialog( LPCWSTR lpwszTitle, LPCWSTR lpwszText )
 {
 	UINT uType = SD_OKCANCEL;
-	if( (GUIFlags&GUIFLAGS_EPD_USEICON) != 0 )
+	if( (GUIFlags & GUIFLAGS_EPD_USEICON) != 0 )
 		uType += SD_ICONMODULE;
 	CSfxDialog_ExtractPath	dlg;
 	return (BOOL)dlg.Show( uType, lpwszTitle, lpwszText );
@@ -1373,29 +1333,28 @@ BOOL SfxExtractPathDialog( LPCWSTR lpwszTitle, LPCWSTR lpwszText )
 void ShowSfxErrorDialog( LPCWSTR lpwszMessage )
 {
 	static bool fErrorShown = false;
-
-	if( fErrorShown != false )
+	if( fErrorShown )
 		return;
 	fErrorShown = true;
 
-	CSfxDialog_Error	dlg;
+	CSfxDialog_Error dlg;
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
-	if( ::IsWindow(hwndExtractDlg) != FALSE && ::IsBadReadPtr(pwndExtractDialog,sizeof(CSfxDialog_Extract)) == FALSE )
+	if( pwndExtractDialog )
 		pwndExtractDialog->SetTaskbarState( TBPF_ERROR );
 #endif // _SFX_USE_WIN7_PROGRESSBAR
 	dlg.Show( SD_OK|SD_ICONSTOP, lpwszErrorTitle, lpwszMessage, hwndExtractDlg );
 }
 
 #ifdef _SFX_USE_WARNINGS
-	INT_PTR ShowSfxWarningDialog( LPCWSTR lpwszMessage )
-	{
-		CSfxDialog_Warning	dlg;
-	#ifdef _SFX_USE_WIN7_PROGRESSBAR
-		if( ::IsWindow(hwndExtractDlg) != FALSE && ::IsBadReadPtr(pwndExtractDialog,sizeof(CSfxDialog_Extract)) == FALSE )
-			pwndExtractDialog->SetTaskbarState( TBPF_PAUSED );
-	#endif // _SFX_USE_WIN7_PROGRESSBAR
-		return dlg.Show( SD_YESNO|SD_ICONWARNING, lpwszWarningTitle, lpwszMessage, hwndExtractDlg );
-	}
+INT_PTR ShowSfxWarningDialog( LPCWSTR lpwszMessage )
+{
+	CSfxDialog_Warning dlg;
+#ifdef _SFX_USE_WIN7_PROGRESSBAR
+	if( pwndExtractDialog )
+		pwndExtractDialog->SetTaskbarState( TBPF_PAUSED );
+#endif // _SFX_USE_WIN7_PROGRESSBAR
+	return dlg.Show( SD_YESNO|SD_ICONWARNING, lpwszWarningTitle, lpwszMessage, hwndExtractDlg );
+}
 #endif // _SFX_USE_WARNINGS
 
 void SfxErrorDialog( BOOL fUseLastError, UINT idFormat, ... )
@@ -1407,7 +1366,7 @@ void SfxErrorDialog( BOOL fUseLastError, UINT idFormat, ... )
 	va_start( va, idFormat );
 	wvsprintf( buf, lpwszFormat, va );
 
-	if( fUseLastError != FALSE )
+	if( fUseLastError )
 	{
 		LPWSTR lpMsgBuf;
 		DWORD dwLastError = ::GetLastError();
@@ -1432,67 +1391,14 @@ void SfxErrorDialog( BOOL fUseLastError, UINT idFormat, ... )
 	ShowSfxErrorDialog( buf );
 }
 
-BOOL ExtractDialog()
+INT_PTR ExtractDialog(CSfxExtractEngine *pSfxExtractEngine)
 {
-	UINT	uType = SD_CANCEL;
+	UINT uType = SD_CANCEL;
 	if( lpwszExtractDialogText == NULL )
 		lpwszExtractDialogText = L"";
 
-	if( (GUIFlags&GUIFLAGS_USEICON) != 0 )
+	if( (GUIFlags & GUIFLAGS_USEICON) != 0 )
 		uType |= SD_ICONMODULE;
-	CSfxDialog_Extract	dlg;
-	return (BOOL)dlg.Show( uType, lpwszExtractTitle, lpwszExtractDialogText );
+	CSfxDialog_Extract dlg(pSfxExtractEngine);
+	return dlg.Show( uType, lpwszExtractTitle, lpwszExtractDialogText );
 }
-
-#if defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)
-	BOOL CSfxDialog_SfxApiPrepare::OnInitDialog()
-	{
-		RECT	rc;
-		POINT	pt;
-		BOOL	bRet = CSfxDialog::OnInitDialog();
-		ShowControl( SDC_BUTTON1, FALSE );
-		ShowControl( SDC_BUTTON2, FALSE );
-		GetDlgItemRect( SDC_BUTTON1, &rc );
-		pt.x = rc.left; pt.y = rc.top;
-		::ClientToScreen( GetHwnd(), &pt );
-		GetWindowRect( GetHwnd(), &rc );
-		SetWindowPos( GetHwnd(), NULL, 0,0, (rc.right-rc.left), pt.y-rc.top, SWP_NOZORDER|SWP_NOMOVE );
-		::SetWindowLong( GetHwnd(), GWL_STYLE, WS_BORDER );
-		::SetWindowLong( GetHwnd(), GWL_EXSTYLE, WS_EX_TOPMOST );
-		::GetWindowRect( GetHwnd(), &rc );
-		SetDlgItemPos( SDC_TEXT, 0,0, rc.right-rc.left, rc.bottom-rc.top, SWP_NOZORDER );
-		::SetWindowLong( GetDlgItem(SDC_TEXT), GWL_STYLE, ::GetWindowLong(GetDlgItem(SDC_TEXT),GWL_STYLE)|SS_CENTER|SS_CENTER|SS_CENTERIMAGE|WS_VISIBLE );
-		return bRet;
-	}
-
-	HRESULT WINAPI CSfxDialog_SfxApiPrepare::ShowThread( CSfxDialog_SfxApiPrepare * pThis )
-	{
-		pThis->CSfxDialog::Show( 0, lpwszTitle, ::GetLanguageString(STR_SFXAPI_PREPARE) );
-		return S_OK;
-	}
-
-	void CSfxDialog_SfxApiPrepare::OnCancel()
-	{
-#ifdef _SFX_USE_TEST
-		if( TSD_Flags.IsEmpty() == false )
-			EndDialog(0);
-#endif // _SFX_USE_TEST
-	}
-
-	void CSfxDialog_SfxApiPrepare::Show()
-	{
-		if( IsWindow() == FALSE )
-			::CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)CSfxDialog_SfxApiPrepare::ShowThread, this, 0, NULL );
-		else
-		{
-			SetWindowText( GetHwnd(), lpwszTitle );
-			SetDlgItemText( SDC_TEXT, ::GetLanguageString(STR_SFXAPI_PREPARE) );
-		}
-	}
-
-	void CSfxDialog_SfxApiPrepare::Hide()
-	{
-		if( ::IsWindow(GetHwnd()) != FALSE )
-			EndDialog(0);
-	}
-#endif // defined(_SFX_USE_SFXAPI) || defined(_SFX_USE_COMPRESSED_CONFIG)

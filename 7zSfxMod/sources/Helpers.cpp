@@ -2,7 +2,7 @@
 /* File:        Helpers.cpp                                                  */
 /* Created:     Sat, 30 Jul 2005 11:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3886                                                         */
 /* Updated:     Sun, 20 Mar 2016 07:07:28 GMT                                */
@@ -16,21 +16,20 @@
 #include "stdafx.h"
 #include "7zSfxModInt.h"
 #ifdef _SFX_USE_IMAGES
-	#include <olectl.h>
-	#include <comdef.h>
+#	include <olectl.h>
+#	include <comdef.h>
+#	include <shlwapi.h>
 #endif // _SFX_USE_IMAGES
 
-CSfxCurrentDirectory::CSfxCurrentDirectory( LPCWSTR lpwszNewFolder )
+CSfxCurrentDirectory::CSfxCurrentDirectory( LPCWSTR /*lpwszNewFolder*/ )
 {
-	DWORD dwSize = ::GetCurrentDirectory( 0, NULL );
-	if( dwSize != 0 )
-		::GetCurrentDirectory( dwSize, m_strDirectory.GetBuffer( dwSize ) );
-	m_strDirectory.ReleaseBuffer();
+	if( DWORD dwSize = ::GetCurrentDirectory( 0, NULL ) )
+		::GetCurrentDirectory( dwSize, m_strDirectory.GetBuf_SetEnd( dwSize - 1 ) );
 }
 
 CSfxCurrentDirectory::~CSfxCurrentDirectory()
 {
-	if( m_strDirectory.IsEmpty() == false )
+	if( !m_strDirectory.IsEmpty() )
 		::SetCurrentDirectory( m_strDirectory );
 }
 #ifdef _SFX_USE_ENVIRONMENT_OLD_VARS
@@ -44,7 +43,7 @@ void SfxAddEnvironmentVar( LPCWSTR lpwszName, LPCWSTR lpwszValue )
 	var.String = lpwszValue;
 	Variables.Add( var );
 #ifdef _SFX_USE_ENVIRONMENT_OLD_VARS
-	if( fUseAlias != FALSE )
+	if( fUseAlias )
 	{
 		CSfxStringU strAliasName = L"7z";
 		strAliasName += lpwszName;
@@ -56,22 +55,17 @@ void SfxAddEnvironmentVar( LPCWSTR lpwszName, LPCWSTR lpwszValue )
 CSfxStringU CreateTempName( LPCWSTR lpwszFormat )
 {
 	CSfxStringU path;
-	DWORD dwSize = ::GetTempPath( 1, path.GetBuffer(2) );
-	path.ReleaseBuffer( 0 );
-	if( dwSize > 0 )
+	if( DWORD length = ::GetTempPath( 0, NULL ) )
 	{
-		::GetTempPath( dwSize+1, path.GetBuffer(dwSize+1) );
-		path.ReleaseBuffer();
-	}
-
-	int length = path.Len();
-	for( int i = 0; i < 0xfff; i++ )
-	{
-		LPWSTR buf = path.GetBuffer( length+15 );
-		wsprintf( buf+length, lpwszFormat, i );
-		path.ReleaseBuffer();
-		if( ::GetFileAttributes( path ) == (DWORD)-1 )
-			break;
+		LPWSTR buffer = path.GetBuf( length + 15 );
+		::GetTempPath( length--,  buffer );
+		for( int i = 0; i < 0xfff; i++ )
+		{
+			path.ReleaseBuf_SetLen(
+				length + wsprintf( buffer + length, lpwszFormat, i ) );
+			if( ::GetFileAttributes( path ) == INVALID_FILE_ATTRIBUTES )
+				break;
+		}
 	}
 	return path;
 }
@@ -79,8 +73,7 @@ CSfxStringU CreateTempName( LPCWSTR lpwszFormat )
 LPCWSTR IsSubString( LPCWSTR lpwszString, LPCWSTR lpwszSubString )
 {
 	int nLength = lstrlenW( lpwszSubString );
-	if( lstrlenW( lpwszString ) >= nLength &&
-		_wcsnicmp( lpwszString, lpwszSubString, nLength ) == 0 )
+	if( _wcsnicmp( lpwszString, lpwszSubString, nLength ) == 0 )
 		return lpwszString + nLength;
 	return NULL;
 }
@@ -111,29 +104,29 @@ LPCWSTR LoadQuotedString( LPCWSTR lpwszSrc, CSfxStringU & result )
 	return lpwszSrc;
 }
 
-CSfxStringU SfxMultiByteToUnicodeString( const CSfxStringA &srcString, UINT codePage )
+CSfxStringU SfxMultiByteToUnicodeString( CSfxStringA const &srcString, UINT codePage )
 {
 	CSfxStringU resultString;
-	if( srcString.IsEmpty() == false )
+	if( unsigned const srcLen = srcString.Len() )
 	{
-		int numChars = MultiByteToWideChar( codePage, 0, srcString, srcString.Len(),
-											resultString.GetBuffer(srcString.Len()), 
-											srcString.Len() + 1 );
-		resultString.ReleaseBuffer(numChars);
+		int numChars = MultiByteToWideChar( codePage, 0, srcString, srcLen,
+											resultString.GetBuf(srcLen), 
+											srcLen + 1 );
+		resultString.ReleaseBuf_SetEnd(numChars);
 	}
 	return resultString;
 }
 
-CSfxStringA SfxUnicodeStringToMultiByte( const CSfxStringU &srcString, UINT codePage )
+CSfxStringA SfxUnicodeStringToMultiByte( CSfxStringU const &srcString, UINT codePage )
 {
 	CSfxStringA resultString;
-	if( srcString.IsEmpty() == false )
+	if( unsigned const srcLen = srcString.Len() )
 	{
-		int numRequiredBytes = srcString.Len() * 2;
-		int numChars = WideCharToMultiByte(	codePage, 0, srcString, srcString.Len(),
-											resultString.GetBuffer(numRequiredBytes), 
+		int numRequiredBytes = srcLen * 2;
+		int numChars = WideCharToMultiByte(	codePage, 0, srcString, srcLen,
+											resultString.GetBuf(numRequiredBytes), 
 											numRequiredBytes + 1, NULL, NULL );
-		resultString.ReleaseBuffer(numChars);
+		resultString.ReleaseBuf_SetEnd(numChars);
 	}
 	return resultString;
 }
@@ -202,72 +195,35 @@ BOOL SfxCreateDirectory( LPCWSTR lpwszPath )
 void ExpandEnvironmentStrings( CSfxStringU & ustr )
 {
 	CSfxStringU	dst;
-
-	DWORD dwSize = ::ExpandEnvironmentStrings( ustr, dst.GetBuffer(1), 1 );
-	if( dwSize == 0 )
-		return;
-	::ExpandEnvironmentStrings( ustr, dst.GetBuffer(dwSize+1), dwSize+1 );
-	dst.ReleaseBuffer();
+	if( DWORD dwSize = ::ExpandEnvironmentStrings( ustr, NULL, 0 ) )
+		::ExpandEnvironmentStrings( ustr, dst.GetBuf_SetEnd( dwSize - 1 ), dwSize );
 	ustr = dst;
 }
 
-
-bool ReadConfig( IInStream * inStream, LPCSTR startID, LPCSTR endID, CSfxStringA &stringResult )
+static bool ReadConfig( Byte const *const buffer, UInt32 const numBytesInBuffer, LPCSTR startID, LPCSTR endID, CSfxStringA &stringResult )
 {
-	inStream->Seek( 0, STREAM_SEEK_SET, NULL );
-	stringResult.Empty();
-	
-	const int kBufferSize = (1 << 12);
-
-	Byte buffer[kBufferSize];
-	int signatureStartSize = lstrlenA(startID);
-	int signatureEndSize = lstrlenA(endID);
-  
-	UInt32 numBytesPrev = 0;
-	bool writeMode = false;
-	UInt64 posTotal = 0;
-	while( true )
+	UInt32 const signatureStartSize = lstrlenA( startID );
+	UInt32 const signatureEndSize = lstrlenA( endID );
+	UInt32 pos = 0;
+	UInt32 i = 0;
+	while( i == 0 && pos + signatureStartSize <= numBytesInBuffer )
 	{
-		if( posTotal > (1 << 20) )
-			return ( stringResult.IsEmpty() == false );
-		UInt32 numReadBytes = kBufferSize - numBytesPrev;
-		UInt32 processedSize;
-		if( inStream->Read(buffer + numBytesPrev, numReadBytes, &processedSize) != S_OK || processedSize == 0 )
-			return false;
-		UInt32 numBytesInBuffer = numBytesPrev + processedSize;
-		UInt32 pos = 0;
-		while( true )
-		{ 
-			if( writeMode != false )
-			{
-				if( (Int32)pos > (Int32)(numBytesInBuffer - signatureEndSize) )
-					break;
-				if( memcmp(buffer + pos, endID, signatureEndSize) == 0 )
-					return true;
-				char b = buffer[pos];
-				if( b == 0 )
-					return false;
-				stringResult += b;
-				pos++;
-			}
-			else
-			{
-				if( (Int32)pos >= (Int32)(numBytesInBuffer - signatureStartSize) )
-					break;
-				if( memcmp(buffer + pos, startID, signatureStartSize) == 0 )
-				{
-					pos += signatureStartSize;
-					if ( buffer[pos] != 0 )
-						writeMode = true;
-				}
-				else
-					pos++;
-			}
-		}
-		numBytesPrev = numBytesInBuffer - pos;
-		posTotal += pos;
-		memmove(buffer, buffer + pos, numBytesPrev);
+		if (memcmp( buffer + pos, startID, signatureStartSize ) == 0)
+			i = pos += signatureStartSize;
+		else
+			++pos;
 	}
+	UInt32 j = i;
+	while( j == i && pos + signatureEndSize <= numBytesInBuffer )
+	{
+		if( memcmp(buffer + pos, endID, signatureEndSize ) == 0 )
+			j = pos;
+		else
+			++pos;
+	}
+	j -= i;
+	memcpy( stringResult.GetBuf_SetEnd( j ), buffer + i, j );
+	return j != i;
 }
 
 static int nCfgLineNumber = 1;
@@ -285,7 +241,7 @@ static bool IsDelimitChar( char c )
 static CSfxStringA GetIDString( const char *string, int &finishPos )
 {
 	CSfxStringA result;
-	for( finishPos = 0; true; finishPos++ )
+	for( finishPos = 0 ;; finishPos++ )
 	{
 		char c = string[finishPos];
 		if( IsDelimitChar(c) || c == '=' )
@@ -346,9 +302,9 @@ bool ReportCfgError( const CSfxStringA &string, int pos, bool fromCmdLine )
 		messageUTF8 += string[i];
 	CSfxStringU messageUnicode = SfxMultiByteToUnicodeString( messageUTF8, CP_UTF8 );
 	if( fromCmdLine == false )
-		SfxErrorDialog( FALSE, ERR_CONFIG_DATA, nCfgLineNumber, (LPCWSTR)messageUnicode );
+		SfxErrorDialog( FALSE, ERR_CONFIG_DATA, nCfgLineNumber, messageUnicode.Ptr() );
 	else
-		SfxErrorDialog( FALSE, ERR_CONFIG_CMDLINE, (LPCWSTR)messageUnicode );
+		SfxErrorDialog( FALSE, ERR_CONFIG_CMDLINE, messageUnicode.Ptr() );
 	return false;
 }
 
@@ -421,19 +377,18 @@ void ReplaceHexChars( CSfxStringU& str )
 
 void DeleteParams( LPCWSTR lpwszName  )
 {
-	for( int  i = 0; i < (int)gConfig.Size(); i++ )
+	unsigned i = gConfig.Size();
+	while( i )
 	{
-		if( lstrcmp( (LPCWSTR)(gConfig[i].ID), lpwszName ) == 0 )
-		{
+		--i;
+		if( lstrcmp( gConfig[i].ID, lpwszName ) == 0 )
 			gConfig.Delete( i );
-			i--;
-		}
 	}
 }
 
 bool GetTextConfig( const CSfxStringA &string, bool fromCmdLine )
 {
-	static LPCWSTR MultipleParameters[] = {
+	static LPCWSTR const MultipleParameters[] = {
 		CFG_GUIFLAGS,
 		CFG_MISCFLAGS,
 		CFG_RUNPROGRAM,
@@ -458,7 +413,7 @@ bool GetTextConfig( const CSfxStringA &string, bool fromCmdLine )
 	/////////////////////
 	// read strings
 	CSfxStringA message;
-	while (true)
+	for( ;; )
 	{
 		if( !SkipSpaces(string, pos) )
 			break;
@@ -466,7 +421,7 @@ bool GetTextConfig( const CSfxStringA &string, bool fromCmdLine )
 		int startPos = pos;
 		int finishPos;
 		// ID name
-		pair.ID = SfxMultiByteToUnicodeString( GetIDString( ((const char *)string) + pos, finishPos ), CP_UTF8 );
+		pair.ID = SfxMultiByteToUnicodeString( GetIDString( string.Ptr(pos), finishPos ), CP_UTF8 );
 		if( finishPos == 0 )
 			return ReportCfgError( string, startPos, fromCmdLine );
 		pos += finishPos;
@@ -491,7 +446,7 @@ bool GetTextConfig( const CSfxStringA &string, bool fromCmdLine )
 		message.Empty();
 #ifdef _SFX_USE_RTF_CONTROL
 Loc_RTF:
-		if( strncmp( ((const char *)string)+pos, "{\\rtf", 5 ) == 0 )
+		if( strncmp( string.Ptr(pos), "{\\rtf", 5 ) == 0 )
 		{
 			while( string[pos] != '\0' && string[pos] != '\"' )
 			{
@@ -505,10 +460,10 @@ Loc_RTF:
 		else
 #endif // _SFX_USE_RTF_CONTROL
 		{
-			while( true )
+			for( ;; )
 			{
 #ifdef _SFX_USE_RTF_CONTROL
-				if( strncmp( ((const char *)string)+pos, "{\\rtf", 5 ) == 0 )
+				if( strncmp( string.Ptr(pos), "{\\rtf", 5 ) == 0 )
 					goto Loc_RTF;
 #endif // _SFX_USE_RTF_CONTROL
 				if( pos >= (int)string.Len() )
@@ -550,7 +505,7 @@ Loc_RTF:
 			if( pair.String.Find( L'=') <= 0 )
 				return ReportCfgError( string, startPos, fromCmdLine );
 		}
-		LPCWSTR * mp = MultipleParameters;
+		LPCWSTR const *mp = MultipleParameters;
 		while( *mp != NULL )
 		{
 			if( wcsncmp( pair.ID, *mp, lstrlen(*mp) ) == 0 )
@@ -588,16 +543,16 @@ BOOL CreateFolderTree( LPCWSTR lpwszPath )
 {
 	int nLength = ::lstrlen( lpwszPath );
 	CSfxStringU	Path2 = lpwszPath;
-	LPWSTR lpwszPath2 = Path2.GetBuffer(0);
+	LPWSTR lpwszPath2 = Path2.GetBuf(0);
 	if( lpwszPath[nLength-1] == L'\\' || lpwszPath[nLength-1] == '/' )
 	{
 		lpwszPath2[nLength-1] = L'\0';
 		nLength--;
 	}
 	int i = nLength;
-	while( TRUE )
+	for( ;; )
 	{
-		if( SfxCreateDirectory( lpwszPath2 ) != FALSE )
+		if( SfxCreateDirectory( lpwszPath2 ) )
 			break;
 		for( ; i > 0 && lpwszPath2[i] != L'/' && lpwszPath2[i] != L'\\'; i-- );
 		if( i == 0 )
@@ -668,7 +623,7 @@ BOOL DeleteDirectoryWithSubitems( LPCWSTR path )
 				if( ::SetFileAttributes( path2, 0 ) == FALSE || ::DeleteFile( path2 ) == FALSE )
 					return FALSE;
 			}
-		} while( ::FindNextFile( hFind, &fd ) != FALSE );
+		} while( ::FindNextFile( hFind, &fd ) );
 		::FindClose( hFind );
 	}
 	::SetCurrentDirectory( strSfxFolder );
@@ -688,11 +643,11 @@ BOOL DeleteFileOrDirectoryAlways( LPCWSTR lpwszPathName )
 	if( hFind == INVALID_HANDLE_VALUE )
 		return TRUE;
 	::FindClose( hFind );
-	if( (fd.dwFileAttributes&FILE_ATTRIBUTE_DIRECTORY) == 0 )
+	if( (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == 0 )
 	{
 		// file
-		if( ClearFileAttributes(lpwszPathName) != FALSE )
-			return DeleteFile( lpwszPathName );
+		if( ::SetFileAttributes( lpwszPathName, 0 ) )
+			return ::DeleteFile( lpwszPathName );
 		return FALSE;
 	}
 	// delete folder tree
@@ -781,8 +736,8 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 		lpszShortcutData++;
 	}
 
-	WCHAR wszPath[MAX_PATH+1];
-	if( ::SHGetSpecialFolderPath(NULL,wszPath,nFolder,FALSE) == FALSE )
+	WCHAR wszPath[MAX_PATH];
+	if( !::SHGetSpecialFolderPath(NULL, wszPath, nFolder, FALSE) )
 		return FALSE;
 
 	// Work with the special folder's path (contained in szPath)
@@ -797,7 +752,7 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 	CSfxStringU	iconIndex;
 
 	lpszShortcutData = FetchShortcutSubstring( lpszShortcutData, srcFile );
-	if( srcFile.IsEmpty() != false )
+	if( srcFile.IsEmpty() )
 		return FALSE;
 	lpszShortcutData = FetchShortcutSubstring( lpszShortcutData, commandLine );
 	lpszShortcutData = FetchShortcutSubstring( lpszShortcutData, dstFolder );
@@ -807,45 +762,42 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 	lpszShortcutData = FetchShortcutSubstring( lpszShortcutData, iconLocation );
 	FetchShortcutSubstring( lpszShortcutData, iconIndex );
 	long nIconIndex = StringToLong( iconIndex );
-	if( shortcutName.IsEmpty() != false )
+	if( shortcutName.IsEmpty() )
 	{
-		int nPos = GetDirectorySeparatorPos( srcFile ); // srcFile.ReverseFind( L'\\' );
-		shortcutName = ((LPCTSTR)srcFile)+nPos+1;
-		nPos = shortcutName.ReverseFind( L'.' );
+		shortcutName = srcFile.Ptr(srcFile.ReverseFind_PathSepar() + 1);
+		int nPos = shortcutName.ReverseFind( L'.' );
 		if( nPos >= 0 )
-			shortcutName.ReleaseBuffer( nPos );
+			shortcutName.ReleaseBuf_SetEnd( nPos );
 	}
 	shortcutPath += L'\\';
-	if( dstFolder.IsEmpty() == false )
+	if( !dstFolder.IsEmpty() )
 	{
-		shortcutPath += dstFolder; shortcutPath += L'\\';
+		shortcutPath += dstFolder;
+		shortcutPath += L'\\';
 	}
-	if( CreateFolderTree( shortcutPath ) == FALSE )
+	if( !CreateFolderTree( shortcutPath ) )
 		return FALSE;
 	shortcutPath += shortcutName;
 	shortcutPath += L".lnk";
 
-	HRESULT hres;
-	IShellLink * psl = NULL;
- 
 	// Get a pointer to the IShellLink interface.
-	hres = CoCreateInstance( CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&psl );
+	IShellLink * psl = NULL;
+	HRESULT hres = CoCreateInstance( CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void **)&psl );
 	if( SUCCEEDED(hres) )
 	{
-		IPersistFile *	ppf = NULL;
- 
 		// Set the path to the shortcut target
 		psl->SetPath( srcFile );
-		if( description.IsEmpty() == false )
+		if( !description.IsEmpty() )
 			psl->SetDescription( description );
-		if( commandLine.IsEmpty() == false )
+		if( !commandLine.IsEmpty() )
 			psl->SetArguments( commandLine );
-		if( workFolder.IsEmpty() == false )
+		if( !workFolder.IsEmpty() )
 			psl->SetWorkingDirectory( workFolder );
-		if( iconLocation.IsEmpty() == false )
+		if( !iconLocation.IsEmpty() )
 			psl->SetIconLocation( iconLocation, nIconIndex );
 
  		// Query IShellLink for the IPersistFile interface for saving the shortcut in persistent storage. 
+		IPersistFile *ppf = NULL;
 		hres = psl->QueryInterface( IID_IPersistFile, (void **)&ppf );
 		if( SUCCEEDED(hres) )
 		{
@@ -861,48 +813,25 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 
 void ReplaceWithExtractPath( CSfxStringU& str, CSfxStringU &extractPath )
 {
-	CSfxStringU tmp;
-	
-	tmp = extractPath; tmp += L"\\"; str.Replace( L"%%T\\", tmp );
-	tmp = extractPath; tmp += L"/"; str.Replace( L"%%T/", tmp );
 	str.Replace( L"%%T", extractPath );
 }
 
 void ReplaceWithArchivePath( CSfxStringU& str, CSfxStringU &archivePath )
 {
-	CSfxStringU tmp;
-	
-	tmp = archivePath; tmp += L"\\"; str.Replace( L"%%S\\", tmp );
-	tmp = archivePath; tmp += L"/"; str.Replace( L"%%S/", tmp );
 	str.Replace( L"%%S", archivePath );
 }
 
 void ReplaceWithArchiveName( CSfxStringU& str, CSfxStringU &archiveName )
 {
-	CSfxStringU tmp;
-	
-	tmp = archiveName; tmp += L"\\"; str.Replace( L"%%M\\", tmp );
-	tmp = archiveName; tmp += L"/"; str.Replace( L"%%M/", tmp );
 	str.Replace( L"%%M", archiveName );
 }
 
 #ifdef _SFX_USE_PREFIX_PLATFORM
-	void ReplaceWithPlatform( CSfxStringU& str )
-	{
-		str.Replace( L"%%P", strOSPlatform );
-	}
-#endif // _SFX_USE_PREFIX_PLATFORM
-
-int MyStrincmp( LPCWSTR str1, LPCWSTR str2, int nLength )
+void ReplaceWithPlatform( CSfxStringU& str )
 {
-	int j;
-	for( j = 0; j < nLength && str1[j] != L'\0' && str2[j] != L'\0'; j++ )
-	{
-		if( MyCharUpper(str1[j]) != MyCharUpper(str2[j]) )
-			return MyCharUpper(str1[j]) - MyCharUpper(str2[j]);
-	}
-	return (j == nLength) ? 0 : 1;
+	str.Replace( L"%%P", strOSPlatform );
 }
+#endif // _SFX_USE_PREFIX_PLATFORM
 
 BOOL checkAlloc(size_t size)
 {
@@ -914,8 +843,8 @@ BOOL checkAlloc(size_t size)
 #ifdef _DEBUG
 	if( size > 100*1024*1024 )
 #else
-	if( (MiscFlags&MISCFLAGS_NO_CHECK_RAM) == 0 &&
-			::GlobalMemoryStatusEx(&ms) != FALSE && ms.ullAvailPhys < size )
+	if( (MiscFlags & MISCFLAGS_NO_CHECK_RAM) == 0 &&
+			::GlobalMemoryStatusEx(&ms) && ms.ullAvailPhys < size )
 #endif // _DEBUG
 	{
 		if( ShowSfxWarningDialog( GetLanguageString(STR_PHYSICAL_MEMORY) ) != IDOK )
@@ -929,65 +858,37 @@ BOOL checkAlloc(size_t size)
 	return TRUE;
 }
 
-int GetDirectorySeparatorPos( CSfxStringU& ustrPath )
+int GetWindowStringU( HWND hwnd, CSfxStringU &result )
 {
-	int nPos1 = ustrPath.ReverseFind( L'\\' );
-	int nPos2 = ustrPath.ReverseFind( L'/' );
-	if( nPos2 > nPos1 ) nPos1 = nPos2;
-	return nPos1;
-}
-
-CSfxStringU GetWindowStringU( HWND hwnd )
-{
-	CSfxStringU result;
 	int nLength = GetWindowTextLength( hwnd );
-	if( nLength > 0 )
-	{
-		GetWindowText( hwnd, result.GetBuffer(nLength+1), nLength+1 );
-		result.ReleaseBuffer( nLength );
-	}
-	return result;
-}
-
-BOOL GetChildRect( HWND hwnd, LPRECT rc )
-{
-	HWND hwndParent =  GetParent( hwnd );
-	if( hwndParent == NULL )
-		return FALSE;
-	::GetWindowRect( hwnd, rc );
-	::ScreenToClient( hwndParent, (LPPOINT)&(rc->left) );
-	::ScreenToClient( hwndParent, (LPPOINT)&(rc->right) );
-	return TRUE;
+	return GetWindowText( hwnd, result.GetBuf_SetEnd( nLength ), nLength + 1 );
 }
 
 BOOL ReplaceVariablesInWindow( HWND hwnd )
 {
-	CSfxStringU	ustrText = GetWindowStringU( hwnd );
+	CSfxStringU	ustrText;
+	GetWindowStringU( hwnd, ustrText );
 	ReplaceVariablesEx( ustrText );
 	ustrText.Replace( L"%^", L"%" );
-	return ::SetWindowText( hwnd, (LPCWSTR)ustrText );
+	return ::SetWindowText( hwnd, ustrText );
 }
 
 #ifdef _SFX_USE_RTF_CONTROL
 
 HWND RecreateAsRichEdit( HWND hwndStatic )
 {
-	char szClassName[64];
-	if( GetClassNameA(hwndStatic, szClassName, 64) == 0 || lstrcmpiA(szClassName, "STATIC") != 0 )
-		return NULL;
-	if( (GetWindowLong(hwndStatic, GWL_STYLE) & SS_TYPEMASK) != SS_BITMAP )
-		return NULL;
-
-	CSfxStringU wndText = GetWindowStringU( hwndStatic );
-	if( MyStrincmp(wndText,L"{\\rtf",5 ) != 0 )
+	CSfxStringU wndText;
+	GetWindowStringU( hwndStatic, wndText );
+	if( _wcsnicmp(wndText, L"{\\rtf", 5) != 0 )
 		return NULL;
 
 	HWND hwndParent =  GetParent( hwndStatic );
 	if( hwndParent == NULL )
 		return NULL;
-	LoadLibraryA( "riched20" );
+	LoadLibraryW( L"riched20" );
 	RECT rcClient;
-	GetChildRect( hwndStatic, &rcClient );
+	::GetWindowRect( hwndStatic, &rcClient );
+	::MapWindowPoints( NULL, hwndParent, reinterpret_cast<LPPOINT>(&rcClient), 2 );
 	HMENU hMenu = GetMenu( hwndStatic );
 	SetThreadLocale( 1049 );
 	HWND hwndRichEdit = ::CreateWindowExW( 0, RICHEDIT_CLASSW, L"",WS_VISIBLE|WS_CHILD|ES_READONLY|ES_MULTILINE,
@@ -995,6 +896,7 @@ HWND RecreateAsRichEdit( HWND hwndStatic )
 		hwndParent, hMenu, NULL, NULL );
 	if( hwndRichEdit == NULL )
 		return NULL;
+	::SetWindowPos( hwndRichEdit, hwndStatic, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE );
 	::DestroyWindow( hwndStatic );
 	::SendMessage( hwndRichEdit, EM_SETTEXTMODE, TM_RICHTEXT|TM_MULTICODEPAGE, 0 );
 	::SendMessage( hwndRichEdit, EM_SETBKGNDCOLOR, 0, GetSysColor(COLOR_3DFACE) );
@@ -1002,7 +904,7 @@ HWND RecreateAsRichEdit( HWND hwndStatic )
 	stex.codepage = CP_UTF8;
 	stex.flags = ST_DEFAULT;
 	CSfxStringA utf8WndText = SfxUnicodeStringToMultiByte( wndText, CP_UTF8 );
-	::SendMessage( hwndRichEdit, EM_SETTEXTEX, (WPARAM)&stex, (LPARAM)((LPCSTR)utf8WndText) );
+	::SendMessage( hwndRichEdit, EM_SETTEXTEX, (WPARAM)&stex, (LPARAM)utf8WndText.Ptr() );
 	return hwndRichEdit;
 }
 
@@ -1010,12 +912,9 @@ HWND RecreateAsRichEdit( HWND hwndStatic )
 
 CSfxStringU MyGetEnvironmentVariable( LPCWSTR lpwszName )
 {
-	TCHAR tmp[2];
-	DWORD dwChars = GetEnvironmentVariableW( lpwszName, tmp, 1 );
 	CSfxStringU	result;
-	result.GetBuffer( dwChars+2 );
-	GetEnvironmentVariableW( lpwszName, result.GetBuffer( dwChars+2 ), dwChars+1 );
-	result.ReleaseBuffer();
+	if ( DWORD dwChars = GetEnvironmentVariableW( lpwszName, NULL, 0 ) )
+		GetEnvironmentVariableW( lpwszName, result.GetBuf_SetEnd( dwChars - 1 ), dwChars );
 	return result;
 }
 
@@ -1024,11 +923,11 @@ LANGID idSfxLang = 0;
 
 #ifdef _SFX_USE_LANG
 
-LPVOID LoadInterfaceResource( LPCSTR lpType, LPCSTR lpName, size_t * lpSize )
+LPVOID LoadInterfaceResource( LPCSTR lpType, LPCSTR lpName, DWORD *lpSize )
 {
 	static BOOL fLangIdSetted = FALSE;
 	HMODULE hModule = ::GetModuleHandle( NULL );
-	HRSRC hRsrc = ::FindResourceExA( hModule, lpType, lpName, (WORD)idSfxLang );
+	HRSRC hRsrc = ::FindResourceExA( hModule, lpType, lpName, idSfxLang );
 	if( hRsrc == NULL )
 		hRsrc = ::FindResourceExA( hModule, lpType, lpName, MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT) );
 	if( hRsrc != NULL )
@@ -1062,64 +961,54 @@ LPVOID LoadInterfaceResource( LPCSTR lpType, LPCSTR lpName, size_t * lpSize )
 
 HBITMAP CopyResizeBmp( HBITMAP hBmp )
 {
-	BITMAP	bmp;
 	HDC hDC = GetWindowDC(NULL);
 	int	dpix = GetDeviceCaps( hDC, LOGPIXELSX );
 	int	aspectratioMul = 1;
 	int aspectratioDiv = 1;
-
-	if( dpix < 1 ) dpix = 96;
+	if( dpix < 1 )
+		dpix = 96;
 	int percent = MulDiv( dpix, 100, 96 );
 	if( percent >= 118 && percent <= 145 )
 	{
 		aspectratioMul = 4;
 		aspectratioDiv = 3;
 	}
+	else if ( percent > 145 )
+	{
+		aspectratioMul = 3;
+		aspectratioDiv = 2;
+	}
+	if( aspectratioMul != 1 )
+	{
+		BITMAP bmp;
+		GetObject( hBmp, sizeof(BITMAP), &bmp );
+		int newcx = MulDiv( bmp.bmWidth, aspectratioMul, aspectratioDiv );
+		int newcy = MulDiv( bmp.bmHeight, aspectratioMul, aspectratioDiv );
+		HDC hdcSrc = CreateCompatibleDC( hDC );
+		HDC hdcDst = CreateCompatibleDC( hDC );
+		HBITMAP hOldSrcBmp = (HBITMAP)SelectObject( hdcSrc, hBmp );
+		HBITMAP hNewBmp = CreateCompatibleBitmap( hDC, newcx, newcy );
+		HBITMAP hOldDstBmp = (HBITMAP)SelectObject( hdcDst, hNewBmp );
+		SetStretchBltMode( hdcDst, HALFTONE );
+		StretchBlt( hdcDst, 0,0, newcx, newcy, hdcSrc,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY );
+		hBmp = (HBITMAP)GetCurrentObject( hdcDst, OBJ_BITMAP );
+		SelectObject( hdcSrc, hOldSrcBmp );
+		SelectObject( hdcDst, hOldDstBmp );
+		DeleteDC( hdcSrc );
+		DeleteDC( hdcDst );
+	}
 	else
-		if ( percent > 145 )
-		{
-			aspectratioMul = 3;
-			aspectratioDiv = 2;
-		}
-		if( aspectratioMul != 1 )
-		{
-			GetObject( hBmp,sizeof(BITMAP),&bmp );
-			int newcx = MulDiv( bmp.bmWidth, aspectratioMul, aspectratioDiv );
-			int newcy = MulDiv( bmp.bmHeight, aspectratioMul, aspectratioDiv );
-			HDC hdcSrc = CreateCompatibleDC( hDC );
-			HDC hdcDst = CreateCompatibleDC( hDC );
-			HBITMAP hOldSrcBmp = (HBITMAP)SelectObject( hdcSrc, hBmp );
-			HBITMAP hNewBmp = CreateCompatibleBitmap( hDC, newcx, newcy );
-			HBITMAP hOldDstBmp = (HBITMAP)SelectObject( hdcDst, hNewBmp );
-			SetStretchBltMode( hdcDst, HALFTONE );
-			StretchBlt( hdcDst, 0,0, newcx, newcy, hdcSrc,0,0,bmp.bmWidth,bmp.bmHeight,SRCCOPY );
-			hNewBmp = (HBITMAP)GetCurrentObject( hdcDst, OBJ_BITMAP );
-			SelectObject( hdcSrc, hOldSrcBmp );
-			SelectObject( hdcDst, hOldDstBmp );
-			DeleteDC( hdcSrc );
-			DeleteDC( hdcDst );
-			ReleaseDC( NULL, hDC );
-			return hNewBmp;
-		}
-		ReleaseDC( NULL, hDC );
-		return (HBITMAP)CopyImage( hBmp,IMAGE_BITMAP,0,0,0 );
+	{
+		hBmp = (HBITMAP)CopyImage( hBmp, IMAGE_BITMAP, 0, 0, 0 );
+	}
+	ReleaseDC( NULL, hDC );
+	return hBmp;
 }
 
 BOOL SetDlgControlImage( HWND hwndControl )
 {
-	// Use IPicture stuff to use JPG / GIF files
-	IPicture *	p;
-	IStream *	s;
-	HBITMAP		hbm;
-
-	char szClassName[64];
-	if( GetClassNameA(hwndControl, szClassName, 64) == 0 || lstrcmpiA(szClassName, "STATIC") != 0 )
-		return FALSE;
-	if( (GetWindowLong(hwndControl, GWL_STYLE) & SS_TYPEMASK) != SS_BITMAP )
-		return FALSE;
-
 	void * data;
-	size_t sz;
+	DWORD sz;
 #ifdef _SFX_USE_LANG
 	data = LoadInterfaceResource( "IMAGES", (LPCSTR)GetMenu(hwndControl), &sz );
 #else
@@ -1135,34 +1024,23 @@ BOOL SetDlgControlImage( HWND hwndControl )
 	if( data == NULL || sz < 16 )
 		return FALSE;
 
-	HGLOBAL hGlobal = GlobalAlloc(GPTR, sz);
-	if (hGlobal == NULL)
-		return FALSE;
-
-	memcpy((void *)hGlobal,data,sz);
-	(void)CoInitialize(NULL);
-	if( ::CreateStreamOnHGlobal( hGlobal, FALSE, &s ) != S_OK || s == NULL )
+	// Use IPicture stuff to use JPG / GIF files
+	IPicture *p = NULL;
+	if( IStream *s = ::SHCreateMemStream( static_cast<BYTE *>(data), sz ) )
 	{
-		::GlobalFree( hGlobal );
-		return FALSE;
+		::OleLoadPicture( s, 0, FALSE, IID_IPicture, (void**)&p );
+		s->Release();
 	}
-
-	::OleLoadPicture( s, 0, FALSE, IID_IPicture, (void**)&p );
-	s->Release();
-	::GlobalFree( hGlobal );
 
 	if( p == NULL )
 		return FALSE;
 
-	hbm = NULL;
-	p->get_Handle( (OLE_HANDLE *)(&hbm) );
+	HBITMAP hbm = NULL;
+	p->get_Handle( (OLE_HANDLE *)&hbm );
 	if( hbm != NULL )
 	{
 		hbm = CopyResizeBmp( hbm );
-		BITMAP	bmp;
-		GetObject( hbm,sizeof(BITMAP),&bmp );
-		SetWindowPos( hwndControl, NULL, 0,0, bmp.bmWidth,bmp.bmHeight, SWP_NOMOVE|SWP_NOZORDER );
-		SendMessage( hwndControl, STM_SETIMAGE, IMAGE_BITMAP, (LPARAM)hbm );
+		SendMessage( hwndControl, STM_SETIMAGE, IMAGE_BITMAP, reinterpret_cast<LPARAM>(hbm) );
 	}
 	p->Release();
 
@@ -1375,7 +1253,7 @@ void CreateConfigSignature(
 	strEnd += "!";
 }
 
-bool LoadConfigs( IInStream * inStream, CSfxStringA& result )
+static bool LoadConfigs( Byte const *const buffer, UInt32 const numBytesInBuffer, CSfxStringA& result )
 {
 #ifdef _SFX_USE_CONFIG_PLATFORM
 	LPCSTR pPlatforms[3];
@@ -1419,7 +1297,7 @@ bool LoadConfigs( IInStream * inStream, CSfxStringA& result )
 		NULL,
 #endif // _SFX_USE_CONFIG_PLATFORM
 		sigBegin, sigEnd );
-	if( ReadConfig( inStream, sigBegin, sigEnd, config ) != false )
+	if( ReadConfig( buffer, numBytesInBuffer, sigBegin, sigEnd, config ) )
 		fResult = true;
 	result = config;
 
@@ -1432,7 +1310,7 @@ bool LoadConfigs( IInStream * inStream, CSfxStringA& result )
 			0,
 #endif // _SFX_USE_LANG
 			*platform, sigBegin, sigEnd );
-		if( ReadConfig( inStream, sigBegin, sigEnd, config ) != false )
+		if( ReadConfig( buffer, numBytesInBuffer, sigBegin, sigEnd, config ) )
 		{
 			if( result.Len() != 0 )
 				result += "\r\n";
@@ -1451,7 +1329,7 @@ bool LoadConfigs( IInStream * inStream, CSfxStringA& result )
 		NULL,
 	#endif // _SFX_USE_CONFIG_PLATFORM
 		sigBegin, sigEnd );
-	if( ReadConfig( inStream, sigBegin, sigEnd, config ) != false )
+	if( ReadConfig( buffer, numBytesInBuffer, sigBegin, sigEnd, config ) )
 		fResult = true;
 	result += config;
 
@@ -1460,7 +1338,7 @@ bool LoadConfigs( IInStream * inStream, CSfxStringA& result )
 		while( *platform != NULL )
 		{
 			CreateConfigSignature( idSfxLang, *platform, sigBegin, sigEnd );
-			if( ReadConfig( inStream, sigBegin, sigEnd, config ) != false )
+			if( ReadConfig( buffer, numBytesInBuffer, sigBegin, sigEnd, config ) )
 			{
 				if( result.Len() != 0 )
 					result += "\r\n";
@@ -1476,29 +1354,23 @@ bool LoadConfigs( IInStream * inStream, CSfxStringA& result )
 }
 #endif // defined(_SFX_USE_CONFIG_PLATFORM) || defined(_SFX_USE_LANG)
 
-int LoadAndParseConfig( IInStream * inStream, bool compressed, CSfxStringA * data )
+int LoadAndParseConfig( Byte const *const buffer, UInt32 const numBytesInBuffer )
 {
 	CSfxStringA	config;
-	inStream->Seek( 0, STREAM_SEEK_SET, NULL );
+	//inStream->Seek( 0, STREAM_SEEK_SET, NULL );
 #if defined(_SFX_USE_CONFIG_PLATFORM) || defined(_SFX_USE_LANG)
-	if( LoadConfigs( inStream, config ) == false && compressed == false )
+	if( !LoadConfigs( buffer, numBytesInBuffer, config ) )
 #else
-	if( ReadConfig( inStream, kSignatureConfigStart, kSignatureConfigEnd, config ) == false )
+	if( !ReadConfig( buffer, numBytesInBuffer, kSignatureConfigStart, kSignatureConfigEnd, config ) )
 #endif // defined(_SFX_USE_CONFIG_PLATFORM) || defined(_SFX_USE_LANG)
 	{
 		SfxErrorDialog( FALSE, ERR_READ_CONFIG );
 		return ERRC_READ_CONFIG;
 	}
 
-	if( !config.IsEmpty() )
-	{
-		// Split SFX config into pairs
-		if( GetTextConfig(config,false) == false )
-			return ERRC_CONFIG_DATA;
-	}
-
-	if( data != NULL )
-		*data = config;
+	// Split SFX config into pairs
+	if( !GetTextConfig(config, false) )
+		return ERRC_CONFIG_DATA;
 
 	return 0;
 }

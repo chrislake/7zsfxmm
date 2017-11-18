@@ -2,7 +2,7 @@
 /* File:        7zSfxModInt.h                                                */
 /* Created:     Wed, 25 Jul 2007 09:54:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3174                                                         */
 /* Updated:     Fri, 01 Apr 2016 20:42:00 GMT                                */
@@ -38,10 +38,14 @@
 #include "version.h"
 #include "7Zip/Archive/7z/7zHandler.h"
 #include "strings.h"
+
+#define SKIP_WHITESPACES_W(str) 	while( *str != L'\0' && unsigned(*str) <= L' ' ) str++;
+
+class CSfxExtractEngine;
+
+int GetWindowStringU( HWND hwnd, CSfxStringU &result );
+
 #include "SfxDialogs.h"
-#ifdef _SFX_USE_SFXAPI
-	#include "sfxapi.h"
-#endif // _SFX_USE_SFXAPI
 #include "archive.h"
 
 struct CTextConfigPair
@@ -69,7 +73,6 @@ namespace SfxErrors
 
 extern char const kSignatureConfigStart[];
 extern char const kSignatureConfigEnd[];
-extern UInt64 const kMaxCheckStartPosition;
 
 extern LPCWSTR	lpwszTitle;
 extern LPCWSTR	lpwszErrorTitle;
@@ -112,8 +115,6 @@ extern int			OverwriteMode, OverwriteFlags;
 extern HWND		hwndExtractDlg;
 extern BOOL		fCancelExtract;
 
-class CSfxExtractEngine;
-extern CSfxExtractEngine * SfxExtractEngine;
 extern CObjectVector<CTextConfigPair> Variables;
 extern HMODULE	hKernel32;
 extern bool	fUseInstallPath;
@@ -128,21 +129,9 @@ void	ShowSfxErrorDialog( LPCWSTR lpwszMessage );
 void	SfxErrorDialog( BOOL fUseLastError, UINT idFormat, ... );
 BOOL	DeleteFileOrDirectoryAlways( LPCWSTR lpwszPathName );
 BOOL	SfxCreateDirectory( LPCWSTR lpwszPath );
-int		LoadAndParseConfig( IInStream * inStream, bool compressed, CSfxStringA * data = NULL );
+int		LoadAndParseConfig( Byte const *buffer, UInt32 numBytesInBuffer );
 HRESULT ExtractArchive( const CSfxStringU &folderName );
-LPCWSTR ParseCommandLineParameters();
-
-#ifdef _SFX_USE_COMPRESSED_CONFIG
-	#define SFXAPI_CONFIG_FILENAME	".sfx.config"
-	bool	IsSfxApiConfig( UInt32 index );
-#endif //_SFX_USE_COMPRESSED_CONFIG
-
-#ifdef _SFX_USE_SFXAPI
-	bool	IsSfxApiHelpers( UInt32 index );
-	#define SFX_ON_LOAD_DIR	gSfxApi.GetDirectory()
-#else
-	#define SFX_ON_LOAD_DIR	strSfxFolder
-#endif // _SFX_USE_SFXAPI
+LPCWSTR ParseCommandLineParameters(LPCWSTR);
 
 BOOL	CreateFolderTree( LPCWSTR lpwszPath );
 BOOL	CreateShortcut( LPCTSTR lpszShortcutData );
@@ -158,7 +147,6 @@ LPCWSTR GetTextConfigValue( LPCWSTR id, int * pFrom = NULL );
 BOOL	SfxExtractPathDialog( LPCWSTR lpwszTitle, LPCWSTR lpwszText );
 void	ExpandEnvironmentStrings( CSfxStringU & ustr );
 int		GetOverwriteMode( LPCWSTR lpwszPath, FILETIME * fileTime );
-int		MyStrincmp( LPCWSTR str1, LPCWSTR str2, int nLength );
 BOOL	ReplaceVariablesInWindow( HWND hwnd );
 BOOL	GetChildRect( HWND hwnd, LPRECT rc );
 void	ReplaceHexChars( CSfxStringU& str );
@@ -186,18 +174,16 @@ CSfxStringA SfxUnicodeStringToMultiByte( const CSfxStringU &srcString, UINT code
 LPCWSTR LoadQuotedString( LPCWSTR lpwszSrc, CSfxStringU & result );
 BOOL SfxExecute( LPCWSTR lpwszCmdLine, DWORD dwFlags, LPCWSTR lpwszDirectory );
 DWORD Child_ExecuteSfxWaitAll( LPCWSTR lpwszCmdLine );
-BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFolder, bool fUseExecuteFile, CSfxStringU& ustrDirPrefix, LPCWSTR cmdline );
+BOOL ExecuteConfigProgram( LPCWSTR lpwszValue, LPCWSTR lpwszCurrentFolder, bool fUseExecuteFile, CSfxStringU& ustrDirPrefix, LPCWSTR cmdline );
 BOOL ExecuteBatch( LPCWSTR lpwszKey, LPCWSTR lpwszCurrentFolder, LPCWSTR lpwszBatch, CSfxStringU& ustrDirPrefix, LPCWSTR cmdline );
 DWORD GetPlatform();
 LPCWSTR IsPrefixCurrentPlatform( LPCWSTR lpwszString );
 
-BOOL ExtractDialog();
+INT_PTR ExtractDialog(CSfxExtractEngine *);
 
 #define SFX_OM_ERROR		-1
 #define SFX_OM_OVERWRITE	0
 #define SFX_OM_SKIP			1
-
-#define ClearFileAttributes(path)		SetFileAttributes(path,0)
 
 void SfxDialog_InitHooks();
 UINT SfxDialog( LPCWSTR lpwszCaption, LPCWSTR lpwszText, UINT uType,
@@ -227,7 +213,6 @@ CSfxStringU CreateTempName( LPCWSTR lpwszFormat );
 #endif // _SFX_USE_TEST
 
 BOOL IsRunAsAdmin();
-int GetDirectorySeparatorPos( CSfxStringU& ustrPath );
 void SfxCleanup();
 void ReplaceVariablesEx( CSfxStringU& str );
 CSfxStringU MyGetEnvironmentVariable( LPCWSTR lpwszName );
@@ -258,8 +243,6 @@ void CreateConfigSignature(
 #define SFXEXEC_RUNAS		0x02
 #define SFXEXEC_EXT_MASC	0x07
 #define SFXEXEC_NOWAIT		0x10000
-
-#define SetLastWriteTime	SetMTime
 
 #ifdef _SFX_USE_PREFIX_PLATFORM
 	#define SFX_EXECUTE_PLATFORM_ANY		0
@@ -296,21 +279,6 @@ void CreateConfigSignature(
 #endif // SFX_VOLUMES
 	};
 #endif // !defined(SFX_VOLUMES) && !defined(SFX_PROTECT)
-
-#ifdef _SFX_USE_CUSTOM_EXCEPTIONS
-	extern UINT_PTR uSfxExceptionText;
-	#define SFX_EXCEPTION_HANDLER_BEGIN(n)	uSfxExceptionText=(UINT_PTR)(n);
-	#define SFX_EXCEPTION_HANDLER_END		uSfxExceptionText=0;
-#else
-	#define SFX_EXCEPTION_HANDLER_BEGIN(n)
-	#define SFX_EXCEPTION_HANDLER_END
-#endif // _SFX_USE_CUSTOM_EXCEPTIONS
-
-#if defined(_SFX_USE_CUSTOM_EXCEPTIONS) && defined(_WIN64)
-	LPITEMIDLIST safe_SHBrowseForFolder( LPBROWSEINFO lpbi );
-#else
-	#define safe_SHBrowseForFolder	SHBrowseForFolder
-#endif // defined(_SFX_USE_CUSTOM_EXCEPTIONS) && defined(_WIN64)
 
 class CSfxCurrentDirectory
 {

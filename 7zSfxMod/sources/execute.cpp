@@ -2,7 +2,7 @@
 /* File:        execute.cpp                                                  */
 /* Created:     Fri, 05 Feb 2016 10:45:46 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    37                                                           */
 /* Updated:     Sat, 12 Mar 2016 11:24:03 GMT                                */
@@ -64,7 +64,7 @@ DWORD Parent_ExecuteSfxWaitAll( LPCWSTR lpwszApp, LPCWSTR lpwszCmdLine, int flag
 			}
 		}
 	}
-	if( fWaitProcess != false )
+	if( fWaitProcess )
 	{
 		::ResumeThread( pi.hThread );
 		::WaitForSingleObject( pi.hProcess, INFINITE );
@@ -199,13 +199,13 @@ BOOL SfxExecute( LPCWSTR lpwszCmdLine, DWORD dwFlags, LPCWSTR lpwszDirectory )
 	return FALSE;
 }
 
-BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFolder, bool fUseExecuteFile, CSfxStringU& ustrDirPrefix, LPCWSTR cmdline )
+BOOL ExecuteConfigProgram( LPCWSTR lpwszValue, LPCWSTR lpwszCurrentFolder, bool fUseExecuteFile, CSfxStringU& ustrDirPrefix, LPCWSTR cmdline )
 {
 	DWORD dwExecFlags = 0;
 	int		ShortcutDefault = -1;
 	int		DeleteDefault = -1;
 	CSfxStringU	ustrRunProgram;
-	LPCWSTR lpwszValue;
+	CSfxStringU ustrConfigString = lpwszValue;
 	CSfxCurrentDirectory currentFolder(lpwszCurrentFolder);
 
 #ifdef _SFX_USE_PREFIX_PLATFORM
@@ -218,7 +218,7 @@ BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFo
 	ReplaceVariablesEx( ustrConfigString );
 	lpwszValue = ustrConfigString;
 
-	while( 1 )
+	for( ;; )
 	{
 		LPCWSTR lpwszTmp;
 #ifdef _SFX_USE_PREFIX_WAITALL
@@ -242,7 +242,7 @@ BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFo
 		{
 			lpwszValue = lpwszTmp;
 			// work only with InstallPath
-			if( fUseInstallPath != false ) dwExecFlags |= SFXEXEC_NOWAIT;
+			if( fUseInstallPath ) dwExecFlags |= SFXEXEC_NOWAIT;
 			continue;
 		}
 #endif // _SFX_USE_PREFIX_NOWAIT
@@ -289,7 +289,7 @@ BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFo
 		break;
 	}
 
-	if( fUseExecuteFile != false )
+	if( fUseExecuteFile )
 	{
 		if( *lpwszValue != L'\"' )
 		{
@@ -328,7 +328,7 @@ BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFo
 				while( *cmdline != L'\0' ) cmdline++;
 			}
 			ReplaceVariablesEx( fileParams );
-			while( 1 )
+			for( ;; )
 			{
 #ifdef _SFX_USE_PREFIX_WAITALL
 				if( fUseWaitAll == false )
@@ -347,7 +347,7 @@ BOOL ExecuteConfigProgram( CSfxStringU& ustrConfigString, LPCWSTR lpwszCurrentFo
 					::SetLastError( dwExitCode );
 				}
 #endif // _SFX_USE_PREFIX_WAITALL
-				if( (MiscFlags&MISCFLAGS_NO_CANCELLED) == FALSE || ::GetLastError() != ERROR_CANCELLED )
+				if( (MiscFlags & MISCFLAGS_NO_CANCELLED) == FALSE || ::GetLastError() != ERROR_CANCELLED )
 					SfxErrorDialog( TRUE, ERR_EXECUTE, (LPCWSTR)ustrRunProgram );
 				SfxCleanup();
 				return ERRC_EXECUTE;
@@ -370,7 +370,7 @@ BOOL ExecuteBatch( LPCWSTR lpwszKey, LPCWSTR lpwszCurrentFolder, LPCWSTR lpwszBa
 	int		nExecuteIndex = 0;
 	CSfxStringU	executeName = lpwszKey;
 	executeName += *lpwszBatch;
-	while( 1 )
+	for( ;; )
 	{
 		if( (lpwszValue = GetTextConfigValue( executeName, &nExecuteIndex )) == NULL )
 		{
@@ -386,7 +386,7 @@ BOOL ExecuteBatch( LPCWSTR lpwszKey, LPCWSTR lpwszCurrentFolder, LPCWSTR lpwszBa
 			}
 			break;
 		}
-		ExecuteConfigProgram( CSfxStringU(lpwszValue), lpwszCurrentFolder, false, ustrDirPrefix, cmdline );
+		ExecuteConfigProgram( lpwszValue, lpwszCurrentFolder, false, ustrDirPrefix, cmdline );
 		cmdline = L"";
 		ustrDirPrefix.Empty();
 		nExecuteIndex++;

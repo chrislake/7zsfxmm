@@ -2,10 +2,10 @@
 /* File:        main.cpp                                                     */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 01 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
-/* Ppdated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
+/* Updated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1798                                                         */
@@ -36,18 +36,18 @@
 #include "7zSfxModInt.h"
 #include "ExtractEngine.h"
 #include "archive.h"
+#include "../C/Lzma86.h"
 
 using NWindows::NFile::NIO::CInFile;
 using NWindows::NFile::NIO::COutFile;
 
-void DeleteSFX( CSfxStringU moduleName );
+void DeleteSFX( LPCWSTR moduleName );
 
-CSfxStringU SfxMultiByteToUnicodeString( const CSfxStringA &srcString, UINT codePage );
-CSfxStringA SfxUnicodeStringToMultiByte( const CSfxStringU &srcString, UINT codePage );
+CSfxStringU SfxMultiByteToUnicodeString( CSfxStringA const &srcString, UINT codePage );
+CSfxStringA SfxUnicodeStringToMultiByte( CSfxStringU const &srcString, UINT codePage );
 
 char const kSignatureConfigStart[] = ";!@Install@!UTF-8!";
 char const kSignatureConfigEnd[] = ";!@InstallEnd@!";
-UInt64 const kMaxCheckStartPosition = 1 << 20;
 
 LPCWSTR	lpwszErrorTitle;
 #ifdef _SFX_USE_WARNINGS
@@ -80,6 +80,7 @@ int		FinishMessage = -1;
 #ifdef _SFX_USE_BEGINPROMPTTIMEOUT
 	int		BeginPromptTimeout = 0;
 #endif // _SFX_USE_BEGINPROMPTTIMEOUT
+CSfxStringU	extractRoot;
 CSfxStringU	extractPath;
 CSfxStringU strSfxFolder;
 CSfxStringU strSfxName;
@@ -88,9 +89,6 @@ CSfxStringU	strTitle;
 #ifdef _SFX_USE_PREFIX_PLATFORM
 	CSfxStringU	strOSPlatform;
 #endif // _SFX_USE_PREFIX_PLATFORM
-#ifdef _SFX_USE_SFXAPI
-	CSfxAPI	gSfxApi;
-#endif // _SFX_USE_SFXAPI
 CSfxArchive	gSfxArchive;
 
 bool	fUseInstallPath;
@@ -122,7 +120,7 @@ ENVALIAS const EnvAliases [] = {
 
 void SfxInit()
 {
-	hKernel32 = ::LoadLibraryA("kernel32");
+	hKernel32 = ::GetModuleHandleW( L"kernel32" );
 	InitCommonControls();
 	CrcGenerateTable();
 
@@ -141,15 +139,15 @@ void SfxInit()
 	lpwszCancelPrompt = GetLanguageString( STR_CANCEL_PROMPT );
 	lpwszCancelText = lpwszExtractDialogText = NULL;
 
-	WCHAR	wszPath[MAX_PATH+1];
-	WCHAR	wszName[sizeof(SPECIAL_FOLDER_FORMAT)/sizeof(WCHAR)+32];
+	WCHAR	wszPath[MAX_PATH];
+	WCHAR	wszName[_countof(SPECIAL_FOLDER_FORMAT) + 32];
 	for( int i = 0; i < 0x40; i++ )
 	{
-		if( SHGetSpecialFolderPath(NULL,wszPath,i,FALSE) != FALSE )
+		if( SHGetSpecialFolderPath(NULL, wszPath, i, FALSE) )
 		{
 			wsprintf( wszName, SPECIAL_FOLDER_FORMAT, i );
 			SfxAddEnvironmentVarWithAlias( wszName, wszPath );
-			for( int j = 0; j < (sizeof(EnvAliases)/sizeof(EnvAliases[0])); j++ )
+			for( int j = 0; j < _countof(EnvAliases); j++ )
 			{
 				if( EnvAliases[j].nFolder == i )
 					SfxAddEnvironmentVar( EnvAliases[j].lpwszName, wszPath );
@@ -171,14 +169,14 @@ void ReplaceVariables( CSfxStringU& str )
 
 void ReplaceVariablesEx( CSfxStringU& str )
 {
-	ExpandEnvironmentStrings( str );
-	ReplaceWithExtractPath( str, extractPath );
+	// ExpandEnvironmentStrings( str );
+	ReplaceWithExtractPath( str, extractRoot );
 	ReplaceVariables( str );
 }
 
 void SetEnvironment()
 {
-	for( int i = 0; i < (int)Variables.Size(); i++ )
+	for( unsigned i = 0; i < Variables.Size(); i++ )
 	{
 		CSfxStringU val = Variables[i].String;
 		ReplaceVariablesEx( val );
@@ -231,30 +229,13 @@ LPCWSTR UpdateOverwriteMode( LPCWSTR lpwszText )
 	return lpwszRet;
 }
 
-bool SaveConfiguration( LPCWSTR lpwszFileName, CSfxStringA & CfgData )
-{
-	COutFile cfg;
-	UInt32 processedSize;
-	static char const utf8prefix[] = "\xEF\xBB\xBF";
-	if (!cfg.Open(lpwszFileName, CREATE_ALWAYS))
-		return false;
-	CSfxStringA fullCfg;
-	fullCfg = utf8prefix;
-	fullCfg += kSignatureConfigStart;
-	fullCfg += CfgData;
-	fullCfg += kSignatureConfigEnd;
-	if (!cfg.Write(fullCfg, fullCfg.Len(), processedSize) || (processedSize != fullCfg.Len()))
-		return false;
-	return true;
-}
-
-void ReplaceVariableInShortcut( CSfxStringU& strShortcut, CSfxStringU& strVarName, CSfxStringU& strVarValue )
+void ReplaceVariableInShortcut( CSfxStringU &strShortcut, CSfxStringU const &strVarName, CSfxStringU const &strVarValue )
 {
 	int nVarNameLength = strVarName.Len();
-	for( int i = 0; i < (int)strShortcut.Len(); i++ )
+	for( unsigned i = 0; i < strShortcut.Len(); i++ )
 	{
 		if( strShortcut[i] == L'%' &&
-			MyStrincmp( strShortcut.Ptr( i + 1 ), strVarName, nVarNameLength ) == 0 &&
+			_wcsnicmp( strShortcut.Ptr( i + 1 ), strVarName, nVarNameLength ) == 0 &&
 			strShortcut[i + nVarNameLength + 1] == L'%' )
 		{
 			// var found
@@ -267,22 +248,14 @@ void ReplaceVariableInShortcut( CSfxStringU& strShortcut, CSfxStringU& strVarNam
 LPCWSTR IsSfxSwitch( LPCWSTR lpwszCommandLine, LPCWSTR lpwszSwitch )
 {
 	SKIP_WHITESPACES_W(lpwszCommandLine);
-	// 1. check old notation
-	if( lpwszCommandLine[0] == L'-' && lpwszCommandLine[1] == '-' )
+	if( *lpwszCommandLine == L'-' || *lpwszCommandLine == L'/')
 	{
-		lpwszCommandLine++;
-	}
-	// 2. New (common) notation
-	if( lpwszCommandLine[0] == L'-' || lpwszCommandLine[0] == '/')
-	{
-		int nSwitchLength = lstrlen(lpwszSwitch);
-		if( MyStrincmp( lpwszCommandLine+1, lpwszSwitch, lstrlen(lpwszSwitch) ) == 0 &&
-				(((unsigned)lpwszCommandLine[nSwitchLength+1]) <= L' ' || lpwszCommandLine[nSwitchLength+1] == L':') )
+		lpwszCommandLine = IsSubString( lpwszCommandLine + 1, lpwszSwitch );
+		if( lpwszCommandLine && (unsigned(*lpwszCommandLine) <= L' ' || *lpwszCommandLine == L':') )
 		{
-			return lpwszCommandLine+nSwitchLength+1;
+			return lpwszCommandLine;
 		}
 	}
-	
 	return NULL;
 }
 
@@ -380,17 +353,17 @@ void SetConfigVariables()
 void PostExecute_Shortcut( LPCWSTR lpwszValue )
 {
 	CSfxStringU strShortcut = lpwszValue;
-	ReplaceWithExtractPath( strShortcut, extractPath );
+	ReplaceWithExtractPath( strShortcut, extractRoot );
 	ReplaceWithArchivePath( strShortcut, strSfxFolder );
 	ReplaceWithArchiveName( strShortcut, strSfxName );
 #ifdef _SFX_USE_PREFIX_PLATFORM
 	ReplaceWithPlatform( strShortcut );
 #endif // _SFX_USE_PREFIX_PLATFORM
-	for( int i = 0; i < (int)Variables.Size(); i++ )
+	for( unsigned i = 0; i < Variables.Size(); i++ )
 	{
 		CSfxStringU varValue = MyGetEnvironmentVariable( Variables[i].ID );
 		ExpandEnvironmentStrings( varValue );
-		ReplaceWithExtractPath( varValue, extractPath );
+		ReplaceWithExtractPath( varValue, extractRoot );
 		ReplaceWithArchivePath( varValue, strSfxFolder );
 		ReplaceWithArchiveName( varValue, strSfxName );
 #ifdef _SFX_USE_PREFIX_PLATFORM
@@ -483,7 +456,60 @@ void ShowSfxVersion()
 void SfxCleanup()
 {
 	if( fUseInstallPath == false )
-		DeleteFileOrDirectoryAlways( extractPath );
+		DeleteFileOrDirectoryAlways( extractRoot );
+}
+
+static BOOL CALLBACK SfxEnumResNameProc(HMODULE hModule, LPCWSTR lpType, LPWSTR lpName, LONG_PTR lParam)
+{
+	HRSRC const hFindRes = FindResource(hModule, lpName, lpType);
+	HGLOBAL const hLoadRes = LoadResource(hModule, hFindRes);
+	const Byte *inBuffer = static_cast<const Byte *>(LockResource(hLoadRes));
+	UInt32 inSize32 = SizeofResource(hModule, hFindRes);
+	CBuffer<Byte> outBuffer;
+	if (lpType == RT_MANIFEST)
+	{
+		lpName = L"7ZSfxMod.exe.manifest";
+	}
+	else if (*inBuffer <= 0xE0)
+	{
+		size_t inSize = inSize32;
+		UInt64 outSize64;
+		if (Lzma86_GetUnpackSize(inBuffer, inSize, &outSize64) != 0)
+			return FALSE; // data error
+		size_t outSize = static_cast<UInt32>(outSize64);
+		if (outSize != outSize64)
+			return FALSE; // Unpack size is too big
+		outBuffer.Alloc(outSize);
+		if (Lzma86_Decode(outBuffer, &outSize, inBuffer, &inSize) != 0)
+			return FALSE; // Decode error
+		if (outSize != static_cast<UInt32>(outSize64))
+			return FALSE; // incorrect processed size
+		inBuffer = outBuffer;
+		inSize32 = static_cast<UInt32>(outSize);
+	}
+	if (lParam == 0)
+		return LoadAndParseConfig(inBuffer, inSize32) == 0;
+	CSfxStringU OutFileName = reinterpret_cast<LPWSTR>(lParam);
+	OutFileName += L"\\";
+	OutFileName += lpName;
+	COutFile OutFile;
+	if (!OutFile.Open(OutFileName, CREATE_ALWAYS))
+		return FALSE;
+	UInt32 processedSize;
+	if (!OutFile.Write(inBuffer, inSize32, processedSize) || (processedSize != inSize32))
+		return FALSE;
+	return TRUE;
+}
+
+static BOOL ExtractResources(HMODULE hModule, LPWSTR lpType, LPCWSTR lpRoot)
+{
+	CreateFolderTree(lpRoot);
+	return EnumResourceNamesW(hModule, lpType, SfxEnumResNameProc, reinterpret_cast<LONG_PTR>(lpRoot));
+}
+
+static BOOL LoadAndParseConfig(HMODULE hModule)
+{
+	return EnumResourceNamesW(hModule, RT_HTML, SfxEnumResNameProc, 0);
 }
 
 bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
@@ -491,137 +517,68 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	CSfxStringU OutFileName;
 	SKIP_WHITESPACES_W(lpwszValue);
 	lpwszValue = LoadQuotedString(lpwszValue, OutFileName);
-	CInFile InFile;
 	COutFile OutFile;
-	if (!InFile.Open(strModulePathName) || !OutFile.Open(OutFileName, CREATE_ALWAYS))
-		return false;
 	UInt32 processedSize;
-	IMAGE_DOS_HEADER mz;
-	IMAGE_NT_HEADERS nt;
-	BYTE buf[8192];
-	// Copy MS-DOS stub
-	if (!InFile.Read(&mz, sizeof mz, processedSize) || (processedSize != sizeof mz))
-		return false;
-	if (mz.e_magic != IMAGE_DOS_SIGNATURE)
-		return false;
-	if (!OutFile.Write(&mz, sizeof mz, processedSize) || (processedSize != sizeof mz))
-		return false;
-	if (mz.e_lfanew < sizeof mz)
-		return false;
-	LONG e_lfanew = sizeof mz;
-	LONG const e_cb = 512UL * (mz.e_cp ? mz.e_cp - 1 : mz.e_cp) + mz.e_cblp;
-	// Could also set e_cb to e_lfanew to keep existing content between headers
-	while (e_lfanew < e_cb)
-	{
-		UInt32 remainingSize = e_cb - e_lfanew;
-		if (remainingSize > sizeof buf)
-			remainingSize = sizeof buf;
-		if (!InFile.Read(buf, remainingSize, processedSize) || (processedSize != remainingSize))
-			return false;
-		if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
-			return false;
-		e_lfanew += processedSize;
-	}
-	// Move to start of NT header
 	UInt64 newPosition;
-	if (!InFile.Seek(mz.e_lfanew, newPosition))
+	if (!CopyFile(strModulePathName, OutFileName, FALSE))
 		return false;
-	// Include config files as specified
-	while (LPCWSTR lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCONFIG))
+	HANDLE hUpdate = BeginUpdateResourceW(OutFileName, FALSE);
+	if (hUpdate == NULL)
+		return false;
+	BOOL fDiscard = TRUE;
+	BOOL fSuccess = TRUE;
+	// Add resources as specified
+	LPCWSTR lpwszAhead;
+	while (LPWSTR lpType =
+		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_CONFIG)) != NULL ? RT_HTML :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_ADJUNCT)) != NULL ? RT_RCDATA :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_MANIFEST)) != NULL ? RT_MANIFEST :
+		NULL)
 	{
 		CSfxStringU InFileName;
 		SKIP_WHITESPACES_W(lpwszAhead);
 		lpwszValue = LoadQuotedString(lpwszAhead, InFileName);
 		CInFile InFile;
-		if (!InFile.Open(InFileName))
+		UInt64 fileSize;
+		if (!InFile.Open(InFileName) || !InFile.GetLength(fileSize))
 			return false;
-		do
+		CBuffer<Byte> inBuffer(static_cast<size_t>(fileSize));
+		UInt32 inSize = static_cast<UInt32>(fileSize);
+		if (inSize != fileSize)
+			return false; // File is too big
+		if (!InFile.Read(inBuffer, inSize, processedSize) || (processedSize != inSize))
+			return false;
+		CBuffer<Byte> outBuffer;
+		LPVOID lpData = inBuffer;
+		LPCWSTR lpName = MAKEINTRESOURCE(1);
+		if (lpType != RT_MANIFEST)
 		{
-			UInt32 remainingSize;
-			if (!InFile.Read(buf, sizeof buf, remainingSize))
-				return false;
-			if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
-				return false;
-			e_lfanew += processedSize;
-		} while (processedSize != 0);
+			// we allocate 105% of original size for output buffer
+			UInt64 outSize64 = fileSize / 20 * 21 + (1 << 16);
+			size_t outSize = static_cast<UInt32>(outSize64);
+			if (outSize != outSize64)
+				return false; // File is too big
+			outBuffer.Alloc(outSize);
+			UInt32 dict = 1 << 24;
+			while (UInt32 smaller = dict >> 1)
+			{
+				if (smaller < inSize)
+					break;
+				dict = smaller;
+			}
+			int res = Lzma86_Encode(outBuffer, &outSize, inBuffer, inSize, 5, dict, SZ_FILTER_AUTO);
+			if (res != 0)
+				return false; // Encode error
+			inSize = static_cast<UInt32>(outSize);
+			lpData = outBuffer;
+			lpName = InFileName.Ptr() + InFileName.ReverseFind_PathSepar() + 1;
+		}
+		UString ResourceName = ExtractFileNameFromPath(InFileName);
+		BOOL fUpdate = UpdateResourceW(hUpdate, lpType, lpName, 0, lpData, inSize);
+		(fUpdate ? fDiscard : fSuccess) = FALSE;
 	}
-	// Copy NT header
-	if (!InFile.Read(&nt, sizeof nt, processedSize) || (processedSize != sizeof nt))
+	if (!EndUpdateResourceW(hUpdate, fDiscard) || !fSuccess)
 		return false;
-	if (nt.Signature != IMAGE_NT_SIGNATURE)
-		return false;
-	if (nt.FileHeader.SizeOfOptionalHeader != sizeof nt.OptionalHeader)
-		return false;
-	// Keep file alignment intact
-	if (UInt32 unalignedSize = e_lfanew - mz.e_lfanew & nt.OptionalHeader.FileAlignment - 1)
-	{
-		UInt32 alignmentSize = nt.OptionalHeader.FileAlignment - unalignedSize;
-		memset(buf, 0, alignmentSize);
-		if (!OutFile.Write(buf, alignmentSize, processedSize) || (processedSize != alignmentSize))
-			return false;
-		e_lfanew += processedSize;
-	}
-	LONG displacement = e_lfanew - mz.e_lfanew;
-	int i;
-	nt.OptionalHeader.SizeOfHeaders += displacement;
-	// No way to relocate code, so don't grow headers beyond section alignment
-	if (nt.OptionalHeader.SizeOfHeaders > nt.OptionalHeader.SectionAlignment)
-		return false;
-	nt.OptionalHeader.CheckSum = 0;
-	if (!OutFile.Write(&nt, sizeof nt, processedSize) || (processedSize != sizeof nt))
-		return false;
-	for (i = 0; i < nt.FileHeader.NumberOfSections; ++i)
-	{
-		IMAGE_SECTION_HEADER sh;
-		if (!InFile.Read(&sh, sizeof sh, processedSize) || (processedSize != sizeof sh))
-			return false;
-		if (sh.PointerToRawData)
-			sh.PointerToRawData += displacement;
-		if (sh.PointerToRelocations)
-			sh.PointerToRelocations += displacement;
-		if (sh.PointerToLinenumbers)
-			sh.PointerToLinenumbers += displacement;
-		if (!OutFile.Write(&sh, sizeof sh, processedSize) || (processedSize != sizeof sh))
-			return false;
-	}
-	do
-	{
-		UInt32 remainingSize;
-		if (!InFile.Read(buf, sizeof buf, remainingSize))
-			return false;
-		if (!OutFile.Write(buf, remainingSize, processedSize) || (processedSize != remainingSize))
-			return false;
-	} while (processedSize != 0);
-	// PE header address fixup
-	if (mz.e_lfanew != e_lfanew)
-	{
-		mz.e_lfanew = e_lfanew;
-		if (!OutFile.SeekToBegin())
-			return false;
-		if (!OutFile.Write(&mz, sizeof mz, processedSize) || (processedSize != sizeof mz))
-			return false;
-	}
-	if (!OutFile.Close())
-		return false;
-	// Add manifest as specified
-	if (LPCWSTR lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXMANIFEST))
-	{
-		CSfxStringU InFileName;
-		SKIP_WHITESPACES_W(lpwszAhead);
-		lpwszValue = LoadQuotedString(lpwszAhead, InFileName);
-		CInFile InFile;
-		if (!InFile.Open(InFileName))
-			return false;
-		if (!InFile.Read(buf, sizeof buf, processedSize) || (processedSize == sizeof buf))
-			return false;
-		HANDLE handle = BeginUpdateResourceW(OutFileName, FALSE);
-		if (handle == NULL)
-			return false;
-		BOOL done = UpdateResourceW(handle, RT_MANIFEST, MAKEINTRESOURCEW(1),
-			MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL), buf, processedSize);
-		if (!EndUpdateResourceW(handle, FALSE) || !done)
-			return false;
-	}
 	// Append archives as specified
 	if (!OutFile.Open(OutFileName, OPEN_EXISTING) || !OutFile.SeekToEnd(newPosition))
 		return false;
@@ -634,6 +591,7 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 			return false;
 		do
 		{
+			BYTE buf[8192];
 			UInt32 remainingSize;
 			if (!InFile.Read(buf, sizeof buf, remainingSize))
 				return false;
@@ -645,44 +603,23 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 }
 
 #include <new.h>
-int __cdecl sfx_new_handler( size_t size )
+int __cdecl sfx_new_handler( size_t /*size*/ )
 {
-	MessageBoxA( NULL, "Could not allocate memory", "7-Zip SFX", MB_OK|MB_ICONSTOP );
+	MessageBoxA( NULL, "Could not allocate memory", "7-Zip SFX", MB_OK | MB_ICONSTOP );
 	return 0;
 }
 
-#ifdef _SFX_USE_CUSTOM_EXCEPTIONS
-int APIENTRY WinMain2( HINSTANCE hInstance,
-					   HINSTANCE hPrevInstance,
-					   LPSTR lpCmdLine, int nCmdShow );
-
-int APIENTRY WinMain( HINSTANCE hInstance,
-					  HINSTANCE hPrevInstance,
-					  LPSTR lpCmdLine, int nCmdShow )
-{
-	try {
-		return WinMain2( hInstance, hPrevInstance, lpCmdLine, nCmdShow );
-	}
-	catch( ... ) {
-		return ERRC_EXCEPTION;
-	}
-}
-int APIENTRY WinMain2( HINSTANCE hInstance,
-#else
-int APIENTRY WinMain( HINSTANCE hInstance,
-#endif // _SFX_USE_CUSTOM_EXCEPTIONS
-					 HINSTANCE hPrevInstance,
-					 LPSTR lpCmdLine, int nCmdShow )
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
 {
 #ifdef _DEBUG
 	DWORD dwStartTime = ::GetTickCount();
 #endif // -DEBUG
 	_set_new_handler( sfx_new_handler );
 
-	int		ShortcutDefault = -1;
-	int		DeleteDefault = -1;
-	int		SelfDelete = -1;
-	LPCWSTR	lpwszValue;
+	int ShortcutDefault = -1;
+	int DeleteDefault = -1;
+	int SelfDelete = -1;
+	LPCWSTR lpwszValue;
 	// Command line
 	CSfxStringU tmpstr;
 	CSfxStringU	SfxConfigFilename;
@@ -701,9 +638,8 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 
 #ifdef _SFX_USE_LANG
 	#ifdef _SFX_USE_ENVIRONMENT_VARS
-		wsprintf( tmpstr.GetBuffer(32), L"%d", idSfxLang );
-		tmpstr.ReleaseBuffer();
-		SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_SYSTEM_LANGUAGE, (LPCWSTR)tmpstr );
+		tmpstr.ReleaseBuf_SetEnd( wsprintf( tmpstr.GetBuf(32), L"%d", idSfxLang ) );
+		SfxAddEnvironmentVarWithAlias( SFX_ENV_VAR_SYSTEM_LANGUAGE, tmpstr );
 	#endif // _SFX_USE_ENVIRONMENT_VARS
 
 	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXLANG )) != NULL && *lpwszValue == L':' )
@@ -737,25 +673,13 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 		str = lpwszValue;
 	}
 #endif // _SFX_USE_ELEVATION
-#ifdef _DEBUG
-	strModulePathName = L"S:\\tmp\\setup_button_x86_x64.exe";
-	strModulePathName = L"S:\\tmp\\Aida64AE.exe";
-	strModulePathName = L"C:\\tmp\\vars.exe";
-#else
-	if( ::GetModuleFileName( NULL, strModulePathName.GetBuffer(MAX_PATH*2), MAX_PATH*2 ) == 0 )
-	{
-		SfxErrorDialog( TRUE, ERR_MODULEPATHNAME );
-		return ERRC_GET_PATHNAME;
-	}
-#endif
-	strModulePathName.ReleaseBuffer();
 
 	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXTEST )) != NULL )
 #ifdef _SFX_USE_TEST
 	{
 		if( lpwszValue[0] != L':' )
 			return ERRC_SFXTEST;
-		switch( lpwszValue[1]|L' ' )
+		switch( MyCharLower_Ascii( lpwszValue[1] ) )
 		{
 		case L'd':
 			// dialogs test
@@ -768,7 +692,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 				{
 					TSD_Flags += *lpwszValue++;
 				}
-				if( TSD_Flags.IsEmpty() != false )
+				if( TSD_Flags.IsEmpty() )
 					return ERRC_SFXTEST;
 			}
 			else
@@ -825,7 +749,22 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 			tmpstr.Empty();
 			str = LoadQuotedString( lpwszValue, tmpstr );
 			if( nTestModeType != TMT_ARCHIVE )
+			{
 				strModulePathName = tmpstr;
+				CInFile InFile;
+				UInt64 fileSize;
+				if (!InFile.Open(tmpstr) || !InFile.GetLength(fileSize))
+					return ERRC_SFXTEST;
+				CBuffer<Byte> inBuffer(static_cast<size_t>(fileSize));
+				UInt32 inSize = static_cast<UInt32>(fileSize);
+				if (inSize != fileSize)
+					return ERRC_SFXTEST; // File is too big
+				UInt32 processedSize;
+				if (!InFile.Read(inBuffer, inSize, processedSize) || (processedSize != inSize))
+					return ERRC_SFXTEST;
+				if (LoadAndParseConfig(inBuffer, inSize) != 0)
+					return ERRC_SFXTEST;
+			}
 		}
 	}
 #else
@@ -833,6 +772,24 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 		return ERRC_SFXTEST;
 	}
 #endif // _SFX_USE_TEST
+
+#ifdef _DEBUG
+	if( strModulePathName.IsEmpty() )
+	{
+		strModulePathName = L"S:\\tmp\\setup_button_x86_x64.exe";
+		strModulePathName = L"S:\\tmp\\Aida64AE.exe";
+		strModulePathName = L"C:\\tmp\\vars.exe";
+		hInstance = LoadLibraryEx(strModulePathName, NULL, LOAD_LIBRARY_AS_DATAFILE);
+	}
+#else
+	strModulePathName.ReleaseBuf_SetEnd(
+		::GetModuleFileName( NULL, strModulePathName.GetBuf(MAX_PATH), MAX_PATH ) );
+	if( strModulePathName.IsEmpty() )
+	{
+		SfxErrorDialog( TRUE, ERR_MODULEPATHNAME );
+		return ERRC_GET_PATHNAME;
+	}
+#endif
 
 	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXCREATE )) != NULL )
 	{
@@ -845,16 +802,37 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 		return ERRC_NONE;
 	}
 
+#ifdef _SFX_USE_TEST
+	if( nTestModeType == 0 && (lpwszValue = IsSfxSwitch( str,CMDLINE_SFXCONFIG )) != NULL )
+#else
+	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXCONFIG )) != NULL )
+#endif // _SFX_USE_TEST
+	{
+		SKIP_WHITESPACES_W( lpwszValue );
+		lpwszValue = LoadQuotedString(lpwszValue, extractRoot);
+		if (!ExtractResources(hInstance, RT_RCDATA, extractRoot + L"\\adjunct") &&
+				GetLastError() != ERROR_RESOURCE_TYPE_NOT_FOUND ||
+			!ExtractResources(hInstance, RT_HTML, extractRoot + L"\\config") &&
+				GetLastError() != ERROR_RESOURCE_TYPE_NOT_FOUND ||
+			!ExtractResources(hInstance, RT_MANIFEST, extractRoot + L"\\manifest") &&
+				GetLastError() != ERROR_RESOURCE_TYPE_NOT_FOUND)
+		{
+			SfxErrorDialog( FALSE, ERR_WRITE_CONFIG );
+			return ERRC_CONFIG_DATA;
+		}
+		return ERRC_NONE;
+	}
+
 	strSfxFolder = strModulePathName;
 	strSfxName = strModulePathName;
-	int nPos = GetDirectorySeparatorPos( strModulePathName );
+	int nPos = strModulePathName.ReverseFind_PathSepar();
 	if( nPos >= 0 )
 	{
-		strSfxFolder.ReleaseBuffer( nPos );
+		strSfxFolder.ReleaseBuf_SetEnd( nPos );
 		strSfxName = strModulePathName.Ptr( nPos + 1 );
 		strTitle = strModulePathName.Ptr( nPos + 1 );
 		if( (nPos = strTitle.ReverseFind( L'.' )) > 0 )
-			strTitle.ReleaseBuffer( nPos );
+			strTitle.ReleaseBuf_SetEnd( nPos );
 		strErrorTitle = strTitle;
 		strErrorTitle += GetLanguageString( STR_ERROR_SUFFIX );
 		lpwszTitle = strTitle;
@@ -874,27 +852,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	}
 
 	// Read SFX config
-	CSfxStringA	textConfig;
-
-	gConfig.Clear();
-	if( int result = LoadAndParseConfig(gSfxArchive.GetStream(), FALSE, &textConfig) )
-		return result;
-
-#ifdef _SFX_USE_TEST
-	if( nTestModeType == 0 && (lpwszValue = IsSfxSwitch( str,CMDLINE_SFXCONFIG )) != NULL )
-#else
-	if( (lpwszValue = IsSfxSwitch( str, CMDLINE_SFXCONFIG )) != NULL )
-#endif // _SFX_USE_TEST
-	{
-		if( *lpwszValue == L':' ) lpwszValue++;
-		SKIP_WHITESPACES_W( lpwszValue );
-		if( *lpwszValue != L'\0' && SaveConfiguration( lpwszValue, textConfig ) == false )
-		{
-			SfxErrorDialog( FALSE, ERR_WRITE_CONFIG );
-			return ERRC_CONFIG_DATA;
-		}
-		return ERRC_NONE;
-	}
+	LoadAndParseConfig(hInstance);
 
 #ifdef _SFX_USE_TEST
 	if( nTestModeType == TMT_CHECK_CONFIG )
@@ -911,27 +869,15 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	}
 
 	// parse command line
-	gSfxArchive.SetCommandLine(str);
-	if( (str=ParseCommandLineParameters()) == NULL )
+	if( (str=ParseCommandLineParameters(str)) == NULL )
 		return ERR_CONFIG_CMDLINE;
 	SetConfigVariables();
 
 	gSfxArchive.Open();
 
-#ifdef _SFX_USE_COMPRESSED_CONFIG
-	// Reinit config due possible changes in compressed version
-	gConfig.Clear();
-	LoadAndParseConfig(gSfxArchive.GetStream(),NULL);
-	SetConfigVariables();
-	// compressed config
-	gSfxArchive.LoadAndParseCompressedConfig();
-	ParseCommandLineParameters();
-	SetConfigVariables();
-#endif
-
 #ifdef _SFX_USE_ELEVATION
 // Check elevation
-	if( fInElevation == false && (MiscFlags&MISCFLAGS_ELEVATE) != 0 && IsRunAsAdmin() == FALSE )
+	if( fInElevation == false && (MiscFlags & MISCFLAGS_ELEVATE) != 0 && IsRunAsAdmin() == FALSE )
 	{
 		CSfxStringU sfxPath;
 		CSfxStringU executeString;
@@ -946,14 +892,14 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 
 	// extra environment variables
 	int		nIndex = 0;
-	while( (lpwszValue = GetTextConfigValue( CFG_SETENVIRONMENT, &nIndex)) != NULL )
+	while( (lpwszValue = GetTextConfigValue( CFG_SETENVIRONMENT, &nIndex )) != NULL )
 	{
 		CSfxStringU strEnvName = lpwszValue;
-		nPos = strEnvName.Find( L'=');
+		nPos = strEnvName.Find( L'=' );
 		if( nPos <= 0 )
 			break;
-		strEnvName.ReleaseBuffer( nPos );
-		SfxAddEnvironmentVar( (LPCWSTR)strEnvName, lpwszValue+nPos+1 );
+		strEnvName.ReleaseBuf_SetEnd( nPos );
+		SfxAddEnvironmentVar( strEnvName, lpwszValue + nPos + 1 );
 		nIndex++;
 	}
 
@@ -962,7 +908,7 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 	if( GUIFlags == -1 )
 		GUIFlags = 0;
 
-	if( gSfxArchive.GetShowHelp() != false )
+	if( gSfxArchive.GetShowHelp() )
 	{
 		if( (lpwszValue = GetTextConfigValue(CFG_HELP_TEXT)) == NULL )
 				lpwszValue = GetLanguageString( STR_DEFAULT_HELP_TEXT );
@@ -971,8 +917,8 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 		return ERRC_NONE;
 	}
 
-	if( gSfxArchive.GetAssumeYes() != false )
-		GUIFlags &= (~GUIFLAGS_CONFIRM_CANCEL);
+	if( gSfxArchive.GetAssumeYes() )
+		GUIFlags &= ~GUIFLAGS_CONFIRM_CANCEL;
 
 	CoInitializeEx( NULL, COINIT_APARTMENTTHREADED | COINIT_DISABLE_OLE1DDE );
 
@@ -1002,25 +948,15 @@ int APIENTRY WinMain( HINSTANCE hInstance,
 #endif // _SFX_USE_TEST
 
 #ifdef _SFX_USE_CONFIG_EARLY_EXECUTE
-	#if defined(_SFX_USE_ENVIRONMENT_VARS) && defined(_SFX_USE_SFXAPI)
-		SfxAddEnvironmentVarInternal( SFX_ENV_VAR_APIPATH, L"", false );
-		SetEnvironment();
-	#endif // defined(_SFX_USE_ENVIRONMENT_VARS) && defined(_SFX_USE_SFXAPI)
 	if( GetTextConfigValue(CFG_EXECUTE_ON_LOAD) != NULL && gSfxArchive.GetNoRun() == false )
 	{
-		#if defined(_SFX_USE_ENVIRONMENT_VARS) && defined(_SFX_USE_SFXAPI)
-			SfxAddEnvironmentVarInternal( SFX_ENV_VAR_APIPATH, gSfxApi.GetDirectory(), false );
-			SetEnvironment();
-		#endif // defined(_SFX_USE_ENVIRONMENT_VARS) && defined(_SFX_USE_SFXAPI)
-		ExecuteBatch( CFG_EXECUTE_ON_LOAD, SFX_ON_LOAD_DIR, L"", CSfxStringU(L""), L"" );
+		CSfxStringU ustrDirPrefix;
+		ExecuteBatch( CFG_EXECUTE_ON_LOAD, strSfxFolder, L"", ustrDirPrefix, L"" );
 	}
 #endif // _SFX_USE_CONFIG_EARLY_EXECUTE
 
-#ifdef _SFX_USE_SFXAPI
-	gSfxArchive.HidePrepareDialog();
-#endif // _SFX_USE_SFXAPI
 #ifdef _DEBUG
-	DWORD dwTime = ::GetTickCount()-dwStartTime;
+	DWORD dwTime = ::GetTickCount() - dwStartTime;
 	CHAR msg[128];
 	wsprintfA( msg, "Time: %u msec", dwTime );
 	::MessageBoxA( NULL, msg, "Time", MB_OK );
@@ -1041,7 +977,7 @@ Loc_BeginPrompt:
 				gSfxArchive.SetAssumeYes(true);
 			}
 #ifdef _SFX_USE_BEGINPROMPTTIMEOUT
-			if( CSfxDialog::IsTimedOut() != FALSE )
+			if( CSfxDialog::IsTimedOut() )
 				GUIFlags &= ~GUIFLAGS_EXTRACT_PATH2;
 #endif // _SFX_USE_BEGINPROMPTTIMEOUT
 		}
@@ -1049,7 +985,7 @@ Loc_BeginPrompt:
 
 	// check autoinstall
 	CSfxStringU	executeName;
-	if( gSfxArchive.GetAutoInstall() != false )
+	if( gSfxArchive.GetAutoInstall() )
 	{
 		LPCWSTR p1 = gSfxArchive.GetBatchInstall();
 		do {
@@ -1058,7 +994,7 @@ Loc_BeginPrompt:
 			if( GetTextConfigValue( executeName ) == NULL )
 			{
 				// auto install command not found
-				SfxErrorDialog( FALSE, ERR_AUTOINSTALL_NOTFOUND, (LPCWSTR)executeName );
+				SfxErrorDialog( FALSE, ERR_AUTOINSTALL_NOTFOUND, executeName.Ptr() );
 				return ERRC_BAD_AUTOINSTALL;
 			}
 			p1++;
@@ -1070,13 +1006,13 @@ Loc_BeginPrompt:
 
 	bool fUseExecuteFile = false;
 	// check for 'ExecuteFile' (only if no 'autoinstall' commands)
-	if( executeName.IsEmpty() != false && GetTextConfigValue( CFG_EXECUTEFILE ) != NULL )
+	if( executeName.IsEmpty() && GetTextConfigValue( CFG_EXECUTEFILE ) != NULL )
 	{
 		executeName = CFG_EXECUTEFILE;
 		fUseExecuteFile = true;
 	}
 	// if no 'ExecuteFile' - try 'RunProgram'
-	if( executeName.IsEmpty() != false && GetTextConfigValue( CFG_RUNPROGRAM ) != NULL )
+	if( executeName.IsEmpty() && GetTextConfigValue( CFG_RUNPROGRAM ) != NULL )
 		executeName = CFG_RUNPROGRAM;
 
 	// Path to extract
@@ -1084,53 +1020,53 @@ Loc_BeginPrompt:
 			(GUIFlags&(GUIFLAGS_EXTRACT_PATH2|GUIFLAGS_EXTRACT_PATH1)) == GUIFLAGS_EXTRACT_PATH2 &&
 				SfxExtractPathDialog( lpwszExtractPathTitle, lpwszExtractPathText ) == FALSE )
 	{
-		if( fUseBackward != false )
+		if( fUseBackward )
 			goto Loc_BeginPrompt;
 		return ERRC_CANCELED;
 	}
 
-	// 
-	if( extractPath.IsEmpty() != false )
+	if( unsigned len = extractPath.Len() )
 	{
-		// create temp path
-		extractPath = CreateTempName( L"7ZipSfx.%03x" );
+		--len;
+		if( extractPath[len] == L'\\' || extractPath[len] == L'/' )
+			extractPath.ReleaseBuf_SetEnd( len );
+	}
+
+	if( extractPath.IsEmpty() || extractPath.Find( L"%%T" ) != -1 )
+	{
+		extractRoot = CreateTempName( L"7ZipSfx.%03x" );
 		fUseInstallPath = false;
 	}
 	else
 	{
-		CSfxStringU tmp = extractPath;
-		ReplaceVariables( tmp );
-		if( tmp.IsEmpty() == false )
-			extractPath = tmp;
+		extractRoot = extractPath;
 		fUseInstallPath = true;
 	}
+	ReplaceVariablesEx( extractPath );
+	if( extractPath.IsEmpty() )
+		extractPath = extractRoot;
 
-	if( extractPath[extractPath.Len()-1] == L'\\' || extractPath[extractPath.Len()-1] == L'/' )
-	{
-		extractPath.ReleaseBuffer( extractPath.Len()-1 );
-	}
-
-	if( gSfxArchive.GetAssumeYes() != false )
+	if( gSfxArchive.GetAssumeYes() )
 		MiscFlags |= MISCFLAGS_NO_CHECK_DISK_FREE | MISCFLAGS_NO_CHECK_RAM;
 #ifdef _SFX_USE_CONFIG_EARLY_EXECUTE
 	CSfxStringU strPreExtract = CFG_PREEXTRACT;
 	strPreExtract += *gSfxArchive.GetBatchInstall();
 	if( GetTextConfigValue(strPreExtract) != NULL && gSfxArchive.GetNoRun() == false )
 	{
-		#if defined(_SFX_USE_ENVIRONMENT_VARS) && defined(_SFX_USE_SFXAPI)
-			SfxAddEnvironmentVarInternal( SFX_ENV_VAR_APIPATH, gSfxApi.GetDirectory(), false );
-			SetEnvironment();
-		#endif // defined(_SFX_USE_ENVIRONMENT_VARS) && defined(_SFX_USE_SFXAPI)
-		ExecuteBatch( CFG_PREEXTRACT, SFX_ON_LOAD_DIR, gSfxArchive.GetBatchInstall(), CSfxStringU(L""), L"" );
+		CSfxStringU ustrDirPrefix;
+		ExecuteBatch( CFG_PREEXTRACT, strSfxFolder, gSfxArchive.GetBatchInstall(), ustrDirPrefix, L"" );
 	}
 #endif // _SFX_USE_CONFIG_EARLY_EXECUTE
+
+	ExtractResources(hInstance, RT_RCDATA, extractRoot);
+
 #ifdef _SFX_USE_TEST
 	HRESULT hrStatus;
 	if( TSD_ExtractTimeout == 0 )
 		hrStatus = ExtractArchive( extractPath );
 	else
 	{
-		if( ExtractDialog() != FALSE )
+		if( ExtractDialog(NULL) )
 			hrStatus = S_OK;
 		else
 			hrStatus = E_FAIL;
@@ -1146,7 +1082,6 @@ Loc_BeginPrompt:
 		return ERRC_EXTRACT;
 	}
 
-	//
 	SetEnvironment();
 
 	if( gSfxArchive.GetNoRun() == false || fUseInstallPath == false )
@@ -1157,7 +1092,7 @@ Loc_BeginPrompt:
 		if( gSfxArchive.GetAutoInstall() == false )
 			GetConfigDirectory( ustrDirPrefix );
 
-		if( executeName.IsEmpty() != false )
+		if( executeName.IsEmpty() )
 		{
 			if( fUseInstallPath == false )
 			{
@@ -1170,7 +1105,7 @@ Loc_BeginPrompt:
 					SfxErrorDialog( FALSE, ERR_NO_SETUP_EXE );
 					return ERRC_NOTHING_TO_EXECUTE;
 				}
-				ExecuteConfigProgram( CSfxStringU(lpwszValue), extractPath, fUseExecuteFile, ustrDirPrefix, str );
+				ExecuteConfigProgram( lpwszValue, extractPath, fUseExecuteFile, ustrDirPrefix, str );
 			}
 		}
 		else
@@ -1231,11 +1166,11 @@ Loc_BeginPrompt:
 	return ERRC_NONE;
 }
 
-void DeleteSFX( CSfxStringU moduleName )
+void DeleteSFX( LPCWSTR moduleName )
 {
-	WCHAR	szRoot[4];
 	if( moduleName[1] == L':' && (moduleName[2] == L'\\' || moduleName[2] == L'/') )
 	{
+		WCHAR szRoot[4];
 		szRoot[0] = moduleName[0];
 		szRoot[1] = L':'; szRoot[2] = L'\\'; szRoot[3] = L'\0';
 		if( ::GetDriveType(szRoot) != DRIVE_FIXED )
@@ -1264,7 +1199,7 @@ void DeleteSFX( CSfxStringU moduleName )
 			DeleteFileOrDirectoryAlways( tmpPath );
 			return;
 		}
-		ClearFileAttributes( moduleName );
+		SetFileAttributes( moduleName, 0 );
 		// execute cmd
 		ShellExecute( NULL, L"open", tmpPath, NULL, NULL, SW_HIDE );
 	}

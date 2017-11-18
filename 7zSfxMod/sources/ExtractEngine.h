@@ -2,7 +2,7 @@
 /* File:        ExtractEngine.h                                              */
 /* Created:     Wed, 05 Oct 2005 17:35:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3813                                                         */
 /* Updated:     Mon, 14 Mar 2016 05:05:17 GMT                                */
@@ -44,6 +44,8 @@ public:
 #endif // SFX_CRYPTO
 
 	CSfxExtractEngine()
+		: m_hExtractThread(NULL)
+		, m_ErrorCode(NArchive::NExtract::NOperationResult::kOK)
 	{
 		m_outFileStreamSpec = NULL;
 #ifdef _SFX_USE_EXTRACT_MASK
@@ -62,8 +64,8 @@ private:
 	COutFileStream *		m_outFileStreamSpec;
 	CMyComPtr<ISequentialOutStream> m_outFileStream;
 	CSfxStringU				m_diskFilePath;
-	static HANDLE			m_hExtractThread;
-	static Int32			m_ErrorCode;
+	HANDLE					m_hExtractThread;
+	Int32					m_ErrorCode;
 #ifdef _SFX_USE_EXTRACT_MASK
 	UInt32 *				m_indices;
 	UInt32					m_numIndices;

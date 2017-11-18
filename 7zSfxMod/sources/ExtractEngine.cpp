@@ -2,7 +2,7 @@
 /* File:        ExtractEngine.cpp                                            */
 /* Created:     Wed, 05 Oct 2005 07:36:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 31 Oct 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3816                                                         */
 /* Updated:     Thu, 17 Mar 2016 05:51:18 GMT                                */
@@ -22,11 +22,6 @@
 #include "7zSfxModInt.h"
 #include "ExtractEngine.h"
 
-CSfxExtractEngine * SfxExtractEngine;
-
-Int32 CSfxExtractEngine::m_ErrorCode = NArchive::NExtract::NOperationResult::kOK;
-HANDLE CSfxExtractEngine::m_hExtractThread;
-
 using namespace NWindows;
 
 
@@ -34,8 +29,8 @@ STDMETHODIMP CSfxExtractEngine::SetTotal( UInt64 size )
 {
 #ifdef _SFX_USE_CHECK_FREE_SPACE
 	UInt64 ui64Free;
-	if( (MiscFlags&MISCFLAGS_NO_CHECK_DISK_FREE) == 0 &&
-			::GetDiskFreeSpaceEx( extractPath, (PULARGE_INTEGER)&ui64Free, NULL, NULL ) != FALSE && ui64Free < size )
+	if( (MiscFlags & MISCFLAGS_NO_CHECK_DISK_FREE) == 0 &&
+			::GetDiskFreeSpaceEx( extractPath, (PULARGE_INTEGER)&ui64Free, NULL, NULL ) && ui64Free < size )
 	{
 		if( ShowSfxWarningDialog( GetLanguageString(STR_DISK_FREE_SPACE) ) != IDOK )
 		{
@@ -51,13 +46,10 @@ STDMETHODIMP CSfxExtractEngine::SetTotal( UInt64 size )
 
 STDMETHODIMP CSfxExtractEngine::SetCompleted( const UInt64 *completeValue )
 {
-	if( fCancelExtract != FALSE )
+	if( fCancelExtract )
 		return E_ABORT;
 	if( completeValue != NULL )
 		::SendMessage( hwndExtractDlg, WM_7ZSFX_SETCOMPLETED, 0, (LPARAM)completeValue );
-//#if defined(_DEBUG)
-//		Sleep( 20 );
-//#endif
 	return S_OK;
 }
 
@@ -80,9 +72,9 @@ STDMETHODIMP CSfxExtractEngine::SetOperationResult( Int32 resultEOperationResult
 	}
 
 	if( m_outFileStream != NULL )
-		m_outFileStreamSpec->SetLastWriteTime( &m_processedFileInfo.UTCLastWriteTime );
+		m_outFileStreamSpec->SetMTime( &m_processedFileInfo.UTCLastWriteTime );
 	m_outFileStream.Release();
-	if( m_extractMode != FALSE )
+	if( m_extractMode )
 		SetFileAttributes( m_diskFilePath, m_processedFileInfo.Attributes );
 	return S_OK;
 }
@@ -102,7 +94,7 @@ STDMETHODIMP CSfxExtractEngine::SayInternalError( Int32 errc, DWORD dwLastError 
 
 STDMETHODIMP CSfxExtractEngine::GetStream( UInt32 index, ISequentialOutStream **outStream, Int32 askExtractMode )
 {
-	if( fCancelExtract != FALSE )
+	if( fCancelExtract )
 		return E_ABORT;
 	*outStream = NULL;
 	if( askExtractMode != NArchive::NExtract::NAskMode::kExtract )
@@ -144,7 +136,7 @@ STDMETHODIMP CSfxExtractEngine::GetStream( UInt32 index, ISequentialOutStream **
 		if (propVariantTemp.vt == VT_BOOL)
 			isAnti = (propVariantTemp.boolVal != VARIANT_FALSE) ? TRUE : FALSE;
 	}
-	if( isAnti != FALSE )
+	if( isAnti )
 	{
 		return SetOperationResult( SfxErrors::seAnti );
 	}*/
@@ -164,7 +156,7 @@ STDMETHODIMP CSfxExtractEngine::GetStream( UInt32 index, ISequentialOutStream **
 		return SetOperationResult( SfxErrors::sePropVariant3 );
 	}
 
-	if( m_processedFileInfo.IsDirectory != FALSE )
+	if( m_processedFileInfo.IsDirectory )
 	{
 		if( CreateFolderTree( m_diskFilePath ) == FALSE )
 			return SetOperationResult( SfxErrors::seCreateFolder );
@@ -185,10 +177,10 @@ STDMETHODIMP CSfxExtractEngine::GetStream( UInt32 index, ISequentialOutStream **
 	{
 		DWORD dwLastError = ::GetLastError();
 		CSfxStringU filePath = m_diskFilePath;
-		int nPos = GetDirectorySeparatorPos( filePath );
+		int nPos = filePath.ReverseFind_PathSepar();
 		if( nPos < 0 )
 			return SayInternalError( SfxErrors::seCreateFile, dwLastError );
-		filePath.ReleaseBuffer( nPos );
+		filePath.ReleaseBuf_SetEnd( nPos );
 		if( CreateFolderTree( filePath ) == FALSE )
 			return SetOperationResult( SfxErrors::seCreateFolder );
 		if( m_outFileStreamSpec->Create( m_diskFilePath, true ) == false )
@@ -204,19 +196,18 @@ HRESULT CSfxExtractEngine::Extract(LPCWSTR lpwszFolderName)
 {
 	SetDirectory( lpwszFolderName );
 
-	SfxExtractEngine = this;
 	DWORD dwThreadId;
 	m_ErrorCode = NArchive::NExtract::NOperationResult::kOK;
-	m_hExtractThread = ::CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)CSfxExtractEngine::ExtractThread, this, 0, &dwThreadId );
+	m_hExtractThread = ::CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)CSfxExtractEngine::ExtractThread, this, CREATE_SUSPENDED, &dwThreadId );
 
 	if (m_hExtractThread != NULL)
 	{
 		if (GUIMode != GUIMODE_HIDDEN)
-			ExtractDialog();
+			ExtractDialog(this);
+		::ResumeThread(m_hExtractThread);
 		::WaitForSingleObject(m_hExtractThread, INFINITE);
 	}
 
-	hwndExtractDlg = NULL;
 	if( m_ErrorCode != NArchive::NExtract::NOperationResult::kOK )
 	{
 		switch( m_ErrorCode )
@@ -269,10 +260,6 @@ HRESULT CSfxExtractEngine::Extract(LPCWSTR lpwszFolderName)
 
 HRESULT WINAPI CSfxExtractEngine::ExtractThread(CSfxExtractEngine *pThis)
 {
-	if( GUIMode != GUIMODE_HIDDEN )
-	{
-		while( hwndExtractDlg == NULL ) Sleep( 20 );
-	}
 	HRESULT result = E_FAIL;
 	UInt32 * indices = NULL;
 	UInt32 num_indices = (UInt32)-1;
@@ -325,14 +312,10 @@ STDMETHODIMP CSfxExtractEngine::CryptoGetTextPassword(BSTR *password)
 		}
 	#endif // _SFX_USE_PREFIX_PLATFORM
 
-	BOOL IsExtractCadidate( UInt32 index, LPCWSTR lpwszMaskName )
+	BOOL IsExtractCadidate( UInt32 /*index*/, LPCWSTR lpwszMaskName )
 	{
 		if( MyStringCompareNoCase(lpwszMaskName,CFG_EXTRACTMASK_INCLUDE) != 0 )
 			return FALSE;
-	#ifdef _SFX_USE_SFXAPI
-		if( IsSfxApiConfig(index) || IsSfxApiHelpers(index) )
-			return FALSE;
-	#endif // _SFX_USE_SFXAPI
 		return TRUE;
 	}
 #endif // _SFX_USE_EXTRACT_MASK
@@ -362,7 +345,7 @@ HRESULT ExtractArchive( const CSfxStringU &folderName )
 		return E_FAIL;
 #endif // _SFX_USE_TEST
 
-	CSfxExtractEngine * extractEngine = new CSfxExtractEngine;
+	CMyComPtr<CSfxExtractEngine> extractEngine = new CSfxExtractEngine;
 
 #ifdef _SFX_USE_EXTRACT_MASK
 	#ifdef _SFX_USE_PREFIX_PLATFORM
@@ -371,7 +354,7 @@ HRESULT ExtractArchive( const CSfxStringU &folderName )
 	#endif // _SFX_USE_PREFIX_PLATFORM
 	LPCWSTR lpwsz1stMask = CFG_EXTRACTMASK_EXCLUDE;
 	LPCWSTR lpwsz2ndMask = CFG_EXTRACTMASK_INCLUDE;
-	if( MiscFlags&MISCFLAGS_EXTRACTMASK_INVERT )
+	if( MiscFlags & MISCFLAGS_EXTRACTMASK_INVERT )
 	{
 		// Inverting: first 'include', late 'exclude'
 		lpwsz1stMask = CFG_EXTRACTMASK_INCLUDE;
@@ -401,9 +384,9 @@ HRESULT ExtractArchive( const CSfxStringU &folderName )
 		while( mask_founded == FALSE && (lpwszValue = GetTextConfigValue( lpwsz1stMask, &from )) != NULL )
 		{
 			from++;
-			if( DoesWildcardMatchName(CSfxStringU(lpwszValue),pathName) != false )
+			if( DoesWildcardMatchName(CSfxStringU(lpwszValue),pathName) )
 			{
-				if( IsExtractCadidate(i,lpwsz1stMask) != FALSE )
+				if( IsExtractCadidate(i,lpwsz1stMask) )
 					indices[j++] = i;
 				mask_founded = TRUE;
 			}
@@ -413,16 +396,16 @@ HRESULT ExtractArchive( const CSfxStringU &folderName )
 		while( mask_founded == FALSE && (lpwszValue = GetTextConfigValue( lpwsz2ndMask, &from )) != NULL )
 		{
 			from++;
-			if( DoesWildcardMatchName(CSfxStringU(lpwszValue),pathName) != false )
+			if( DoesWildcardMatchName(CSfxStringU(lpwszValue),pathName) )
 			{
-				if( IsExtractCadidate(i,lpwsz2ndMask) != FALSE )
+				if( IsExtractCadidate(i,lpwsz2ndMask) )
 					indices[j++] = i;
 				mask_founded = TRUE;
 			}
 		}
 		if( mask_founded == FALSE &&
 				MyStringCompareNoCase(lpwsz2ndMask,CFG_EXTRACTMASK_EXCLUDE) == 0 &&
-					IsExtractCadidate(i,CFG_EXTRACTMASK_INCLUDE) != FALSE )
+					IsExtractCadidate(i,CFG_EXTRACTMASK_INCLUDE) )
 			indices[j++] = i;
 	}
 	extractEngine->SetIndices( indices, j );
