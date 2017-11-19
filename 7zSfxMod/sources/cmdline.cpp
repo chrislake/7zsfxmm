@@ -68,7 +68,7 @@ LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 	LPCWSTR const* pParams = ConfigParams;
 	while( *pParams != NULL )
 	{
-		int nLen = lstrlen(*pParams);
+		int nLen = wcslen(*pParams);
 		if( _wcsnicmp( lpwszCommandLine, *pParams, nLen ) == 0 && lpwszCommandLine[nLen] == L'=' )
 		{
 			CSfxStringU str = lpwszCommandLine;
@@ -118,7 +118,7 @@ LPCWSTR ParseCommandLineParameters(LPCWSTR str)
 #ifdef _SFX_USE_ENVIRONMENT_VARS
 	CSfxStringU	tmpstr;
 	LPCWSTR lpwszCmdLineStart = str;
-	LPCWSTR lpwszCmdLineEnd = str + lstrlen(str);
+	LPCWSTR lpwszCmdLineEnd = str + wcslen(str);
 	LPCWSTR lpwszCmdLine1End = NULL;
 	SKIP_WHITESPACES_W( lpwszCmdLineStart );
 #endif // _SFX_USE_ENVIRONMENT_VARS

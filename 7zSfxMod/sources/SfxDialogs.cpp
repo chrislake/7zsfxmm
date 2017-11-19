@@ -1364,24 +1364,26 @@ void SfxErrorDialog( BOOL fUseLastError, UINT idFormat, ... )
 
 	LPCWSTR lpwszFormat = GetLanguageString( idFormat );
 	va_start( va, idFormat );
-	wvsprintf( buf, lpwszFormat, va );
+	int nMessageLength = wvsprintf( buf, lpwszFormat, va );
 
 	if( fUseLastError )
 	{
 		LPWSTR lpMsgBuf;
 		DWORD dwLastError = ::GetLastError();
-		if( ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-							 NULL, dwLastError, idSfxLang,
-							 (LPWSTR)&lpMsgBuf, 0, &va ) != 0 ||
-			::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
-							 NULL, dwLastError, 0,
-							 (LPWSTR)&lpMsgBuf, 0, &va ) != 0 )
+		LANGID idMsgLang = 0;
+		DWORD dwMsgLen;
+		do
 		{
-			int nMessageLength = lstrlen(buf);
-			LPWSTR lpszFullMessage = new WCHAR[lstrlen(lpMsgBuf)+nMessageLength+2];
-			lstrcpy( lpszFullMessage, buf );
+			idMsgLang ^= idSfxLang;
+			dwMsgLen = ::FormatMessage( FORMAT_MESSAGE_ALLOCATE_BUFFER | FORMAT_MESSAGE_FROM_SYSTEM,
+										NULL, dwLastError, idMsgLang, (LPWSTR)&lpMsgBuf, 0, &va );
+		} while (dwMsgLen == 0 && idMsgLang != 0);
+		if (dwMsgLen != 0)
+		{
+			LPWSTR lpszFullMessage = new WCHAR[nMessageLength + dwMsgLen + 2];
+			wcscpy( lpszFullMessage, buf );
 			lpszFullMessage[nMessageLength] = L'\n';
-			lstrcpy( lpszFullMessage+nMessageLength+1, lpMsgBuf );
+			wcscpy( lpszFullMessage + nMessageLength + 1, lpMsgBuf );
 			ShowSfxErrorDialog( lpszFullMessage );
 			delete[] lpszFullMessage;
 			::LocalFree( lpMsgBuf );

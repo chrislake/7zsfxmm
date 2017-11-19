@@ -287,7 +287,7 @@ void SetConfigVariables()
 	if( (lpwszValue = GetTextConfigValue( CFG_EXTRACT_TITLE )) != NULL )
 		lpwszExtractTitle = lpwszValue;
 	// Load GUIMode & 7-Zip > 4.42 'Progress'
-	if( (lpwszValue = GetTextConfigValue( CFG_PROGRESS)) != NULL && lstrcmpi( lpwszValue, L"no" ) == 0 )
+	if( (lpwszValue = GetTextConfigValue( CFG_PROGRESS)) != NULL && _wcsicmp( lpwszValue, L"no" ) == 0 )
 		GUIMode = GUIMODE_HIDDEN;
 	if( (lpwszValue = GetTextConfigValue( CFG_GUIMODE )) != NULL )
 	{

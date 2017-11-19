@@ -72,7 +72,7 @@ CSfxStringU CreateTempName( LPCWSTR lpwszFormat )
 
 LPCWSTR IsSubString( LPCWSTR lpwszString, LPCWSTR lpwszSubString )
 {
-	int nLength = lstrlenW( lpwszSubString );
+	int nLength = wcslen( lpwszSubString );
 	if( _wcsnicmp( lpwszString, lpwszSubString, nLength ) == 0 )
 		return lpwszString + nLength;
 	return NULL;
@@ -202,8 +202,8 @@ void ExpandEnvironmentStrings( CSfxStringU & ustr )
 
 static bool ReadConfig( Byte const *const buffer, UInt32 const numBytesInBuffer, LPCSTR startID, LPCSTR endID, CSfxStringA &stringResult )
 {
-	UInt32 const signatureStartSize = lstrlenA( startID );
-	UInt32 const signatureEndSize = lstrlenA( endID );
+	UInt32 const signatureStartSize = strlen( startID );
+	UInt32 const signatureEndSize = strlen( endID );
 	UInt32 pos = 0;
 	UInt32 i = 0;
 	while( i == 0 && pos + signatureStartSize <= numBytesInBuffer )
@@ -310,13 +310,13 @@ bool ReportCfgError( const CSfxStringA &string, int pos, bool fromCmdLine )
 
 CTextConfigPair * GetConfigPair( LPCWSTR id, int * pFrom )
 {
-	int nFrom = (pFrom == NULL) ? 0: (*pFrom);
+	int nFrom = pFrom ? *pFrom : 0;
 	for( int i = nFrom; i < (int)gConfig.Size(); i++ )
-		if( lstrcmp( gConfig[i].ID, id ) == 0 )
+		if( wcscmp( gConfig[i].ID, id ) == 0 )
 		{
 			if( pFrom != NULL )
 				*pFrom = i;
-			return (CTextConfigPair *)(&(gConfig[i]));
+			return &gConfig[i];
 		}
 		
 	return NULL;
@@ -381,7 +381,7 @@ void DeleteParams( LPCWSTR lpwszName  )
 	while( i )
 	{
 		--i;
-		if( lstrcmp( gConfig[i].ID, lpwszName ) == 0 )
+		if( wcscmp( gConfig[i].ID, lpwszName ) == 0 )
 			gConfig.Delete( i );
 	}
 }
@@ -500,7 +500,7 @@ Loc_RTF:
 		}
 		pair.String = SfxMultiByteToUnicodeString( message, CP_UTF8 );
 		ReplaceHexChars( pair.String );
-		if( lstrcmp( pair.ID, CFG_SETENVIRONMENT ) == 0 )
+		if( wcscmp( pair.ID, CFG_SETENVIRONMENT ) == 0 )
 		{
 			if( pair.String.Find( L'=') <= 0 )
 				return ReportCfgError( string, startPos, fromCmdLine );
@@ -508,7 +508,7 @@ Loc_RTF:
 		LPCWSTR const *mp = MultipleParameters;
 		while( *mp != NULL )
 		{
-			if( wcsncmp( pair.ID, *mp, lstrlen(*mp) ) == 0 )
+			if( wcsncmp( pair.ID, *mp, wcslen(*mp) ) == 0 )
 				break;
 			mp++;
 		}
@@ -541,14 +541,10 @@ LPCWSTR GetTextConfigValue( LPCWSTR id, int * pFrom )
 
 BOOL CreateFolderTree( LPCWSTR lpwszPath )
 {
-	int nLength = ::lstrlen( lpwszPath );
 	CSfxStringU	Path2 = lpwszPath;
-	LPWSTR lpwszPath2 = Path2.GetBuf(0);
-	if( lpwszPath[nLength-1] == L'\\' || lpwszPath[nLength-1] == '/' )
-	{
-		lpwszPath2[nLength-1] = L'\0';
-		nLength--;
-	}
+	int nLength = Path2.Len();
+	int nPathSep = Path2.ReverseFind_PathSepar();
+	LPWSTR lpwszPath2 = Path2.GetBuf_SetEnd(nLength > nPathSep + 1 ? nLength : --nLength);
 	int i = nLength;
 	for( ;; )
 	{
@@ -611,7 +607,7 @@ BOOL DeleteDirectoryWithSubitems( LPCWSTR path )
 			if( (fd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) != 0 )
 			{
 				// directory
-				if( lstrcmp(fd.cFileName, L".") != 0 && lstrcmp(fd.cFileName, L"..") != 0 )
+				if( fd.cFileName[wcsspn(fd.cFileName, L".")] != L'\0' )
 				{
 					if( DeleteDirectoryWithSubitems( path2 ) == FALSE )
 						return FALSE;
@@ -1070,8 +1066,8 @@ UINT GetUILanguage()
 LPCWSTR GetLanguageString( UINT id )
 {
 	UINT i;
-	WCHAR	wszEnvName[sizeof(SFX_STRING_FORMAT)/sizeof(WCHAR)+32];
-	LPWSTR	lpwszEnvValue;
+	WCHAR wszEnvName[_countof(SFX_STRING_FORMAT) + 32];
+	LPWSTR lpwszEnvValue;
 
 	for( i = 0; SfxLangStrings[i].id != 0; i++ )
 	{
@@ -1081,18 +1077,16 @@ LPCWSTR GetLanguageString( UINT id )
 	if( SfxLangStrings[i].id == 0 )
 		return L"";
 
-	DWORD dwCurrentLastError = ::GetLastError();
 	wsprintf( wszEnvName, SFX_STRING_FORMAT, id );
-	DWORD dwSize = GetEnvironmentVariable( wszEnvName, NULL, 0 );
-	if( GetLastError() == NO_ERROR )
+	if( DWORD dwSize = GetEnvironmentVariable( wszEnvName, NULL, 0 ) )
 	{
 		// use environment value
-		lpwszEnvValue = new WCHAR[dwSize+2];
-		if( GetEnvironmentVariable( wszEnvName, lpwszEnvValue, dwSize+1 ) <= dwSize && GetLastError() == NO_ERROR )
+		lpwszEnvValue = new WCHAR[dwSize];
+		if( GetEnvironmentVariable( wszEnvName, lpwszEnvValue, dwSize ) < dwSize )
 		{
 			if( SfxLangStrings[i].lpszUnicode != NULL )
 			{
-				if( lstrcmpi(SfxLangStrings[i].lpszUnicode,lpwszEnvValue) != 0 )
+				if( _wcsicmp(SfxLangStrings[i].lpszUnicode, lpwszEnvValue) != 0 )
 				{
 					delete SfxLangStrings[i].lpszUnicode;
 					SfxLangStrings[i].lpszUnicode = lpwszEnvValue;
@@ -1108,28 +1102,19 @@ LPCWSTR GetLanguageString( UINT id )
 		else
 			delete[] lpwszEnvValue;
 	}
-	::SetLastError( dwCurrentLastError );
 
 	if( SfxLangStrings[i].lpszUnicode != NULL )
 		return SfxLangStrings[i].lpszUnicode;
 	
-	LPCSTR	lpszReturn = SfxLangStrings[i].strPrimary;
+	LPCSTR lpszReturn = SfxLangStrings[i].strPrimary;
 	
 	if( SfxLangStrings[i].strSecondary != NULL && GetUILanguage() == SfxSecondaryLangId )
 		lpszReturn = SfxLangStrings[i].strSecondary;
 	
-	int nLength = lstrlenA(lpszReturn)+1;
-	SfxLangStrings[i].lpszUnicode = new WCHAR[nLength+2];
-	static UINT uACP = (UINT)-1;
-	if( uACP == (UINT)-1 )
-	{
-		WCHAR acp_text[32];
-		uACP = CP_ACP;
-		if( GetLocaleInfo( idSfxLang, LOCALE_IDEFAULTANSICODEPAGE, acp_text, (sizeof(acp_text)/sizeof(acp_text[0]))-1 ) > 0 )
-			uACP = StringToLong( acp_text );
-	}
-	::MultiByteToWideChar( uACP, 0, lpszReturn, nLength, SfxLangStrings[i].lpszUnicode, nLength+1 );
-	
+	int const nLength = strlen(lpszReturn) + 1;
+	SfxLangStrings[i].lpszUnicode = new WCHAR[nLength];
+	::MultiByteToWideChar( CP_UTF8, 0, lpszReturn, nLength, SfxLangStrings[i].lpszUnicode, nLength );
+
 	return SfxLangStrings[i].lpszUnicode;
 }
 
