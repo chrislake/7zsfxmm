@@ -37,6 +37,8 @@
 #include "ExtractEngine.h"
 #include "archive.h"
 #include "../C/Lzma86.h"
+#include "VersionData.h"
+#include "vs_version.h"
 
 using NWindows::NFile::NIO::CInFile;
 using NWindows::NFile::NIO::COutFile;
@@ -576,6 +578,98 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 		UString ResourceName = ExtractFileNameFromPath(InFileName);
 		BOOL fUpdate = UpdateResourceW(hUpdate, lpType, lpName, 0, lpData, inSize);
 		(fUpdate ? fDiscard : fSuccess) = FALSE;
+	}
+	// Patch version resource
+	static WCHAR const Version[]			= L"*Version";			// Shortcut to set all version fields at once
+	static WCHAR const FileVersion[]		= L"FileVersion";
+	static WCHAR const ProductVersion[]		= L"ProductVersion";
+	static WCHAR const CompanyName[]		= L"CompanyName";
+	static WCHAR const FileDescription[]	= L"FileDescription";
+	static WCHAR const InternalName[]		= L"InternalName";
+	static WCHAR const LegalCopyright[]		= L"LegalCopyright";
+	static WCHAR const OriginalFilename[]	= L"OriginalFilename";
+	static WCHAR const PrivateBuild[]		= L"PrivateBuild";
+	static WCHAR const SpecialBuild[]		= L"SpecialBuild";
+	static WCHAR const ProductName[]		= L"ProductName";
+	file_ver_data fvd;
+	if (CVersionData const *const pvd = CVersionData::Load())
+	{
+		if (VS_FIXEDFILEINFO const *const pVffInfo =
+			reinterpret_cast<const VS_FIXEDFILEINFO *>(pvd->Data()))
+		{
+			fvd.m_fxi = *pVffInfo;
+			fvd.m_fxi.dwFileFlags = 0;
+		}
+		if (CVersionData const *const pvdStringFileInfo = pvd->Find(L"StringFileInfo"))
+		{
+			if (CVersionData const *const pvdLanguage = pvdStringFileInfo->First())
+			{
+				CVersionData const *const qvdLanguage = pvdStringFileInfo->Next();
+				CVersionData const *pvdAssignment = reinterpret_cast<CVersionData const *>(pvdLanguage->Data());
+				while (pvdAssignment < qvdLanguage)
+				{
+					if (_wcsicmp(pvdAssignment->szKey, PrivateBuild) != 0)
+					{
+						fvd.addTwostr(pvdAssignment->szKey, pvdAssignment->Data());
+					}
+					pvdAssignment = pvdAssignment->Next();
+				}
+			}
+		}
+	}
+	bool bPatchVersionResource = false;
+	while (LPCWSTR lpKey =
+		(lpwszAhead = IsSfxSwitch(lpwszValue, &Version[true]))		!= NULL	? MAKEINTRESOURCE(offsetof(file_ver_data, m_fxi.dwFileVersionLS)) :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, L"FileVersionNo"))	!= NULL	? MAKEINTRESOURCE(offsetof(file_ver_data, m_fxi.dwFileVersionMS)) :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, L"ProductVersionNo"))	!= NULL	? MAKEINTRESOURCE(offsetof(file_ver_data, m_fxi.dwProductVersionMS)) :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, FileVersion))			!= NULL	? FileVersion :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, ProductVersion))		!= NULL	? ProductVersion :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, CompanyName))			!= NULL	? CompanyName :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, FileDescription))		!= NULL	? FileDescription :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, InternalName))		!= NULL	? InternalName :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, LegalCopyright))		!= NULL	? LegalCopyright :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, OriginalFilename))	!= NULL	? OriginalFilename :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, PrivateBuild))		!= NULL	? PrivateBuild :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, SpecialBuild))		!= NULL	? SpecialBuild :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, ProductName))			!= NULL	? ProductName :
+		NULL)
+	{
+		CSfxStringU Value;
+		SKIP_WHITESPACES_W(lpwszAhead);
+		lpwszValue = LoadQuotedString(lpwszAhead, Value);
+		if (IS_INTRESOURCE(lpKey))
+		{
+			LPBYTE p = reinterpret_cast<LPBYTE>(&fvd) + reinterpret_cast<WORD>(lpKey);
+			memset(p, 0, 8);
+			swscanf(Value, L"%hu.%hu.%hu.%hu", p + 2, p + 0, p + 6, p + 4);
+			switch (reinterpret_cast<WORD>(lpKey))
+			{
+			case offsetof(file_ver_data, m_fxi.dwFileVersionLS):
+				fvd.m_fxi.dwFileVersionMS = fvd.m_fxi.dwFileVersionLS;
+				fvd.m_fxi.dwFileVersionLS = fvd.m_fxi.dwProductVersionMS;
+				fvd.m_fxi.dwProductVersionMS = fvd.m_fxi.dwFileVersionMS;
+				fvd.m_fxi.dwProductVersionLS = fvd.m_fxi.dwFileVersionLS;
+				lpKey = &Version[false];
+				break;
+			case offsetof(file_ver_data, m_fxi.dwFileVersionMS):
+				lpKey = FileVersion;
+				break;
+			case offsetof(file_ver_data, m_fxi.dwProductVersionMS):
+				lpKey = ProductVersion;
+				break;
+			}
+		}
+		fvd.addTwostr(lpKey, Value);
+		bPatchVersionResource = true;
+	}
+	if (bPatchVersionResource)
+	{
+		BYTE buf[8192];
+		if (UInt32 cb = fvd.makeVersionResource(buf, sizeof buf))
+		{
+			BOOL fUpdate = UpdateResourceW(hUpdate, RT_VERSION, MAKEINTRESOURCE(VS_VERSION_INFO), 0, buf, cb);
+			(fUpdate ? fDiscard : fSuccess) = FALSE;
+		}
 	}
 	if (!EndUpdateResourceW(hUpdate, fDiscard) || !fSuccess)
 		return false;

@@ -53,6 +53,8 @@
 #include <initguid.h>
 #include <richedit.h>
 
+#include <assert.h>
+#include <wchar.h>
 
 #include "Windows/PropVariant.h"
 #include "Common/Common.h"

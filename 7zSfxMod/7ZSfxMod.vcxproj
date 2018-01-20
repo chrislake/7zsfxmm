@@ -2416,6 +2416,7 @@
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='SfxTools|x64'">%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <ClCompile Include="..\7-Zip\CPP\Common\Wildcard.cpp" />
+    <ClCompile Include="sources\vs_version.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\7-Zip\CPP\7zip\Common\CWrappers.h" />
@@ -2453,6 +2454,8 @@
     <ClInclude Include="sources\stdafx.h" />
     <ClInclude Include="sources\strings.h" />
     <ClInclude Include="sources\version.h" />
+    <ClInclude Include="sources\VersionData.h" />
+    <ClInclude Include="sources\vs_version.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="sources\res\7zsfx.ico" />
