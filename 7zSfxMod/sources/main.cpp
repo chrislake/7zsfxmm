@@ -535,6 +535,7 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_CONFIG)) != NULL ? RT_HTML :
 		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_ADJUNCT)) != NULL ? RT_RCDATA :
 		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_MANIFEST)) != NULL ? RT_MANIFEST :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_ICON)) != NULL ? RT_GROUP_ICON :
 		NULL)
 	{
 		CSfxStringU InFileName;
@@ -553,7 +554,101 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 		CBuffer<Byte> outBuffer;
 		LPVOID lpData = inBuffer;
 		LPCWSTR lpName = MAKEINTRESOURCE(1);
-		if (lpType != RT_MANIFEST)
+		if (lpType == RT_GROUP_ICON)
+		{
+			struct IconHeader
+			{
+				WORD idReserved;
+				WORD idType;
+				WORD idCount;
+			};
+			struct IconFileRecord
+			{
+				BYTE bWidth;
+				BYTE bHeight;
+				BYTE bColorCount;
+				BYTE bReserved;
+				WORD wPlanes;
+				WORD wBitCount;
+				DWORD dwBytesInRes;
+				DWORD dwOffset;
+			};
+			struct IconGroupRecord
+			{
+				BYTE bWidth;
+				BYTE bHeight;
+				BYTE bColorCount;
+				BYTE bReserved;
+				WORD wPlanes;
+				WORD wBitCount;
+				BYTE dwBytesInRes[sizeof(DWORD)];
+				WORD nId;
+			};
+			// Limit the size and color depth of the icon as specified
+			LONG lMaxWidth = LONG_MAX;
+			UINT uMaxDepth = UINT_MAX;
+			UINT limits[3];
+			if (swscanf(lpwszValue, L"%ux%ux%u", &limits[0], &limits[1], &limits[2]) == 3)
+			{
+				// Assign to lMaxWidth the value which occurs at least twice
+				// Assign to uMaxDepth whatever value remains
+				UINT i = limits[1] == limits[2] ? 0 : limits[0] == limits[2] ? 1 : limits[0] == limits[1] ? 2 : 3;
+				if (i < _countof(limits))
+				{
+					uMaxDepth = limits[i];
+					lMaxWidth = limits[!i];
+				}
+				// Consume the extra argument
+				lpwszValue = LoadQuotedString(lpwszValue, InFileName);
+			}
+			IconHeader const *const qHeader = reinterpret_cast<IconHeader *>(static_cast<Byte *>(inBuffer));
+			IconFileRecord const *qEntry = reinterpret_cast<IconFileRecord const *>(qHeader + 1);
+			WORD const n = qHeader->idCount;
+			UInt32 outSize = sizeof(IconHeader) + n * sizeof(IconGroupRecord);
+			outBuffer.Alloc(outSize);
+			IconHeader *const pHeader = reinterpret_cast<IconHeader *>(&outBuffer[0]);
+			IconGroupRecord *pEntry = reinterpret_cast<IconGroupRecord *>(pHeader + 1);
+			*pHeader = *qHeader;
+			pHeader->idCount = 0;
+			outSize = sizeof(IconHeader);
+			WORD nId = 1;
+			for (WORD i = 0; i < n; ++i)
+			{
+				BITMAPINFOHEADER *pBIH = reinterpret_cast<BITMAPINFOHEADER *>(&inBuffer[qEntry->dwOffset]);
+				if (pBIH->biWidth <= lMaxWidth && pBIH->biBitCount <= uMaxDepth)
+				{
+					++pHeader->idCount;
+					outSize += sizeof(IconGroupRecord);
+					memcpy(pEntry, qEntry, offsetof(IconGroupRecord, nId));
+					pEntry->nId = nId;
+					pEntry->wPlanes = pBIH->biPlanes;
+					pEntry->wBitCount = pBIH->biBitCount;
+					++nId;
+					++pEntry;
+				}
+				++qEntry;
+			}
+			// Update RT_GROUP_ICON *before* RT_ICON so as to not end up in a mess!
+			BOOL fUpdate = UpdateResourceW(hUpdate, lpType, lpName, 0, pHeader, outSize);
+			(fUpdate ? fDiscard : fSuccess) = FALSE;
+			pEntry = reinterpret_cast<IconGroupRecord *>(pHeader + 1);
+			qEntry = reinterpret_cast<IconFileRecord const *>(qHeader + 1);
+			nId = 1;
+			for (WORD i = 0; i < n; ++i)
+			{
+				BITMAPINFOHEADER *pBIH = reinterpret_cast<BITMAPINFOHEADER *>(&inBuffer[qEntry->dwOffset]);
+				if (pBIH->biWidth <= lMaxWidth && pBIH->biBitCount <= uMaxDepth)
+				{
+					BOOL fUpdate = UpdateResourceW(hUpdate, RT_ICON, MAKEINTRESOURCE(nId), 0, pBIH, qEntry->dwBytesInRes);
+					(fUpdate ? fDiscard : fSuccess) = FALSE;
+					++nId;
+					++pEntry;
+				}
+				++qEntry;
+			}
+			continue; // Update of RT_GROUP_ICON has already happened above!
+		}
+		else if (lpType != RT_MANIFEST)
 		{
 			// we allocate 105% of original size for output buffer
 			UInt64 outSize64 = fileSize / 20 * 21 + (1 << 16);
@@ -575,7 +670,6 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 			lpData = outBuffer;
 			lpName = InFileName.Ptr() + InFileName.ReverseFind_PathSepar() + 1;
 		}
-		UString ResourceName = ExtractFileNameFromPath(InFileName);
 		BOOL fUpdate = UpdateResourceW(hUpdate, lpType, lpName, 0, lpData, inSize);
 		(fUpdate ? fDiscard : fSuccess) = FALSE;
 	}
