@@ -2,7 +2,7 @@
 // Microsoft Visual C++ generated include file.
 // Used by 7zSfxMod.rc
 //
-#define IDI_7ZSFX                       101
+#define IDI_7ZSFX                       1
 
 // Next default values for new objects
 // 
