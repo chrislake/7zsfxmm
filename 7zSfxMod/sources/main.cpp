@@ -2,7 +2,7 @@
 /* File:        main.cpp                                                     */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
 /* Updated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
@@ -103,24 +103,11 @@ HMODULE	hKernel32;
 CObjectVector<CTextConfigPair> Variables;
 bool fUseBackward = false;
 
-typedef struct tagENVALIAS {
-	int		nFolder;
-	LPCWSTR	lpwszName;
-} ENVALIAS, * PENVALIAS;
-
 #ifndef CSIDL_COMMON_DOCUMENTS
 	#define CSIDL_COMMON_DOCUMENTS          0x002e        // All Users\Documents
 #endif
 
-ENVALIAS const EnvAliases [] = {
-	{ CSIDL_COMMON_DESKTOPDIRECTORY,	L"CommonDesktop" },
-	{ CSIDL_COMMON_DOCUMENTS,			L"CommonDocuments" },
-	{ CSIDL_DESKTOPDIRECTORY,			L"UserDesktop" },
-	{ CSIDL_PERSONAL,					L"MyDocuments" },
-	{ CSIDL_PERSONAL,					L"MyDocs" }
-};
-
-void SfxInit()
+static void SfxInit()
 {
 	hKernel32 = ::GetModuleHandleW( L"kernel32" );
 	InitCommonControls();
@@ -147,6 +134,16 @@ void SfxInit()
 	{
 		if( SHGetSpecialFolderPath(NULL, wszPath, i, FALSE) )
 		{
+			static struct {
+				int		nFolder;
+				LPCWSTR	lpwszName;
+			} const EnvAliases[] = {
+				{ CSIDL_COMMON_DESKTOPDIRECTORY,	L"CommonDesktop" },
+				{ CSIDL_COMMON_DOCUMENTS,			L"CommonDocuments" },
+				{ CSIDL_DESKTOPDIRECTORY,			L"UserDesktop" },
+				{ CSIDL_PERSONAL,					L"MyDocuments" },
+				{ CSIDL_PERSONAL,					L"MyDocs" }
+			};
 			wsprintf( wszName, SPECIAL_FOLDER_FORMAT, i );
 			SfxAddEnvironmentVarWithAlias( wszName, wszPath );
 			for( int j = 0; j < _countof(EnvAliases); j++ )
@@ -158,7 +155,7 @@ void SfxInit()
 	}
 }
 
-void ReplaceVariables( CSfxStringU& str )
+static void ReplaceVariables( CSfxStringU& str )
 {
 	ExpandEnvironmentStrings( str );
 	ReplaceWithArchivePath( str, strSfxFolder );
@@ -176,7 +173,7 @@ void ReplaceVariablesEx( CSfxStringU& str )
 	ReplaceVariables( str );
 }
 
-void SetEnvironment()
+static void SetEnvironment()
 {
 	for( unsigned i = 0; i < Variables.Size(); i++ )
 	{
@@ -186,7 +183,7 @@ void SetEnvironment()
 	}
 }
 
-LPCWSTR UpdateFlagsCommon( LPCWSTR lpwszText, int * pnValue )
+static LPCWSTR UpdateFlagsCommon( LPCWSTR lpwszText, int * pnValue )
 {
 	while( (*lpwszText >= L'0' && *lpwszText <= L'9') || *lpwszText == L'+' || *lpwszText == L'-' )
 	{
@@ -203,7 +200,7 @@ LPCWSTR UpdateFlagsCommon( LPCWSTR lpwszText, int * pnValue )
 	return lpwszText;
 }
 
-LPCWSTR UpdateGUIFlags( LPCWSTR lpwszText )
+static LPCWSTR UpdateGUIFlags( LPCWSTR lpwszText )
 {
 	if( GUIFlags == -1 || (*lpwszText != L'+' && *lpwszText != L'-') )
 		GUIFlags = 0;
@@ -211,7 +208,7 @@ LPCWSTR UpdateGUIFlags( LPCWSTR lpwszText )
 	return UpdateFlagsCommon( lpwszText, &GUIFlags );
 }
 
-LPCWSTR UpdateMiscFlags( LPCWSTR lpwszText )
+static LPCWSTR UpdateMiscFlags( LPCWSTR lpwszText )
 {
 	if( *lpwszText != L'+' && *lpwszText != L'-' )
 		MiscFlags = 0;
@@ -219,7 +216,7 @@ LPCWSTR UpdateMiscFlags( LPCWSTR lpwszText )
 	return UpdateFlagsCommon( lpwszText, &MiscFlags );
 }
 
-LPCWSTR UpdateOverwriteMode( LPCWSTR lpwszText )
+static LPCWSTR UpdateOverwriteMode( LPCWSTR lpwszText )
 {
 	int nValue = OverwriteMode | OverwriteFlags;
 	if( *lpwszText != L'+' && *lpwszText != L'-' )
@@ -231,7 +228,7 @@ LPCWSTR UpdateOverwriteMode( LPCWSTR lpwszText )
 	return lpwszRet;
 }
 
-void ReplaceVariableInShortcut( CSfxStringU &strShortcut, CSfxStringU const &strVarName, CSfxStringU const &strVarValue )
+static void ReplaceVariableInShortcut( CSfxStringU &strShortcut, CSfxStringU const &strVarName, CSfxStringU const &strVarValue )
 {
 	int nVarNameLength = strVarName.Len();
 	for( unsigned i = 0; i < strShortcut.Len(); i++ )
@@ -247,7 +244,7 @@ void ReplaceVariableInShortcut( CSfxStringU &strShortcut, CSfxStringU const &str
 	}
 }
 
-LPCWSTR IsSfxSwitch( LPCWSTR lpwszCommandLine, LPCWSTR lpwszSwitch )
+static LPCWSTR IsSfxSwitch( LPCWSTR lpwszCommandLine, LPCWSTR lpwszSwitch )
 {
 	SKIP_WHITESPACES_W(lpwszCommandLine);
 	if( *lpwszCommandLine == L'-' || *lpwszCommandLine == L'/')
@@ -261,7 +258,7 @@ LPCWSTR IsSfxSwitch( LPCWSTR lpwszCommandLine, LPCWSTR lpwszSwitch )
 	return NULL;
 }
 
-void SetConfigVariables()
+static void SetConfigVariables()
 {
 	LPCWSTR	lpwszValue;
 	int from;
@@ -352,7 +349,7 @@ void SetConfigVariables()
 #endif // _SFX_USE_VOLUME_NAME_STYLE
 }
 
-void PostExecute_Shortcut( LPCWSTR lpwszValue )
+static void PostExecute_Shortcut( LPCWSTR lpwszValue )
 {
 	CSfxStringU strShortcut = lpwszValue;
 	ReplaceWithExtractPath( strShortcut, extractRoot );
@@ -377,7 +374,7 @@ void PostExecute_Shortcut( LPCWSTR lpwszValue )
 	CreateShortcut( strShortcut );
 }
 
-void PostExecute_Delete( LPCWSTR lpwszValue )
+static void PostExecute_Delete( LPCWSTR lpwszValue )
 {
 	CSfxStringU tmp = lpwszValue;
 	ReplaceVariablesEx( tmp );
@@ -386,10 +383,10 @@ void PostExecute_Delete( LPCWSTR lpwszValue )
 
 typedef void (* POST_EXECUTE_PROC)( LPCWSTR lpwszParamName );
 
-void ProcessPostExecuteSub( POST_EXECUTE_PROC pfnPostExecute,
-						    LPCWSTR lpwszParamPrefix,
-							LPCWSTR lpwszBatchIndexes,
-							int nUseDefault )
+static void ProcessPostExecuteSub(	POST_EXECUTE_PROC pfnPostExecute,
+									LPCWSTR lpwszParamPrefix,
+									LPCWSTR lpwszBatchIndexes,
+									int nUseDefault )
 {
 		CSfxStringU	ustrParamName;
 		LPCWSTR	lpwszValue;
@@ -428,7 +425,7 @@ void ProcessPostExecuteSub( POST_EXECUTE_PROC pfnPostExecute,
 		}
 }
 
-void ShowSfxVersion()
+static void ShowSfxVersion()
 {
 	GUIFlags = 0;
 	CSfxDialog_Version dlg;
@@ -514,7 +511,7 @@ static BOOL LoadAndParseConfig(HMODULE hModule)
 	return EnumResourceNamesW(hModule, RT_HTML, SfxEnumResNameProc, 0);
 }
 
-bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
+static bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 {
 	CSfxStringU OutFileName;
 	SKIP_WHITESPACES_W(lpwszValue);
@@ -790,20 +787,11 @@ bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	return true;
 }
 
-#include <new.h>
-int __cdecl sfx_new_handler( size_t /*size*/ )
-{
-	MessageBoxA( NULL, "Could not allocate memory", "7-Zip SFX", MB_OK | MB_ICONSTOP );
-	return 0;
-}
-
-int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR, int)
+static int Run(HINSTANCE hInstance)
 {
 #ifdef _DEBUG
 	DWORD dwStartTime = ::GetTickCount();
 #endif // -DEBUG
-	_set_new_handler( sfx_new_handler );
-
 	int ShortcutDefault = -1;
 	int DeleteDefault = -1;
 	int SelfDelete = -1;
@@ -1391,4 +1379,30 @@ void DeleteSFX( LPCWSTR moduleName )
 		// execute cmd
 		ShellExecute( NULL, L"open", tmpPath, NULL, NULL, SW_HIDE );
 	}
+}
+
+#include <new.h>
+
+static int sfx_new_handler(size_t)
+{
+	FatalAppExitA(0, "Could not allocate memory");
+	return 0;
+}
+
+int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR , int)
+{
+	int ret = 0;
+	_set_new_handler(sfx_new_handler);
+	_set_new_mode(1);
+	__try
+	{
+		ret = Run(hInstance);
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		char msg[256];
+		wsprintfA(msg, "An exception of type 0x%08lX has occurred", GetExceptionCode());
+		FatalAppExitA(0, msg);
+	}
+	return ret;
 }

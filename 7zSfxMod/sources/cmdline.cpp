@@ -2,7 +2,7 @@
 /* File:        cmdline.cpp                                                  */
 /* Created:     Sun, 06 Mar 2016 01:44:14 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    12                                                           */
 /* Updated:     Thu, 17 Mar 2016 06:22:46 GMT                                */
@@ -68,7 +68,7 @@ LPCWSTR ParseConfigOverride( LPCWSTR lpwszCommandLine )
 	LPCWSTR const* pParams = ConfigParams;
 	while( *pParams != NULL )
 	{
-		int nLen = wcslen(*pParams);
+		int const nLen = static_cast<int>(wcslen(*pParams));
 		if( _wcsnicmp( lpwszCommandLine, *pParams, nLen ) == 0 && lpwszCommandLine[nLen] == L'=' )
 		{
 			CSfxStringU str = lpwszCommandLine;

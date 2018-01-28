@@ -271,11 +271,20 @@ HRESULT WINAPI CSfxExtractEngine::ExtractThread(CSfxExtractEngine *pThis)
 	}
 #endif // _SFX_USE_EXTRACT_MASK
 
+	__try
+	{
 #ifdef _SFX_USE_TEST
-	result = gSfxArchive.GetHandler()->Extract( indices, num_indices, nTestModeType == TMT_ARCHIVE ? true : false, pThis );
+		result = gSfxArchive.GetHandler()->Extract( indices, num_indices, nTestModeType == TMT_ARCHIVE ? true : false, pThis );
 #else
-	result = gSfxArchive.GetHandler()->Extract( indices, num_indices, 0, pThis );
+		result = gSfxArchive.GetHandler()->Extract( indices, num_indices, 0, pThis );
 #endif // _SFX_USE_TEST
+	}
+	__except(EXCEPTION_EXECUTE_HANDLER)
+	{
+		char msg[256];
+		wsprintfA(msg, "An exception of type 0x%08lX has occurred", GetExceptionCode());
+		FatalAppExitA(0, msg);
+	}
 	if( GUIMode != GUIMODE_HIDDEN && hwndExtractDlg != NULL )
 		::SendNotifyMessage( hwndExtractDlg, WM_COMMAND, SDC_BUTTON1, 0 );
 

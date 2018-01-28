@@ -2,9 +2,11 @@
 /* File:        stdafx.h                                                     */
 /* Created:     Sun, 29 Oct 2006 13:32:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sun, 06 Mar 2016 20:17:50 GMT                                */
-/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
+/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
+/*---------------------------------------------------------------------------*/
 /* Revision:    3417                                                         */
+/* Updated:     Sun, 06 Mar 2016 20:17:50 GMT                                */
+/*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /*---------------------------------------------------------------------------*/
 /* Revision:    1240                                                         */
 /* Updated:     Mon, 22 Mar 2010 11:33:37 GMT                                */
@@ -15,6 +17,11 @@
 #define _STDAFX_H_INCLUDED_
 
 #include "config.h"
+
+#define _NO_EXCEPTIONS
+#define _HAS_EXCEPTIONS 0
+#define try if (1,1)
+#define catch(x) else if (1,1)
 
 #if !defined(UNICODE) || !defined(_UNICODE)
 	#error "UNICODE and _UNICODE must be defined"

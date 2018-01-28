@@ -2,7 +2,7 @@
 /* File:        Helpers.cpp                                                  */
 /* Created:     Sat, 30 Jul 2005 11:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3886                                                         */
 /* Updated:     Sun, 20 Mar 2016 07:07:28 GMT                                */
@@ -72,7 +72,7 @@ CSfxStringU CreateTempName( LPCWSTR lpwszFormat )
 
 LPCWSTR IsSubString( LPCWSTR lpwszString, LPCWSTR lpwszSubString )
 {
-	int nLength = wcslen( lpwszSubString );
+	int const nLength = static_cast<int>(wcslen(lpwszSubString));
 	if( _wcsnicmp( lpwszString, lpwszSubString, nLength ) == 0 )
 		return lpwszString + nLength;
 	return NULL;
@@ -202,8 +202,8 @@ void ExpandEnvironmentStrings( CSfxStringU & ustr )
 
 static bool ReadConfig( Byte const *const buffer, UInt32 const numBytesInBuffer, LPCSTR startID, LPCSTR endID, CSfxStringA &stringResult )
 {
-	UInt32 const signatureStartSize = strlen( startID );
-	UInt32 const signatureEndSize = strlen( endID );
+	UInt32 const signatureStartSize = static_cast<UInt32>(strlen(startID));
+	UInt32 const signatureEndSize = static_cast<UInt32>(strlen(endID));
 	UInt32 pos = 0;
 	UInt32 i = 0;
 	while( i == 0 && pos + signatureStartSize <= numBytesInBuffer )
@@ -1111,7 +1111,7 @@ LPCWSTR GetLanguageString( UINT id )
 	if( SfxLangStrings[i].strSecondary != NULL && GetUILanguage() == SfxSecondaryLangId )
 		lpszReturn = SfxLangStrings[i].strSecondary;
 	
-	int const nLength = strlen(lpszReturn) + 1;
+	int const nLength = static_cast<int>(strlen(lpszReturn)) + 1;
 	SfxLangStrings[i].lpszUnicode = new WCHAR[nLength];
 	::MultiByteToWideChar( CP_UTF8, 0, lpszReturn, nLength, SfxLangStrings[i].lpszUnicode, nLength );
 
