@@ -1,7 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
+# Visual C++ Express 2010
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "7ZSfxMod", "7ZSfxMod.vcxproj", "{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Unzipper", "Unzipper.vcxproj", "{179F6952-30D1-40A3-89A4-12F74838489B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,6 +19,8 @@ Global
 		LZMA2|x64 = LZMA2|x64
 		PPMd|Win32 = PPMd|Win32
 		PPMd|x64 = PPMd|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
 		SfxTools|Win32 = SfxTools|Win32
 		SfxTools|x64 = SfxTools|x64
 	EndGlobalSection
@@ -45,10 +49,37 @@ Global
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|Win32.Build.0 = PPMd|Win32
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|x64.ActiveCfg = PPMd|x64
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.PPMd|x64.Build.0 = PPMd|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Release|Win32.ActiveCfg = SfxTools|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Release|x64.ActiveCfg = SfxTools|x64
+		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.Release|x64.Build.0 = SfxTools|x64
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|Win32.ActiveCfg = SfxTools|Win32
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|Win32.Build.0 = SfxTools|Win32
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|x64.ActiveCfg = SfxTools|x64
 		{60FC2AAC-F2C7-48E6-A78D-ACDC6988B8C4}.SfxTools|x64.Build.0 = SfxTools|x64
+		{179F6952-30D1-40A3-89A4-12F74838489B}.All|Win32.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.All|Win32.Build.0 = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.All|x64.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Debug|Win32.ActiveCfg = Debug|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Debug|Win32.Build.0 = Debug|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Debug|x64.ActiveCfg = Debug|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Deflate|Win32.ActiveCfg = Debug|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Deflate|Win32.Build.0 = Debug|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Deflate|x64.ActiveCfg = Debug|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.LZMA|Win32.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.LZMA|Win32.Build.0 = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.LZMA|x64.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.LZMA2|Win32.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.LZMA2|Win32.Build.0 = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.LZMA2|x64.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.PPMd|Win32.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.PPMd|Win32.Build.0 = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.PPMd|x64.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Release|Win32.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Release|Win32.Build.0 = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.Release|x64.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.SfxTools|Win32.ActiveCfg = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.SfxTools|Win32.Build.0 = Release|Win32
+		{179F6952-30D1-40A3-89A4-12F74838489B}.SfxTools|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

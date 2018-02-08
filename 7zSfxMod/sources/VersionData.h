@@ -17,7 +17,7 @@ public:
 	{
 		if (this)
 		{
-			const WCHAR *p = szKey + lstrlenW(szKey) + 1;
+			const WCHAR *p = szKey + wcslen(szKey) + 1;
 			return (const WCHAR *)((INT_PTR)p + 3 & ~3);
 		}
 		return 0;
@@ -43,7 +43,7 @@ public:
 		const CVersionData *p = First();
 		while (p < Next())
 		{
-			if (lpszKey == 0 || lstrcmpiW(lpszKey, p->szKey) == 0)
+			if (lpszKey == 0 || _wcsicmp(lpszKey, p->szKey) == 0)
 				return p;
 			p = p->Next();
 		}

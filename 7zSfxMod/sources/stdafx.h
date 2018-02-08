@@ -2,7 +2,7 @@
 /* File:        stdafx.h                                                     */
 /* Created:     Sun, 29 Oct 2006 13:32:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
+/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3417                                                         */
 /* Updated:     Sun, 06 Mar 2016 20:17:50 GMT                                */
@@ -23,36 +23,11 @@
 #define try if (1,1)
 #define catch(x) else if (1,1)
 
-#if !defined(UNICODE) || !defined(_UNICODE)
-	#error "UNICODE and _UNICODE must be defined"
-#endif // UNICODE && _UNICODE
-
-#define _MSC_VER_MIN	1400
-#define _MSC_VER_MAX	1600
-
-#if defined(_MSC_VER) && (_MSC_VER < _MSC_VER_MIN || (_MSC_VER > _MSC_VER_MAX && _MSC_VER != 1900))
-	#pragma message( "Warning: This MS compiler is not tested" )
-	#undef _MSC_VER_OK
-#else
-	#define _MSC_VER_OK	
-#endif // _MSC_VER
-
 #define WIN32_LEAN_AND_MEAN
-#define _WIN32_WINNT 0x0500
+#define _WIN32_WINNT	0x0500
 #define _RICHEDIT_VER	0x0200
 
-#if defined(_MSC_VER) && _MSC_VER == 1200
-	#pragma warning(disable:4068)
-#endif // _MSC_VER && _MSC_VER == 1200
 #include <windows.h>
-#if defined(_MSC_VER) && _MSC_VER == 1200
-	#pragma warning(default:4068)
-#endif // _MSC_VER && _MSC_VER == 1200
-
-#if defined(_MSC_VER) && _MSC_VER == 1900
-	#pragma warning(disable:28159)
-//	#pragma warning(disable:28251)
-#endif // _MSC_VER && _MSC_VER == 1900
 
 #include <commctrl.h>
 #include <shlobj.h>

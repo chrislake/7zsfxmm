@@ -220,4 +220,6 @@ Bool CPU_Is_Aes_Supported();
 
 EXTERN_C_END
 
+#undef MY_CPU_X86_OR_AMD64
+
 #endif

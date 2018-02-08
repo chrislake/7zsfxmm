@@ -2,7 +2,7 @@
 /* File:        main.cpp                                                     */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
+/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
 /* Updated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
@@ -312,20 +312,20 @@ static void SetConfigVariables()
 		from++;
 		UpdateMiscFlags( lpwszValue );
 	}
-	
+
 	lpwszCancelText = GetTextConfigValue( CFG_EXTRACT_CANCELTEXT );
 	lpwszExtractDialogText = GetTextConfigValue( CFG_EXTRACT_DIALOGTEXT );
 	if( (lpwszValue = GetTextConfigValue( CFG_EXTRACT_DIALOGWIDTH)) != NULL )
 		ExtractDialogWidth = StringToLong( lpwszValue );
 	if( (lpwszValue = GetTextConfigValue( CFG_EXTRACTPATH_WIDTH)) != NULL )
 		ExtractPathWidth = StringToLong( lpwszValue );
-	
+
 	// Extract path strings
 	if( (lpwszValue = GetTextConfigValue(CFG_EXTRACT_PATH_TITLE)) != NULL )
 		lpwszExtractPathTitle = lpwszValue;
 	if( (lpwszValue = GetTextConfigValue(CFG_EXTRACT_PATH_TEXT)) != NULL )
 		lpwszExtractPathText = lpwszValue;
-	
+
 	// Cancel prompt text
 	if( (lpwszValue = GetTextConfigValue(CFG_CANCEL_PROMPT)) != NULL )
 		lpwszCancelPrompt = lpwszValue;
@@ -430,7 +430,7 @@ static void ShowSfxVersion()
 	GUIFlags = 0;
 	CSfxDialog_Version dlg;
 	extern unsigned int g_NumCodecs;
-	extern const CCodecInfo *g_Codecs[]; 
+	extern const CCodecInfo *g_Codecs[];
 	CSfxStringU ustrVersion = GetLanguageString( STR_SFXVERSION );
 	unsigned int ki;
 	for( ki = 0; ki < g_NumCodecs; ki++ )
@@ -529,10 +529,10 @@ static bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	// Add resources as specified
 	LPCWSTR lpwszAhead;
 	while (LPWSTR lpType =
-		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_CONFIG)) != NULL ? RT_HTML :
-		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_ADJUNCT)) != NULL ? RT_RCDATA :
-		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_MANIFEST)) != NULL ? RT_MANIFEST :
-		(lpwszAhead = IsSfxSwitch(lpwszValue, CMDLINE_SFXCREATE_ICON)) != NULL ? RT_GROUP_ICON :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, L"config"))	!= NULL ? RT_HTML :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, L"adjunct"))	!= NULL ? RT_RCDATA :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, L"manifest"))	!= NULL ? RT_MANIFEST :
+		(lpwszAhead = IsSfxSwitch(lpwszValue, L"icon"))		!= NULL ? RT_GROUP_ICON :
 		NULL)
 	{
 		CSfxStringU InFileName;
@@ -914,10 +914,10 @@ static int Run(HINSTANCE hInstance)
 		default:
 			return ERRC_SFXTEST;
 		}
-	
+
 		while( ((unsigned)*lpwszValue) > L' ' ) lpwszValue++;
 		str = lpwszValue;
-		
+
 		if( (lpwszValue = IsSfxSwitch( str,CMDLINE_SFXCONFIG )) != NULL )
 		{
 			if( *lpwszValue == L':' ) lpwszValue++;
@@ -1007,6 +1007,12 @@ static int Run(HINSTANCE hInstance)
 		strSfxFolder.ReleaseBuf_SetEnd( nPos );
 		strSfxName = strModulePathName.Ptr( nPos + 1 );
 		strTitle = strModulePathName.Ptr( nPos + 1 );
+		// Sanity check the title string
+		if( strTitle.Find( L'.' ) >= 64 )
+		{
+			SfxErrorDialog( FALSE, ERR_READ_CONFIG );
+			return ERRC_CONFIG_DATA;
+		}
 		if( (nPos = strTitle.ReverseFind( L'.' )) > 0 )
 			strTitle.ReleaseBuf_SetEnd( nPos );
 		strErrorTitle = strTitle;
@@ -1020,7 +1026,7 @@ static int Run(HINSTANCE hInstance)
 #ifdef _SFX_USE_PREFIX_PLATFORM
 	strOSPlatform = GetPlatformName();
 #endif // _SFX_USE_PREFIX_PLATFORM
-	
+
 	if( gSfxArchive.Init(strModulePathName) == false )
 	{
 		SfxErrorDialog( TRUE, ERR_OPEN_ARCHIVE, (LPCWSTR)strModulePathName );
@@ -1034,7 +1040,7 @@ static int Run(HINSTANCE hInstance)
 	if( nTestModeType == TMT_CHECK_CONFIG )
 		return ERRC_NONE;
 #endif // _SFX_USE_TEST
-	// 
+	//
 	LANGSTRING * pLangString = SfxLangStrings;
 	while( pLangString->id != 0 )
 	{
@@ -1288,7 +1294,7 @@ Loc_BeginPrompt:
 		{
 			ExecuteBatch( executeName, extractPath, gSfxArchive.GetBatchInstall(), ustrDirPrefix, str );
 		}
-	
+
 #ifdef _SFX_USE_TEST
 		if( nTestModeType == 0 )
 		{
@@ -1338,7 +1344,7 @@ Loc_BeginPrompt:
 			break;
 		}
 	}
-	
+
 	return ERRC_NONE;
 }
 

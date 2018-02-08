@@ -2,7 +2,7 @@
 /* File:        version.h                                                    */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Tue, 20 Jan 2018 by https://github.com/datadiode             */
+/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
 /* Updated:     Thu, 15 Jun 2017 09:53:44 AET                                */
@@ -346,7 +346,7 @@
 /*						Correct 'x86' and 'x64' prefixes workflow			 */
 /*						for 'RunProgram'									 */
 /*---------------------------------------------------------------------------*/
-#define VERSION_H_REVISION 3902
+#define VERSION_H_REVISION 3903
 #define VERSION_REVISION VERSION_H_REVISION
 
 #ifndef _VERSION_H_INCLUDED_
@@ -354,7 +354,7 @@
 
 #define VERSION_SFX_NUM_TEXT		"1.7.1"
 #define VERSION_SFX_NUM_BIN			1,7,1,VERSION_REVISION
-#define VERSION_SFX_DATE_EN			"January 20, 2018"
+#define VERSION_SFX_DATE_EN			"February 08, 2018"
 #define VERSION_SFX_DATE_RU			VERSION_SFX_DATE_EN
 #define VERSION_SFX_BRANCH_EN		"datadiode"
 #define VERSION_SFX_BRANCH_RU		VERSION_SFX_BRANCH_EN
@@ -385,11 +385,11 @@
 #define VERSION_BUILD_TEXT2(a)	VERSION_BUILD_TEXT1(a)
 #define VERSION_BUILD_TEXT	VERSION_BUILD_TEXT2(VERSION_REVISION)
 
-#define VERSION_SFX_TEXT_EN	VERSION_SFX_NUM_TEXT" "VERSION_SFX_BRANCH_EN" ["PLATFORM_NAME_A"] build "VERSION_BUILD_TEXT" ("VERSION_SFX_DATE_EN")"
-#define VERSION_SFX_TEXT_RU	VERSION_SFX_NUM_TEXT" "VERSION_SFX_BRANCH_RU" ["PLATFORM_NAME_A"] сборка "VERSION_BUILD_TEXT" ("VERSION_SFX_DATE_RU")"
+#define VERSION_SFX_TEXT_EN	VERSION_SFX_NUM_TEXT " " VERSION_SFX_BRANCH_EN " [" PLATFORM_NAME_A "] build " VERSION_BUILD_TEXT " (" VERSION_SFX_DATE_EN ")"
+#define VERSION_SFX_TEXT_RU	VERSION_SFX_NUM_TEXT " " VERSION_SFX_BRANCH_RU " [" PLATFORM_NAME_A "] сборка " VERSION_BUILD_TEXT " (" VERSION_SFX_DATE_RU ")"
 
-#define VERSION_7ZIP_TEXT_EN	VERSION_7ZIP_NUM_TEXT" "VERSION_7ZIP_BRANCH_EN" ("VERSION_7ZIP_DATE_EN")"
-#define VERSION_7ZIP_TEXT_RU	VERSION_7ZIP_NUM_TEXT" "VERSION_7ZIP_BRANCH_RU" ("VERSION_7ZIP_DATE_RU")"
+#define VERSION_7ZIP_TEXT_EN	VERSION_7ZIP_NUM_TEXT " " VERSION_7ZIP_BRANCH_EN " (" VERSION_7ZIP_DATE_EN ")"
+#define VERSION_7ZIP_TEXT_RU	VERSION_7ZIP_NUM_TEXT " " VERSION_7ZIP_BRANCH_RU " (" VERSION_7ZIP_DATE_RU ")"
 
 #define VERSION_7ZSFX_BIN	VERSION_SFX_NUM_BIN
 #define VERSION_7ZSFX_TXT	VERSION_SFX_NUM_TEXT "." VERSION_BUILD_TEXT

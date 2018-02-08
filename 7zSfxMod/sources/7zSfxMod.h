@@ -2,7 +2,7 @@
 /* File:        7zSfxMod.h                                                   */
 /* Created:     Thu, 28 Jul 2005 02:44:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3902                                                         */
 /* Updated:     Sat, 02 Apr 2016 05:00:21 GMT                                */
@@ -24,59 +24,55 @@
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
 /* Description: New file stamp.                                              */
 /*---------------------------------------------------------------------------*/
-	#ifndef _7ZSFXMOD_H_INCLUDED_
+#ifndef _7ZSFXMOD_H_INCLUDED_
 #define _7ZSFXMOD_H_INCLUDED_
 
-#ifndef _CFG_PARAM_TYPE
-	#define _CFG_PARAM_TYPE	L
-#endif // _CFG_PARAM_TYPE
-
-#define CFG_TITLE						_CFG_PARAM_TYPE"Title"
-#define CFG_ERRORTITLE					_CFG_PARAM_TYPE"ErrorTitle"
+#define CFG_TITLE						L"Title"
+#define CFG_ERRORTITLE					L"ErrorTitle"
 #ifdef _SFX_USE_WARNINGS
-	#define CFG_WARNINGTITLE			_CFG_PARAM_TYPE"WarningTitle"
+	#define CFG_WARNINGTITLE			L"WarningTitle"
 #endif // _SFX_USE_WARNINGS
-#define CFG_GUIMODE						_CFG_PARAM_TYPE"GUIMode"
-#define CFG_GUIFLAGS					_CFG_PARAM_TYPE"GUIFlags"
-#define CFG_MISCFLAGS					_CFG_PARAM_TYPE"MiscFlags"
-#define CFG_BEGINPROMPT					_CFG_PARAM_TYPE"BeginPrompt"
-#define CFG_INSTALLPATH					_CFG_PARAM_TYPE"InstallPath"
-#define CFG_EXTRACT_TITLE				_CFG_PARAM_TYPE"ExtractTitle"
-#define CFG_EXTRACT_CANCELTEXT			_CFG_PARAM_TYPE"ExtractCancelText"
-#define CFG_EXTRACT_DIALOGTEXT			_CFG_PARAM_TYPE"ExtractDialogText"
-#define CFG_EXTRACT_DIALOGWIDTH			_CFG_PARAM_TYPE"ExtractDialogWidth"
-#define CFG_RUNPROGRAM					_CFG_PARAM_TYPE"RunProgram"
-#define CFG_AUTOINSTALL					_CFG_PARAM_TYPE"AutoInstall"
-#define CFG_SHORTCUT					_CFG_PARAM_TYPE"Shortcut"
-#define CFG_DELETE						_CFG_PARAM_TYPE"Delete"
-#define CFG_SELFDELETE					_CFG_PARAM_TYPE"SelfDelete"
-#define CFG_EXTRACT_PATH_TITLE			_CFG_PARAM_TYPE"ExtractPathTitle"
-#define CFG_EXTRACT_PATH_TEXT			_CFG_PARAM_TYPE"ExtractPathText"
-#define CFG_HELP_TEXT					_CFG_PARAM_TYPE"HelpText"
-#define CFG_OVERWRITE_MODE				_CFG_PARAM_TYPE"OverwriteMode"
-#define CFG_CANCEL_PROMPT				_CFG_PARAM_TYPE"CancelPrompt"
-#define CFG_EXTRACTPATH_WIDTH			_CFG_PARAM_TYPE"ExtractPathWidth"
-#define CFG_FINISHMESSAGE				_CFG_PARAM_TYPE"FinishMessage"
-#define CFG_EXECUTEFILE					_CFG_PARAM_TYPE"ExecuteFile"
-#define CFG_EXECUTEPARAMETERS			_CFG_PARAM_TYPE"ExecuteParameters"
-#define CFG_DIRECTORY					_CFG_PARAM_TYPE"Directory"
-#define CFG_PROGRESS					_CFG_PARAM_TYPE"Progress"
-#define CFG_SETENVIRONMENT				_CFG_PARAM_TYPE"SetEnvironment"
-#define CFG_BEGINPROMPTTIMEOUT			_CFG_PARAM_TYPE"BeginPromptTimeout"
+#define CFG_GUIMODE						L"GUIMode"
+#define CFG_GUIFLAGS					L"GUIFlags"
+#define CFG_MISCFLAGS					L"MiscFlags"
+#define CFG_BEGINPROMPT					L"BeginPrompt"
+#define CFG_INSTALLPATH					L"InstallPath"
+#define CFG_EXTRACT_TITLE				L"ExtractTitle"
+#define CFG_EXTRACT_CANCELTEXT			L"ExtractCancelText"
+#define CFG_EXTRACT_DIALOGTEXT			L"ExtractDialogText"
+#define CFG_EXTRACT_DIALOGWIDTH			L"ExtractDialogWidth"
+#define CFG_RUNPROGRAM					L"RunProgram"
+#define CFG_AUTOINSTALL					L"AutoInstall"
+#define CFG_SHORTCUT					L"Shortcut"
+#define CFG_DELETE						L"Delete"
+#define CFG_SELFDELETE					L"SelfDelete"
+#define CFG_EXTRACT_PATH_TITLE			L"ExtractPathTitle"
+#define CFG_EXTRACT_PATH_TEXT			L"ExtractPathText"
+#define CFG_HELP_TEXT					L"HelpText"
+#define CFG_OVERWRITE_MODE				L"OverwriteMode"
+#define CFG_CANCEL_PROMPT				L"CancelPrompt"
+#define CFG_EXTRACTPATH_WIDTH			L"ExtractPathWidth"
+#define CFG_FINISHMESSAGE				L"FinishMessage"
+#define CFG_EXECUTEFILE					L"ExecuteFile"
+#define CFG_EXECUTEPARAMETERS			L"ExecuteParameters"
+#define CFG_DIRECTORY					L"Directory"
+#define CFG_PROGRESS					L"Progress"
+#define CFG_SETENVIRONMENT				L"SetEnvironment"
+#define CFG_BEGINPROMPTTIMEOUT			L"BeginPromptTimeout"
 #ifdef SFX_CRYPTO
-	#define CFG_PASSWORD_TITLE			_CFG_PARAM_TYPE"PasswordTitle"
-	#define CFG_PASSWORD_TEXT			_CFG_PARAM_TYPE"PasswordText"
+	#define CFG_PASSWORD_TITLE			L"PasswordTitle"
+	#define CFG_PASSWORD_TEXT			L"PasswordText"
 #endif // SFX_CRYPTO
 #ifdef _SFX_USE_VOLUME_NAME_STYLE
-	#define CFG_VOLUME_NAME_STYLE		_CFG_PARAM_TYPE"VolumeNameStyle"
+	#define CFG_VOLUME_NAME_STYLE		L"VolumeNameStyle"
 #endif // _SFX_USE_VOLUME_NAME_STYLE
 #ifdef _SFX_USE_CONFIG_EARLY_EXECUTE
-	#define	CFG_EXECUTE_ON_LOAD			_CFG_PARAM_TYPE"ExecuteOnLoad"
-	#define	CFG_PREEXTRACT				_CFG_PARAM_TYPE"PreExtract"
+	#define	CFG_EXECUTE_ON_LOAD			L"ExecuteOnLoad"
+	#define	CFG_PREEXTRACT				L"PreExtract"
 #endif // _SFX_USE_CONFIG_EARLY_EXECUTE
 #ifdef _SFX_USE_EXTRACT_MASK
-	#define	CFG_EXTRACTMASK_INCLUDE		_CFG_PARAM_TYPE"ExtractMaskInclude"
-	#define	CFG_EXTRACTMASK_EXCLUDE		_CFG_PARAM_TYPE"ExtractMaskExclude"
+	#define	CFG_EXTRACTMASK_INCLUDE		L"ExtractMaskInclude"
+	#define	CFG_EXTRACTMASK_EXCLUDE		L"ExtractMaskExclude"
 #endif // _SFX_USE_EXTRACT_MASK
 
 
@@ -141,17 +137,11 @@
 #define ERRC_PLATFORM					20
 #define ERRC_SFXTEST					100
 
-#define CMDLINE_SFXCONFIG			_CFG_PARAM_TYPE"sfxconfig"
-#define CMDLINE_SFXCREATE			_CFG_PARAM_TYPE"sfxcreate"
-#define CMDLINE_SFXVERSION			_CFG_PARAM_TYPE"sfxversion"
-#define CMDLINE_SFXLANG				_CFG_PARAM_TYPE"sfxlang"
-#define	CMDLINE_SFXTEST				_CFG_PARAM_TYPE"sfxtest"
-
-/* Specific options for CMDLINE_SFXCREATE */
-#define CMDLINE_SFXCREATE_CONFIG	_CFG_PARAM_TYPE"config"
-#define CMDLINE_SFXCREATE_ADJUNCT	_CFG_PARAM_TYPE"adjunct"
-#define CMDLINE_SFXCREATE_MANIFEST	_CFG_PARAM_TYPE"manifest"
-#define CMDLINE_SFXCREATE_ICON		_CFG_PARAM_TYPE"icon"
+#define CMDLINE_SFXCONFIG			L"sfxconfig"
+#define CMDLINE_SFXCREATE			L"sfxcreate"
+#define CMDLINE_SFXVERSION			L"sfxversion"
+#define CMDLINE_SFXLANG				L"sfxlang"
+#define	CMDLINE_SFXTEST				L"sfxtest"
 
 #ifdef _SFX_USE_TEST
 
@@ -230,6 +220,5 @@
 #define IDC_EXTRA_TEXT					SDC_TEXT2
 #define IDC_EXTRACT_PATH_EDIT			SDC_EXTRACTPATHEDIT
 #define IDC_EXTRACT_PATH_BROWSE			SDC_EXTRACTPATHBROWSE
-
 
 #endif // _7ZSFXMOD_H_INCLUDED_

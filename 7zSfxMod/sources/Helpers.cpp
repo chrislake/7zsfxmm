@@ -2,7 +2,7 @@
 /* File:        Helpers.cpp                                                  */
 /* Created:     Sat, 30 Jul 2005 11:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sun, 28 Jan 2018 by https://github.com/datadiode             */
+/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3886                                                         */
 /* Updated:     Sun, 20 Mar 2016 07:07:28 GMT                                */
@@ -110,7 +110,7 @@ CSfxStringU SfxMultiByteToUnicodeString( CSfxStringA const &srcString, UINT code
 	if( unsigned const srcLen = srcString.Len() )
 	{
 		int numChars = MultiByteToWideChar( codePage, 0, srcString, srcLen,
-											resultString.GetBuf(srcLen), 
+											resultString.GetBuf(srcLen),
 											srcLen + 1 );
 		resultString.ReleaseBuf_SetEnd(numChars);
 	}
@@ -124,7 +124,7 @@ CSfxStringA SfxUnicodeStringToMultiByte( CSfxStringU const &srcString, UINT code
 	{
 		int numRequiredBytes = srcLen * 2;
 		int numChars = WideCharToMultiByte(	codePage, 0, srcString, srcLen,
-											resultString.GetBuf(numRequiredBytes), 
+											resultString.GetBuf(numRequiredBytes),
 											numRequiredBytes + 1, NULL, NULL );
 		resultString.ReleaseBuf_SetEnd(numChars);
 	}
@@ -136,7 +136,7 @@ int DeleteUseOverwriteFlags( LPCWSTR lpwszPath )
 	if( DeleteFileOrDirectoryAlways( lpwszPath ) == FALSE )
 	{
 		DWORD dwLastError = ::GetLastError();
-		if( (dwLastError == ERROR_ACCESS_DENIED || dwLastError == ERROR_SHARING_VIOLATION) 
+		if( (dwLastError == ERROR_ACCESS_DENIED || dwLastError == ERROR_SHARING_VIOLATION)
 				&& (OverwriteFlags&OVERWRITE_FLAG_SKIP_LOCKED) != 0 )
 		{
 			return SFX_OM_SKIP;
@@ -318,7 +318,7 @@ CTextConfigPair * GetConfigPair( LPCWSTR id, int * pFrom )
 				*pFrom = i;
 			return &gConfig[i];
 		}
-		
+
 	return NULL;
 }
 
@@ -562,7 +562,7 @@ BOOL CreateFolderTree( LPCWSTR lpwszPath )
 		}
 		lpwszPath2[i] = L'\0';
 	}
-	
+
 	FILETIME	ftTmp;
 	::GetSystemTimeAsFileTime( &ftTmp );
 	if( (GetFileAttributes(lpwszPath2)&FILE_ATTRIBUTE_DIRECTORY) == 0 &&
@@ -570,13 +570,13 @@ BOOL CreateFolderTree( LPCWSTR lpwszPath )
 	{
 		return FALSE;
 	}
-	
+
 	if( SfxCreateDirectory( lpwszPath2 ) == FALSE )
 	{
 		SfxErrorDialog( TRUE, ERR_CREATE_FOLDER, lpwszPath2 );
 		return FALSE;
 	}
-	
+
 	while( i < nLength )
 	{
 		memcpy( lpwszPath2+i, lpwszPath+i, nLength-i+1 );
@@ -792,7 +792,7 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 		if( !iconLocation.IsEmpty() )
 			psl->SetIconLocation( iconLocation, nIconIndex );
 
- 		// Query IShellLink for the IPersistFile interface for saving the shortcut in persistent storage. 
+ 		// Query IShellLink for the IPersistFile interface for saving the shortcut in persistent storage.
 		IPersistFile *ppf = NULL;
 		hres = psl->QueryInterface( IID_IPersistFile, (void **)&ppf );
 		if( SUCCEEDED(hres) )
@@ -803,7 +803,7 @@ BOOL CreateShortcut( LPCTSTR lpszShortcutData )
 		}
 		psl->Release();
 	}
-	
+
 	return FALSE;
 }
 
@@ -1105,12 +1105,12 @@ LPCWSTR GetLanguageString( UINT id )
 
 	if( SfxLangStrings[i].lpszUnicode != NULL )
 		return SfxLangStrings[i].lpszUnicode;
-	
+
 	LPCSTR lpszReturn = SfxLangStrings[i].strPrimary;
-	
+
 	if( SfxLangStrings[i].strSecondary != NULL && GetUILanguage() == SfxSecondaryLangId )
 		lpszReturn = SfxLangStrings[i].strSecondary;
-	
+
 	int const nLength = static_cast<int>(strlen(lpszReturn)) + 1;
 	SfxLangStrings[i].lpszUnicode = new WCHAR[nLength];
 	::MultiByteToWideChar( CP_UTF8, 0, lpszReturn, nLength, SfxLangStrings[i].lpszUnicode, nLength );
@@ -1339,7 +1339,7 @@ static bool LoadConfigs( Byte const *const buffer, UInt32 const numBytesInBuffer
 }
 #endif // defined(_SFX_USE_CONFIG_PLATFORM) || defined(_SFX_USE_LANG)
 
-int LoadAndParseConfig( Byte const *const buffer, UInt32 const numBytesInBuffer )
+int LoadAndParseConfig( Byte const *buffer, UInt32 numBytesInBuffer )
 {
 	CSfxStringA	config;
 	//inStream->Seek( 0, STREAM_SEEK_SET, NULL );
@@ -1401,9 +1401,9 @@ LPCWSTR CheckPrefix( LPCWSTR lpwszString, LPCWSTR lpwszPrefix, BOOL nCPFlags )
 LPCWSTR IsPrefixPlatformI386( LPCWSTR lpwszString )
 {
 	LPCWSTR lpwszReturn;
-	if( (lpwszReturn = CheckPrefix(lpwszString,L"x86",CPF_NONE)) != NULL ||
-		(lpwszReturn= CheckPrefix( lpwszString,L"i386",CPF_NONE)) != NULL ||
-		(lpwszReturn= CheckPrefix( lpwszString,L"win32",CPF_NONE)) != NULL )
+	if( (lpwszReturn = CheckPrefix(lpwszString, L"x86", CPF_NONE)) != NULL ||
+		(lpwszReturn = CheckPrefix(lpwszString, L"i386", CPF_NONE)) != NULL ||
+		(lpwszReturn = CheckPrefix(lpwszString, L"win32", CPF_NONE)) != NULL )
 	{
 		return lpwszReturn;
 	}
@@ -1413,9 +1413,9 @@ LPCWSTR IsPrefixPlatformI386( LPCWSTR lpwszString )
 LPCWSTR IsPrefixPlatformAmd64( LPCWSTR lpwszString )
 {
 	LPCWSTR lpwszReturn;
-	if( (lpwszReturn = CheckPrefix(lpwszString,L"x64",CPF_NONE)) != NULL ||
-		(lpwszReturn= CheckPrefix( lpwszString,L"amd64",CPF_NONE)) != NULL ||
-		(lpwszReturn= CheckPrefix( lpwszString,L"win64",CPF_NONE)) != NULL )
+	if( (lpwszReturn = CheckPrefix(lpwszString, L"x64", CPF_NONE)) != NULL ||
+		(lpwszReturn = CheckPrefix(lpwszString, L"amd64", CPF_NONE)) != NULL ||
+		(lpwszReturn = CheckPrefix(lpwszString, L"win64", CPF_NONE)) != NULL )
 	{
 		return lpwszReturn;
 	}
