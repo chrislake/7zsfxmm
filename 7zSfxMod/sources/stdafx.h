@@ -2,7 +2,7 @@
 /* File:        stdafx.h                                                     */
 /* Created:     Sun, 29 Oct 2006 13:32:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3417                                                         */
 /* Updated:     Sun, 06 Mar 2016 20:17:50 GMT                                */
@@ -24,7 +24,7 @@
 #define catch(x) else if (1,1)
 
 #define WIN32_LEAN_AND_MEAN
-#define _WIN32_WINNT	0x0500
+#define _WIN32_WINNT	0x0501
 #define _RICHEDIT_VER	0x0200
 
 #include <windows.h>

@@ -2,7 +2,7 @@
 /* File:        ExtractEngine.cpp                                            */
 /* Created:     Wed, 05 Oct 2005 07:36:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3816                                                         */
 /* Updated:     Thu, 17 Mar 2016 05:51:18 GMT                                */
@@ -198,7 +198,7 @@ HRESULT CSfxExtractEngine::Extract(LPCWSTR lpwszFolderName)
 
 	DWORD dwThreadId;
 	m_ErrorCode = NArchive::NExtract::NOperationResult::kOK;
-	m_hExtractThread = ::CreateThread( NULL, 0, (LPTHREAD_START_ROUTINE)CSfxExtractEngine::ExtractThread, this, CREATE_SUSPENDED, &dwThreadId );
+	m_hExtractThread = ::CreateThread( NULL, 0, CSfxExtractEngine::ExtractThread, this, CREATE_SUSPENDED, &dwThreadId );
 
 	if (m_hExtractThread != NULL)
 	{
@@ -258,26 +258,43 @@ HRESULT CSfxExtractEngine::Extract(LPCWSTR lpwszFolderName)
 	return S_OK;
 }
 
-HRESULT WINAPI CSfxExtractEngine::ExtractThread(CSfxExtractEngine *pThis)
+HRESULT CSfxExtractEngine::ExtractWorker()
 {
-	HRESULT result = E_FAIL;
-	UInt32 * indices = NULL;
+	UInt32 *indices = NULL;
 	UInt32 num_indices = (UInt32)-1;
 #ifdef _SFX_USE_EXTRACT_MASK
-	if( pThis->m_numIndices > 0 && pThis->m_indices != NULL )
+	if( m_numIndices > 0 && m_indices != NULL )
 	{
-		indices = pThis->m_indices;
-		num_indices = pThis->m_numIndices;
+		indices = m_indices;
+		num_indices = m_numIndices;
 	}
 #endif // _SFX_USE_EXTRACT_MASK
+#ifdef _SFX_USE_CONFIG_EARLY_EXECUTE
+	CSfxStringU strPreExtract = CFG_PREEXTRACT;
+	strPreExtract += *gSfxArchive.GetBatchInstall();
+	if( GetTextConfigValue(strPreExtract) != NULL && gSfxArchive.GetNoRun() == false )
+	{
+		if( pwndExtractDialog )
+			pwndExtractDialog->SetMarquee( TRUE );
+		CSfxStringU ustrDirPrefix;
+		ExecuteBatch( CFG_PREEXTRACT, strSfxFolder, gSfxArchive.GetBatchInstall(), ustrDirPrefix, L"" );
+		if( pwndExtractDialog )
+			pwndExtractDialog->SetMarquee( FALSE );
+	}
+#endif // _SFX_USE_CONFIG_EARLY_EXECUTE
+#ifdef _SFX_USE_TEST
+	return gSfxArchive.GetHandler()->Extract( indices, num_indices, nTestModeType == TMT_ARCHIVE ? true : false, this );
+#else
+	return gSfxArchive.GetHandler()->Extract( indices, num_indices, 0, this );
+#endif // _SFX_USE_TEST
+}
 
+DWORD WINAPI CSfxExtractEngine::ExtractThread( LPVOID pThis )
+{
+	HRESULT result = E_FAIL;
 	__try
 	{
-#ifdef _SFX_USE_TEST
-		result = gSfxArchive.GetHandler()->Extract( indices, num_indices, nTestModeType == TMT_ARCHIVE ? true : false, pThis );
-#else
-		result = gSfxArchive.GetHandler()->Extract( indices, num_indices, 0, pThis );
-#endif // _SFX_USE_TEST
+		result = static_cast<CSfxExtractEngine *>(pThis)->ExtractWorker();
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{
@@ -285,9 +302,8 @@ HRESULT WINAPI CSfxExtractEngine::ExtractThread(CSfxExtractEngine *pThis)
 		wsprintfA(msg, "An exception of type 0x%08lX has occurred", GetExceptionCode());
 		FatalAppExitA(0, msg);
 	}
-	if( GUIMode != GUIMODE_HIDDEN && hwndExtractDlg != NULL )
+	if( hwndExtractDlg != NULL )
 		::SendNotifyMessage( hwndExtractDlg, WM_COMMAND, SDC_BUTTON1, 0 );
-
 	return result;
 }
 

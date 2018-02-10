@@ -2,7 +2,7 @@
 /* File:        SfxDialogs.h                                                 */
 /* Created:     Sat, 13 Jan 2007 12:01:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3367                                                         */
 /* Updated:     Fri, 01 Apr 2016 20:19:25 GMT                                */
@@ -182,6 +182,7 @@ public:
 #ifdef _SFX_USE_WIN7_PROGRESSBAR
 	void SetTaskbarState( TBPFLAG tbpFlags );
 #endif // _SFX_USE_WIN7_PROGRESSBAR
+	void SetMarquee( BOOL bMarquee );
 protected:
 	virtual BOOL OnInitDialog();
 	virtual void ResizeAndPosition();

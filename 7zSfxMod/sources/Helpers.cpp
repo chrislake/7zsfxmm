@@ -2,7 +2,7 @@
 /* File:        Helpers.cpp                                                  */
 /* Created:     Sat, 30 Jul 2005 11:10:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3886                                                         */
 /* Updated:     Sun, 20 Mar 2016 07:07:28 GMT                                */
@@ -530,7 +530,6 @@ Loc_RTF:
 	return true;
 }
 
-
 LPCWSTR GetTextConfigValue( LPCWSTR id, int * pFrom )
 {
 	CTextConfigPair * pPair = GetConfigPair( id, pFrom );
@@ -922,15 +921,14 @@ LANGID idSfxLang = 0;
 LPVOID LoadInterfaceResource( LPCSTR lpType, LPCSTR lpName, DWORD *lpSize )
 {
 	static BOOL fLangIdSetted = FALSE;
-	HMODULE hModule = ::GetModuleHandle( NULL );
-	HRSRC hRsrc = ::FindResourceExA( hModule, lpType, lpName, idSfxLang );
+	HRSRC hRsrc = ::FindResourceExA( hRsrcModule, lpType, lpName, idSfxLang );
 	if( hRsrc == NULL )
-		hRsrc = ::FindResourceExA( hModule, lpType, lpName, MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT) );
+		hRsrc = ::FindResourceExA( hRsrcModule, lpType, lpName, MAKELANGID(LANG_ENGLISH,SUBLANG_DEFAULT) );
 	if( hRsrc != NULL )
 	{
 		if( lpSize != NULL )
-			*lpSize = SizeofResource( hModule, hRsrc );
-		HGLOBAL hGlobal = ::LoadResource( hModule, hRsrc );
+			*lpSize = SizeofResource( hRsrcModule, hRsrc );
+		HGLOBAL hGlobal = ::LoadResource( hRsrcModule, hRsrc );
 		if( hGlobal != NULL )
 			return ::LockResource( hGlobal );
 	}
@@ -1008,11 +1006,11 @@ BOOL SetDlgControlImage( HWND hwndControl )
 #ifdef _SFX_USE_LANG
 	data = LoadInterfaceResource( "IMAGES", (LPCSTR)GetMenu(hwndControl), &sz );
 #else
-	HRSRC res = FindResourceA(GetModuleHandle(NULL),MAKEINTRESOURCEA(GetMenu(hwndControl)),"IMAGES");
+	HRSRC res = FindResourceA( hRsrcModule, MAKEINTRESOURCEA(GetMenu(hwndControl)), "IMAGES" );
 	if( res == NULL )
 		return FALSE;
-	sz = SizeofResource( GetModuleHandle(NULL), res );
-	HGLOBAL mem = LoadResource( GetModuleHandle(NULL), res );
+	sz = SizeofResource( hRsrcModule, res );
+	HGLOBAL mem = LoadResource( hRsrcModule, res );
 	if( mem == NULL )
 		return FALSE;
 	data = LockResource( mem );

@@ -2,7 +2,7 @@
 /* File:        main.cpp                                                     */
 /* Created:     Fri, 29 Jul 2005 03:23:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Thu, 08 Feb 2018 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3901                                                         */
 /* Updated:     Sat, 02 Apr 2016 06:31:33 GMT                                */
@@ -787,7 +787,7 @@ static bool CreateSelfExtractor(LPCWSTR strModulePathName, LPCWSTR lpwszValue)
 	return true;
 }
 
-static int Run(HINSTANCE hInstance)
+static int Run()
 {
 #ifdef _DEBUG
 	DWORD dwStartTime = ::GetTickCount();
@@ -835,7 +835,7 @@ static int Run(HINSTANCE hInstance)
 	}
 
 #ifdef _SFX_USE_PREFIX_WAITALL
-	if( (lpwszValue = IsSfxSwitch(str,CMDLINE_SFXWAITALL )) != NULL )
+	if( (lpwszValue = IsSfxSwitch(str, CMDLINE_SFXWAITALL)) != NULL )
 	{
 		return Child_ExecuteSfxWaitAll( lpwszValue );
 	}
@@ -843,7 +843,7 @@ static int Run(HINSTANCE hInstance)
 
 #ifdef _SFX_USE_ELEVATION
 	bool fInElevation = false;
-	if( (lpwszValue = IsSfxSwitch(str,CMDLINE_SFXELEVATION)) != NULL )
+	if( (lpwszValue = IsSfxSwitch(str, CMDLINE_SFXELEVATION)) != NULL )
 	{
 		fInElevation = true;
 		str = lpwszValue;
@@ -955,7 +955,7 @@ static int Run(HINSTANCE hInstance)
 		strModulePathName = L"S:\\tmp\\setup_button_x86_x64.exe";
 		strModulePathName = L"S:\\tmp\\Aida64AE.exe";
 		strModulePathName = L"C:\\tmp\\vars.exe";
-		hInstance = LoadLibraryEx(strModulePathName, NULL, LOAD_LIBRARY_AS_DATAFILE);
+		hRsrcModule = LoadLibraryEx(strModulePathName, NULL, LOAD_LIBRARY_AS_DATAFILE);
 	}
 #else
 	strModulePathName.ReleaseBuf_SetEnd(
@@ -986,11 +986,11 @@ static int Run(HINSTANCE hInstance)
 	{
 		SKIP_WHITESPACES_W( lpwszValue );
 		lpwszValue = LoadQuotedString(lpwszValue, extractRoot);
-		if (!ExtractResources(hInstance, RT_RCDATA, extractRoot + L"\\adjunct") &&
+		if (!ExtractResources(hRsrcModule, RT_RCDATA, extractRoot + L"\\adjunct") &&
 				GetLastError() != ERROR_RESOURCE_TYPE_NOT_FOUND ||
-			!ExtractResources(hInstance, RT_HTML, extractRoot + L"\\config") &&
+			!ExtractResources(hRsrcModule, RT_HTML, extractRoot + L"\\config") &&
 				GetLastError() != ERROR_RESOURCE_TYPE_NOT_FOUND ||
-			!ExtractResources(hInstance, RT_MANIFEST, extractRoot + L"\\manifest") &&
+			!ExtractResources(hRsrcModule, RT_MANIFEST, extractRoot + L"\\manifest") &&
 				GetLastError() != ERROR_RESOURCE_TYPE_NOT_FOUND)
 		{
 			SfxErrorDialog( FALSE, ERR_WRITE_CONFIG );
@@ -1034,7 +1034,7 @@ static int Run(HINSTANCE hInstance)
 	}
 
 	// Read SFX config
-	LoadAndParseConfig(hInstance);
+	LoadAndParseConfig(hRsrcModule);
 
 #ifdef _SFX_USE_TEST
 	if( nTestModeType == TMT_CHECK_CONFIG )
@@ -1230,17 +1230,8 @@ Loc_BeginPrompt:
 
 	if( gSfxArchive.GetAssumeYes() )
 		MiscFlags |= MISCFLAGS_NO_CHECK_DISK_FREE | MISCFLAGS_NO_CHECK_RAM;
-#ifdef _SFX_USE_CONFIG_EARLY_EXECUTE
-	CSfxStringU strPreExtract = CFG_PREEXTRACT;
-	strPreExtract += *gSfxArchive.GetBatchInstall();
-	if( GetTextConfigValue(strPreExtract) != NULL && gSfxArchive.GetNoRun() == false )
-	{
-		CSfxStringU ustrDirPrefix;
-		ExecuteBatch( CFG_PREEXTRACT, strSfxFolder, gSfxArchive.GetBatchInstall(), ustrDirPrefix, L"" );
-	}
-#endif // _SFX_USE_CONFIG_EARLY_EXECUTE
 
-	ExtractResources(hInstance, RT_RCDATA, extractRoot);
+	ExtractResources(hRsrcModule, RT_RCDATA, extractRoot);
 
 #ifdef _SFX_USE_TEST
 	HRESULT hrStatus;
@@ -1314,7 +1305,7 @@ Loc_BeginPrompt:
 	}
 	if( FinishMessage == -1 && gSfxArchive.GetAssumeYes() == false )
 	{
-			FinishMessage = 1;
+		FinishMessage = 1;
 	}
 	if( FinishMessage > 0 && (lpwszValue = GetTextConfigValue( CFG_FINISHMESSAGE )) != NULL )
 	{
@@ -1402,7 +1393,8 @@ int APIENTRY wWinMain(HINSTANCE hInstance, HINSTANCE, LPWSTR , int)
 	_set_new_mode(1);
 	__try
 	{
-		ret = Run(hInstance);
+		hRsrcModule = hInstance;
+		ret = Run();
 	}
 	__except(EXCEPTION_EXECUTE_HANDLER)
 	{

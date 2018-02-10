@@ -2,7 +2,7 @@
 /* File:        7zSfxModInt.h                                                */
 /* Created:     Wed, 25 Jul 2007 09:54:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3174                                                         */
 /* Updated:     Fri, 01 Apr 2016 20:42:00 GMT                                */
@@ -88,6 +88,8 @@ extern int		MiscFlags;
 extern LANGID	idSfxLang;
 extern int		ExtractDialogWidth;
 extern int		ExtractPathWidth;
+extern HMODULE	hRsrcModule;
+extern CSfxDialog_Extract *pwndExtractDialog;
 extern HWND		hwndExtractDlg;
 extern int		FinishMessage;
 extern bool		fUseBackward;
@@ -254,8 +256,8 @@ void CreateConfigSignature(
 	LPCWSTR GetPlatformName();
 #endif // _SFX_USE_PREFIX_PLATFORM || _SFX_USE_ENVIRONMENT_VARS
 
-#define CMDLINE_SFXWAITALL			_CFG_PARAM_TYPE"sfxwaitall"
-#define CMDLINE_SFXELEVATION		_CFG_PARAM_TYPE"sfxelevation"
+#define CMDLINE_SFXWAITALL			L"sfxwaitall"
+#define CMDLINE_SFXELEVATION		L"sfxelevation"
 
 #if !defined(SFX_VOLUMES) && !defined(SFX_PROTECT)
 	class CSfxInStream : public CInFileStream

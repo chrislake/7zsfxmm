@@ -41,5 +41,4 @@ bin/
 *.sdf
 *.suo
 *.vcproj.*.user
-*.vcxproj.filters
 *.vcxproj.user

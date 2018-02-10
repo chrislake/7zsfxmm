@@ -2,7 +2,7 @@
 /* File:        SfxDialogs.cpp                                               */
 /* Created:     Sat, 13 Jan 2007 02:03:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3367                                                         */
 /* Updated:     Fri, 01 Apr 2016 20:42:56 GMT                                */
@@ -376,8 +376,8 @@ BOOL CSfxDialog::OnInitDialog()
 	fUseBackward = false;
 	if( (GUIFlags & GUIFLAGS_NO_TITLE_ICON) == 0 )
 	{
-		HICON hBigIcon = ::LoadIcon( ::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_7ZSFX) );
-		HICON hSmallIcon = (HICON)::LoadImage( ::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_7ZSFX), IMAGE_ICON,
+		HICON hBigIcon = ::LoadIcon( hRsrcModule, MAKEINTRESOURCE(IDI_7ZSFX) );
+		HICON hSmallIcon = (HICON)::LoadImage( hRsrcModule, MAKEINTRESOURCE(IDI_7ZSFX), IMAGE_ICON,
 												GetSystemMetrics(SM_CXSMICON), GetSystemMetrics(SM_CYSMICON), 0 );
 		if( hSmallIcon == NULL ) hSmallIcon = hBigIcon;
 		SendMessage( WM_SETICON, ICON_BIG, (LPARAM)hBigIcon );
@@ -453,7 +453,7 @@ BOOL CSfxDialog::OnInitDialog()
 	switch( m_uType&SD_ICON_MASK )
 	{
 	case SD_ICONMODULE:
-		hIcon = ::LoadIcon( ::GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_7ZSFX) );
+		hIcon = ::LoadIcon( hRsrcModule, MAKEINTRESOURCE(IDI_7ZSFX) );
 		break;
 	case SD_ICONQUESTION:
 		hIcon = ::LoadIcon( NULL, IDI_QUESTION );
@@ -680,7 +680,6 @@ INT_PTR CSfxDialog::ShowImpl( HWND hwndParent )
 		*((LPBYTE)(LocalDlgTemplate+36)) = ncm.lfMessageFont.lfItalic;
 	}
 	// new
-	HMODULE hRsrcModule = GetModuleHandle(NULL);
 	LPCDLGTEMPLATE lpDlgTemplate = NULL;
 	if( m_uDlgResourceId != 0 )
 	{
@@ -962,6 +961,7 @@ BOOL CSfxDialog_FinishMessage::OnInitDialog()
 /*--------------------------------------------------------------------------*/
 // CSfxDialog_Extract
 /*--------------------------------------------------------------------------*/
+HMODULE hRsrcModule = NULL;
 HWND hwndExtractDlg = NULL;
 CSfxDialog_Extract *pwndExtractDialog = NULL;
 BOOL fCancelExtract = FALSE;
@@ -973,6 +973,24 @@ void CSfxDialog_Extract::SetTaskbarState( TBPFLAG tbpFlags )
 		m_pTaskbarList->SetProgressState( m_hWnd, tbpFlags );
 }
 #endif // _SFX_USE_WIN7_PROGRESSBAR
+
+void CSfxDialog_Extract::SetMarquee( BOOL bMarquee )
+{
+	if( HWND hwndProgress = ::GetDlgItem( m_hWnd, SDC_PROGRESS ) )
+	{
+		LONG const lStyle = ::GetWindowLong( hwndProgress, GWL_STYLE );
+		if ( bMarquee )
+		{
+			::SetWindowLong( hwndProgress, GWL_STYLE, lStyle | PBS_MARQUEE );
+			::SendMessage( hwndProgress, PBM_SETMARQUEE, TRUE, 0 );
+		}
+		else
+		{
+			::SendMessage( hwndProgress, PBM_SETMARQUEE, FALSE, 0 );
+			::SetWindowLong( hwndProgress, GWL_STYLE, lStyle & ~PBS_MARQUEE );
+		}
+	}
+}
 
 void CSfxDialog_Extract::SetPercentTextFont()
 {

@@ -2,7 +2,7 @@
 /* File:        ExtractEngine.h                                              */
 /* Created:     Wed, 05 Oct 2005 17:35:00 GMT                                */
 /*              by Oleg N. Scherbakov, mailto:oleg@7zsfx.info                */
-/* Last update: Sat, 18 Nov 2017 by https://github.com/datadiode             */
+/* Last update: Sat, 10 Feb 2018 by https://github.com/datadiode             */
 /*---------------------------------------------------------------------------*/
 /* Revision:    3813                                                         */
 /* Updated:     Mon, 14 Mar 2016 05:05:17 GMT                                */
@@ -78,8 +78,10 @@ private:
 		UInt32		Attributes;
 	} m_processedFileInfo;
 
+private:
+	HRESULT ExtractWorker();
+	static DWORD WINAPI ExtractThread( LPVOID pThis );
 public:
-	static HRESULT WINAPI ExtractThread( CSfxExtractEngine * pThis );
 	HRESULT Extract( LPCWSTR lpwszFolderName );
 };
 

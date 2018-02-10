@@ -1,0 +1,415 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{c5e03eab-6792-42dc-9278-8ac3388083ed}</UniqueIdentifier>
+      <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{b59181d0-bc08-4b08-b370-72758fd63aaf}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{b3edde3b-2d67-49ce-891f-ff2da4d4e46b}</UniqueIdentifier>
+      <Extensions>ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe</Extensions>
+    </Filter>
+    <Filter Include="7z">
+      <UniqueIdentifier>{51237348-d21e-45d8-92ab-e1a090e7e355}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="32-bit">
+      <UniqueIdentifier>{8015d7e4-379a-426c-8fbe-7edbe295ff15}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="64-bit">
+      <UniqueIdentifier>{c9342da0-00c8-42ab-a29a-89a33359157d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods">
+      <UniqueIdentifier>{0e480c91-aa89-4eef-87b4-406bd64ea229}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Deflate">
+      <UniqueIdentifier>{1f60cf32-7530-4491-b670-c426d7080354}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Ppmd">
+      <UniqueIdentifier>{53793008-db83-42b6-8e13-7598d717985e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Copy">
+      <UniqueIdentifier>{e93eab41-58be-4772-b982-3a5667fd8d4d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Lzma">
+      <UniqueIdentifier>{3ba7cd04-bb46-4270-acf6-64bba20cf72a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Lzma2">
+      <UniqueIdentifier>{bede617b-3268-4da2-8886-12a69f39ed2b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Bcj">
+      <UniqueIdentifier>{8760f832-b8c5-46a9-8c54-74e1a4e40c63}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Bcj2">
+      <UniqueIdentifier>{1bdde30d-68e7-497e-b677-f37a687f21d0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Lzma86">
+      <UniqueIdentifier>{c7a71ffb-85c6-4450-91e5-c7d034767cc5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="7z\Methods\Delta">
+      <UniqueIdentifier>{6fa69b4a-4b38-421f-a37b-b26da2fb8e77}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="sources\ExtractEngine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\Helpers.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\langstrs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\SfxDialogs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\SfxInStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\SfxTest.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\stdafx.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\7zCrc.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Archive\7z\7zDecode.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Archive\7z\7zExtract.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Archive\7z\7zHandler.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Archive\7z\7zIn.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Archive\Common\CoderMixer2.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\CpuArch.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\CreateCoder.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\Windows\FileIO.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\FileStreams.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\FilterCoder.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\InBuffer.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Archive\Common\ItemNameUtils.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\LimitedStreams.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\LockedStream.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\Common\MyString.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\Common\MyVector.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\OutBuffer.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\ProgressUtils.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\Windows\PropVariant.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\StreamBinder.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\StreamObjects.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\StreamUtils.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\Windows\Synchronization.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\VirtThread.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\archive.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\cmdline.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\execute.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Threads.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\DeflateDecoder.cpp">
+      <Filter>7z\Methods\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\LzOutWindow.cpp">
+      <Filter>7z\Methods\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\BitlDecoder.cpp">
+      <Filter>7z\Methods\Deflate</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\LzmaDecoder.cpp">
+      <Filter>7z\Methods\Lzma</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\Lzma2Decoder.cpp">
+      <Filter>7z\Methods\Lzma2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\PpmdDecoder.cpp">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Common\CWrappers.cpp">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\LzmaDec.c">
+      <Filter>7z\Methods\Lzma</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Lzma2Dec.c">
+      <Filter>7z\Methods\Lzma2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Ppmd7.c">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Ppmd7Dec.c">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\config.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\CopyCoder.cpp">
+      <Filter>7z\Methods\Copy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\Bcj2Coder.cpp">
+      <Filter>7z\Methods\Bcj2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\BcjCoder.cpp">
+      <Filter>7z\Methods\Bcj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\7zip\Compress\BranchMisc.cpp">
+      <Filter>7z\Methods\Bcj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Bra86.c">
+      <Filter>7z\Methods\Bcj</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Bcj2.c">
+      <Filter>7z\Methods\Bcj2</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Lzma86Dec.c">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Lzma86Enc.c">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\LzmaEnc.c">
+      <Filter>7z\Methods\Lzma</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\LzFind.c">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\LzFindMt.c">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Alloc.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\CPP\Common\Wildcard.cpp">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="sources\vs_version.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Aes.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\AesOpt.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Sha256.c">
+      <Filter>7z</Filter>
+    </ClCompile>
+    <ClCompile Include="..\7-Zip\C\Delta.c">
+      <Filter>7z\Methods\Delta</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="sources\7zSfxMod.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\7zSfxModInt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\ExtractEngine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\langstrs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\SfxDialogs.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\stdafx.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\archive.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\strings.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\LzOutWindow.h">
+      <Filter>7z\Methods\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\BitlDecoder.h">
+      <Filter>7z\Methods\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\DeflateDecoder.h">
+      <Filter>7z\Methods\Deflate</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\LzmaDecoder.h">
+      <Filter>7z\Methods\Lzma</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\Lzma2Decoder.h">
+      <Filter>7z\Methods\Lzma2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Common\CWrappers.h">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\PpmdDecoder.h">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\LzmaDec.h">
+      <Filter>7z\Methods\Lzma</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Lzma2Dec.h">
+      <Filter>7z\Methods\Lzma2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Ppmd.h">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Ppmd7.h">
+      <Filter>7z\Methods\Ppmd</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\CopyCoder.h">
+      <Filter>7z\Methods\Copy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\Bcj2Coder.h">
+      <Filter>7z\Methods\Bcj2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\BcjCoder.h">
+      <Filter>7z\Methods\Bcj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\CPP\7zip\Compress\BranchMisc.h">
+      <Filter>7z\Methods\Bcj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Bra.h">
+      <Filter>7z\Methods\Bcj</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Bcj2.h">
+      <Filter>7z\Methods\Bcj2</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Lzma86.h">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\LzmaEnc.h">
+      <Filter>7z\Methods\Lzma</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\LzFind.h">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\LzFindMt.h">
+      <Filter>7z\Methods\Lzma86</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\vs_version.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="sources\VersionData.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Aes.h">
+      <Filter>7z</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Sha256.h">
+      <Filter>7z</Filter>
+    </ClInclude>
+    <ClInclude Include="..\7-Zip\C\Delta.h">
+      <Filter>7z\Methods\Delta</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="sources\res\7zsfx.ico">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="sources\res\7zSfxMod.rc2">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="sources\res\banner_en.gif">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="sources\res\banner_ru.gif">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="sources\res\manifest32.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="sources\res\manifest64.xml">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="changes_draft.txt" />
+    <None Include="changes_ru.txt" />
+    <None Include="Requests.txt" />
+    <None Include="makefile" />
+    <None Include="SfxBuild.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="sources\7zSfxMod.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Library Include="lib\crt\i386\msvcrt.lib">
+      <Filter>32-bit</Filter>
+    </Library>
+    <Library Include="lib\crt\amd64\msvcrt.lib">
+      <Filter>64-bit</Filter>
+    </Library>
+  </ItemGroup>
+  <ItemGroup>
+    <MASM Include="..\7-Zip\Asm\x86\7zCrcOpt.asm">
+      <Filter>7z</Filter>
+    </MASM>
+  </ItemGroup>
+</Project>
