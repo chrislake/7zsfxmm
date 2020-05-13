@@ -1,3 +1,5 @@
+NOTE: I am not a c/c++ programmer by trade. I merely attempted to preserve this code which seemed to have dropped off the the internet. If you find issues, I do not have the skills to fix them. The https://github.com/datadiode/7zsfxmm fork seems to be a better place to ask.
+
 # 7-Zip SFX Modified Module
 This is a copy of the last available version of the 7-Zip SFX Modified Module by Oleg Scherbakov - [SVN Repo](http://web.archive.org/web/20160311162325/http://svn.7zsfx.info/).
 
